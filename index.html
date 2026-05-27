@@ -186,7 +186,7 @@
         }
         .icon-btn:active { background: rgba(123, 44, 191, 0.6); }
 
-        /* ---------- FILTROS ---------- */
+        /* ---------- FILTROS (solo género, sin distancia) ---------- */
         .filters {
             display: flex;
             gap: 0.5rem;
@@ -214,7 +214,6 @@
             box-shadow: 0 0 12px rgba(230,56,59,0.5);
             font-weight: 600;
         }
-
         /* ---------- GRID PERFILES ---------- */
         .grid {
             display: grid;
@@ -250,6 +249,8 @@
             font-weight: bold;
             color: white;
             position: relative;
+            background-size: cover;
+            background-position: center;
         }
         .online-indicator {
             position: absolute;
@@ -300,6 +301,8 @@
             overflow: hidden;
             box-shadow: 0 12px 40px var(--purple-dark);
             animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         @keyframes slideUp {
             from { transform: translateY(60px); opacity: 0; }
@@ -323,19 +326,34 @@
             cursor: pointer;
         }
         .modal-avatar {
-            width: 85px; height: 85px;
+            width: 100px; height: 100px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.2);
             margin: 0 auto 0.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             border: 3px solid rgba(255,255,255,0.4);
+            background-size: cover;
+            background-position: center;
         }
         .modal-body { padding: 1.5rem; text-align: center; }
-        .modal-body .bio { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
+        .modal-body .bio { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; }
+        .album-title { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .album-item {
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            background-color: var(--purple-dark);
+            background-size: cover;
+            background-position: center;
+        }
         .modal-actions { display: flex; gap: 1rem; padding: 0 1.5rem 1.8rem; }
         .btn-like {
             flex: 1; padding: 0.9rem; border: none; border-radius: 30px;
@@ -346,14 +364,32 @@
             font-weight: 700; background: transparent; color: var(--text); cursor: pointer;
         }
 
+        /* ---------- MI PERFIL ---------- */
+        .profile-screen-container {
+            padding: 1.5rem;
+        }
+        .profile-pic-preview {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--red));
+            margin: 0 auto 1rem;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+
         /* ---------- CHAT ---------- */
         .chat-list { flex: 1; overflow-y: auto; padding: 0.5rem 0.8rem; }
         .chat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; border-radius: 14px; margin-bottom: 0.4rem; cursor: pointer; }
         .chat-item:active { background: rgba(123,44,191,0.2); }
-        .chat-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3rem; color: white; flex-shrink: 0; }
+        .chat-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3rem; color: white; flex-shrink: 0; background-size: cover; background-position: center; }
         .chat-info { flex: 1; min-width: 0; }
         .chat-name { font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
-        .streak-badge { font-size: 0.75rem; background: var(--streak); color: #000; padding: 0.15rem 0.5rem; border-radius: 12px; font-weight: 700; }
         .chat-preview { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.7rem; background: var(--bg); }
         .message { max-width: 80%; padding: 0.8rem 1rem; border-radius: 20px; word-wrap: break-word; line-height: 1.4; animation: msgPop 0.3s ease; }
@@ -370,18 +406,15 @@
     </style>
 </head>
 <body>
+
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
             <div class="logo">K</div>
             <h1 style="font-size:2.2rem; margin-bottom:0.3rem;">Kinetic</h1>
             <p class="tagline">La energía que te mueve</p>
-            <div class="input-group">
-                <input type="email" id="emailInput" placeholder="Correo electrónico" autocomplete="email">
-            </div>
-            <div class="input-group">
-                <input type="password" id="passwordInput" placeholder="Contraseña" autocomplete="current-password">
-            </div>
+            <div class="input-group"><input type="email" id="emailInput" placeholder="Correo electrónico" autocomplete="email"></div>
+            <div class="input-group"><input type="password" id="passwordInput" placeholder="Contraseña" autocomplete="current-password"></div>
             <button class="btn btn-primary" id="loginBtn">Iniciar Sesión</button>
             <p class="divider">o</p>
             <button class="btn btn-secondary" id="registerBtn">Crear cuenta gratis</button>
@@ -389,49 +422,35 @@
         </div>
     </div>
 
-    <!-- SETUP PROFILE SCREEN (NUEVA) -->
+    <!-- SETUP PROFILE SCREEN -->
     <div id="setupScreen" class="screen">
         <div class="setup-container">
             <h2>Completa tu perfil</h2>
-            <label for="setupName">Nombre</label>
+            <label>Nombre</label>
+            <div class="input-group"><input type="text" id="setupName" placeholder="Tu nombre"></div>
+            <label>Edad</label>
+            <div class="input-group"><input type="number" id="setupAge" placeholder="18" min="18" max="99"></div>
+            <label>Género</label>
             <div class="input-group">
-                <input type="text" id="setupName" placeholder="Tu nombre" autocomplete="name">
+                <select id="setupGender"><option value="male">Hombre</option><option value="female">Mujer</option><option value="non-binary">No binario</option></select>
             </div>
-            <label for="setupAge">Edad</label>
+            <label>Qué buscas</label>
             <div class="input-group">
-                <input type="number" id="setupAge" placeholder="18" min="18" max="99">
+                <select id="setupInterested"><option value="female">Mujeres</option><option value="male">Hombres</option><option value="all">Todos</option></select>
             </div>
-            <label for="setupGender">Género</label>
-            <div class="input-group">
-                <select id="setupGender">
-                    <option value="male">Hombre</option>
-                    <option value="female">Mujer</option>
-                    <option value="non-binary">No binario</option>
-                </select>
-            </div>
-            <label for="setupInterested">Qué buscas</label>
-            <div class="input-group">
-                <select id="setupInterested">
-                    <option value="female">Mujeres</option>
-                    <option value="male">Hombres</option>
-                    <option value="all">Todos</option>
-                </select>
-            </div>
-            <label for="setupBio">Biografía / Intereses</label>
-            <div class="input-group">
-                <textarea id="setupBio" rows="3" placeholder="Cuéntanos qué te gusta..."></textarea>
-            </div>
+            <label>Biografía / Intereses</label>
+            <div class="input-group"><textarea id="setupBio" rows="3" placeholder="Cuéntanos qué te gusta..."></textarea></div>
             <button class="btn btn-primary" id="saveProfileBtn">Guardar Perfil</button>
             <p id="setupError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
         </div>
     </div>
-
     <!-- MAIN SCREEN -->
     <div id="mainScreen" class="screen">
         <div class="header">
             <h2>⚡ Kinetic</h2>
             <div style="display:flex; gap:0.5rem;">
                 <button class="icon-btn" id="toggleViewBtn" title="Vista mapa/grid">🗺️</button>
+                <button class="icon-btn" id="myProfileBtn" title="Mi perfil">👤</button>
                 <button class="icon-btn" id="chatListBtn" title="Mensajes">💬</button>
                 <button class="icon-btn" id="logoutBtn" title="Salir">🚪</button>
             </div>
@@ -440,9 +459,6 @@
             <span class="filter-chip active" data-gender="all">🌐 Todos</span>
             <span class="filter-chip" data-gender="female">👩 Mujeres</span>
             <span class="filter-chip" data-gender="male">👨 Hombres</span>
-            <span class="filter-chip" data-distance="5">📍 <5 km</span>
-            <span class="filter-chip" data-distance="20">📍 <20 km</span>
-            <span class="filter-chip" data-distance="50">📍 <50 km</span>
         </div>
         <div id="dynamicContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
         <div id="limitWarning" style="display:none; background:var(--purple-dark); padding:0.5rem; text-align:center; font-size:0.8rem;">
@@ -450,17 +466,48 @@
         </div>
     </div>
 
-    <!-- MODAL PERFIL -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content" id="modalContent"></div>
+    <!-- MI PERFIL SCREEN -->
+    <div id="myProfileScreen" class="screen">
+        <div class="header">
+            <button class="icon-btn" id="backFromProfileBtn">←</button>
+            <h2>Mi Perfil</h2>
+            <div></div>
+        </div>
+        <div class="profile-screen-container">
+            <div class="profile-pic-preview" id="profilePicPreview"></div>
+            <label>URL Foto de Perfil</label>
+            <div class="input-group"><input type="url" id="editProfilePic" placeholder="https://..."></div>
+            <label>Nombre</label>
+            <div class="input-group"><input type="text" id="editName"></div>
+            <label>Edad</label>
+            <div class="input-group"><input type="number" id="editAge" min="18" max="99"></div>
+            <label>Género</label>
+            <div class="input-group">
+                <select id="editGender"><option value="male">Hombre</option><option value="female">Mujer</option><option value="non-binary">No binario</option></select>
+            </div>
+            <label>Qué buscas</label>
+            <div class="input-group">
+                <select id="editInterested"><option value="female">Mujeres</option><option value="male">Hombres</option><option value="all">Todos</option></select>
+            </div>
+            <label>Biografía</label>
+            <div class="input-group"><textarea id="editBio" rows="3"></textarea></div>
+            <label>Álbum (hasta 3 URLs)</label>
+            <div class="input-group"><input type="url" id="editAlbum1" placeholder="Foto 1 (opcional)"></div>
+            <div class="input-group"><input type="url" id="editAlbum2" placeholder="Foto 2 (opcional)"></div>
+            <div class="input-group"><input type="url" id="editAlbum3" placeholder="Foto 3 (opcional)"></div>
+            <button class="btn btn-primary" id="saveMyProfileBtn">Guardar Cambios</button>
+            <p id="profileEditError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
+        </div>
     </div>
+
+    <!-- MODAL PERFIL -->
+    <div id="profileModal" class="modal"><div class="modal-content" id="modalContent"></div></div>
 
     <!-- CHAT LIST SCREEN -->
     <div id="chatListScreen" class="screen">
         <div class="header">
             <button class="icon-btn" id="backFromChatListBtn">←</button>
-            <h2>Mensajes</h2>
-            <div></div>
+            <h2>Mensajes</h2><div></div>
         </div>
         <div class="chat-list" id="chatListContainer"></div>
     </div>
@@ -469,8 +516,7 @@
     <div id="chatScreen" class="screen">
         <div class="header">
             <button class="icon-btn" id="backFromChatBtn">←</button>
-            <h2 id="chatPartnerName">Chat</h2>
-            <div></div>
+            <h2 id="chatPartnerName">Chat</h2><div></div>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-input-area">
@@ -482,11 +528,11 @@
     <!-- TOAST -->
     <div id="toast" class="toast" style="display:none;"></div>
 
-    <!-- Firebase SDK y Leaflet -->
+    <!-- Firebase y Leaflet -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
@@ -500,7 +546,6 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Variables globales
         let currentUser = null;
         let userProfile = null;
         let nearbyUsers = [];
@@ -508,14 +553,14 @@
         let map = null;
         let mapMarkers = [];
         let activeChatId = null;
-        let dailyLimit = 10;
+        const dailyLimit = 10;
         let filterGender = 'all';
-        let filterMaxDistance = 50;
 
-        // Referencias DOM
+        // DOM
         const loginScreen = document.getElementById('loginScreen');
         const setupScreen = document.getElementById('setupScreen');
         const mainScreen = document.getElementById('mainScreen');
+        const myProfileScreen = document.getElementById('myProfileScreen');
         const profileModal = document.getElementById('profileModal');
         const modalContent = document.getElementById('modalContent');
         const chatListScreen = document.getElementById('chatListScreen');
@@ -523,129 +568,88 @@
         const toast = document.getElementById('toast');
         const limitWarning = document.getElementById('limitWarning');
 
-        // Autenticación
+        // ---------- AUTENTICACIÓN ----------
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
             if (!email || !password) return showAuthError('Completa todos los campos');
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                showAuthError('Error al iniciar sesión: ' + error.message);
-            }
+            try { await signInWithEmailAndPassword(auth, email, password); }
+            catch (e) { showAuthError('Error: ' + e.message); }
         });
-
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
             if (!email || !password) return showAuthError('Completa todos los campos');
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                // No creamos perfil en BD aún, se hará en setup
-            } catch (error) {
-                showAuthError('Error al registrarse: ' + error.message);
-            }
+            try { await createUserWithEmailAndPassword(auth, email, password); }
+            catch (e) { showAuthError('Error: ' + e.message); }
         });
-
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await signOut(auth);
-        });
-
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
         function showAuthError(msg) {
             document.getElementById('authError').textContent = msg;
-            setTimeout(() => { document.getElementById('authError').textContent = ''; }, 4000);
+            setTimeout(() => document.getElementById('authError').textContent = '', 4000);
         }
 
-        // Estado de autenticación
+        // ---------- ESTADO DE AUTENTICACIÓN ----------
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                const userRef = ref(db, 'users/' + user.uid);
-                const snapshot = await get(userRef);
-                if (snapshot.exists()) {
-                    userProfile = snapshot.val();
+                const snap = await get(ref(db, 'users/' + user.uid));
+                if (snap.exists()) {
+                    userProfile = snap.val();
                     userProfile.uid = user.uid;
-                    // Verificar que tenga todos los campos obligatorios
                     if (!userProfile.name || !userProfile.age || !userProfile.gender || !userProfile.interestedIn || userProfile.bio === undefined) {
-                        // Perfil incompleto: mostrar setup
                         showScreen('setupScreen');
-                        // Precargar email si existe
-                        document.getElementById('setupName').value = userProfile.name || '';
-                        document.getElementById('setupAge').value = userProfile.age || '';
-                        document.getElementById('setupGender').value = userProfile.gender || 'male';
-                        document.getElementById('setupInterested').value = userProfile.interestedIn || 'female';
-                        document.getElementById('setupBio').value = userProfile.bio || '';
+                        prefillSetupForm();
                     } else {
-                        // Perfil completo
-                        update(userRef, { online: true });
+                        update(ref(db, 'users/' + user.uid), { online: true });
                         initApp();
                     }
                 } else {
-                    // No existe perfil: nuevo usuario, mostrar setup
                     userProfile = { uid: user.uid, email: user.email };
                     showScreen('setupScreen');
                 }
             } else {
-                currentUser = null;
-                userProfile = null;
-                nearbyUsers = [];
+                currentUser = null; userProfile = null; nearbyUsers = [];
                 showScreen('loginScreen');
-                if (map) map.remove();
-                map = null;
+                if (map) map.remove(); map = null;
             }
         });
 
-        // Guardar perfil desde setup
+        function prefillSetupForm() {
+            document.getElementById('setupName').value = userProfile.name || '';
+            document.getElementById('setupAge').value = userProfile.age || '';
+            document.getElementById('setupGender').value = userProfile.gender || 'male';
+            document.getElementById('setupInterested').value = userProfile.interestedIn || 'female';
+            document.getElementById('setupBio').value = userProfile.bio || '';
+        }
+
+        // ---------- GUARDAR PERFIL (SETUP) ----------
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('setupName').value.trim();
             const age = parseInt(document.getElementById('setupAge').value);
             const gender = document.getElementById('setupGender').value;
             const interestedIn = document.getElementById('setupInterested').value;
             const bio = document.getElementById('setupBio').value.trim();
-            const errorEl = document.getElementById('setupError');
+            const err = document.getElementById('setupError');
+            if (!name || !age || age < 18) return err.textContent = 'Nombre y edad (mín 18) requeridos.';
+            if (!bio) return err.textContent = 'Escribe una biografía.';
 
-            if (!name || !age || age < 18) {
-                errorEl.textContent = 'Completa nombre y edad (mínimo 18 años).';
-                return;
-            }
-            if (!gender || !interestedIn) {
-                errorEl.textContent = 'Selecciona género y qué buscas.';
-                return;
-            }
-            if (!bio) {
-                errorEl.textContent = 'Escribe una breve biografía.';
-                return;
-            }
-
-            // Obtener ubicación
             let lat = null, lng = null;
             try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
-                });
-                lat = position.coords.latitude;
-                lng = position.coords.longitude;
-            } catch (e) {
-                console.warn('Geolocalización no disponible en setup, se guardará sin coordenadas.');
-            }
+                const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 }));
+                lat = pos.coords.latitude; lng = pos.coords.longitude;
+            } catch (e) { console.warn('Sin ubicación en setup'); }
 
-            const profileData = {
-                email: currentUser.email,
-                name,
-                age,
-                gender,
-                interestedIn,
-                bio,
-                premium: false,
-                dailyViews: 0,
-                lastResetDate: getTodayString(),
-                lat,
-                lng,
-                online: true
+            const data = {
+                email: currentUser.email, name, age, gender, interestedIn, bio,
+                profilePic: userProfile?.profilePic || '',
+                album: userProfile?.album || [],
+                premium: userProfile?.premium || false,
+                dailyViews: 0, lastResetDate: getTodayString(),
+                lat, lng, online: true
             };
-
-            await set(ref(db, 'users/' + currentUser.uid), profileData);
-            userProfile = { uid: currentUser.uid, ...profileData };
+            await set(ref(db, 'users/' + currentUser.uid), data);
+            userProfile = { uid: currentUser.uid, ...data };
             showScreen('mainScreen');
             initApp();
         });
@@ -660,62 +664,63 @@
         function getUserLocation() {
             if (!navigator.geolocation) return showToast('Geolocalización no soportada');
             navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    if (currentUser) await update(ref(db, 'users/' + currentUser.uid), { lat, lng });
+                async (pos) => {
+                    const { latitude: lat, longitude: lng } = pos.coords;
+                    await update(ref(db, 'users/' + currentUser.uid), { lat, lng });
                     loadNearbyUsers();
                 },
-                (error) => showToast('Activa la ubicación para ver personas cerca'),
+                () => showToast('Activa la ubicación para ver personas cerca'),
                 { enableHighAccuracy: true }
             );
         }
-
+        // ---------- CARGAR USUARIOS (sin límite de distancia) ----------
         async function loadNearbyUsers() {
             if (!currentUser || !userProfile) return;
-            const usersRef = ref(db, 'users');
-            const snapshot = await get(usersRef);
-            if (!snapshot.exists()) { nearbyUsers = []; renderDynamicView(); return; }
-            const allUsers = snapshot.val();
+            const snap = await get(ref(db, 'users'));
+            if (!snap.exists()) { nearbyUsers = []; renderDynamicView(); return; }
+            const all = snap.val();
             const me = currentUser.uid;
-            const myLat = userProfile.lat;
-            const myLng = userProfile.lng;
+            const myLat = userProfile.lat, myLng = userProfile.lng;
 
-            nearbyUsers = Object.entries(allUsers)
-                .filter(([uid, profile]) => {
-                    if (uid === me) return false;
-                    if (userProfile.interestedIn === 'female' && profile.gender !== 'female') return false;
-                    if (userProfile.interestedIn === 'male' && profile.gender !== 'male') return false;
-                    if (myLat == null || myLng == null || profile.lat == null || profile.lng == null) return true;
-                    const distance = calcDistance(myLat, myLng, profile.lat, profile.lng);
-                    return distance <= filterMaxDistance;
-                })
-                .map(([uid, profile]) => {
-                    const distance = (myLat != null && myLng != null && profile.lat != null && profile.lng != null)
-                        ? calcDistance(myLat, myLng, profile.lat, profile.lng) : null;
-                    return { uid, ...profile, distance };
-                })
-                .sort((a, b) => {
-                    if (a.distance == null && b.distance == null) return 0;
-                    if (a.distance == null) return 1;
-                    if (b.distance == null) return -1;
-                    return a.distance - b.distance;
+            let users = Object.entries(all)
+                .filter(([uid]) => uid !== me)
+                .map(([uid, p]) => {
+                    let distance = null;
+                    if (myLat != null && myLng != null && p.lat != null && p.lng != null) {
+                        distance = calcDistance(myLat, myLng, p.lat, p.lng);
+                    }
+                    return { uid, ...p, distance };
                 });
 
-            if (filterGender !== 'all') nearbyUsers = nearbyUsers.filter(u => u.gender === filterGender);
+            // Filtrar por género de interés
+            if (userProfile.interestedIn === 'female') users = users.filter(u => u.gender === 'female');
+            else if (userProfile.interestedIn === 'male') users = users.filter(u => u.gender === 'male');
+            // Si es 'all', no filtramos por género
+
+            // Filtro adicional del usuario (chip de género)
+            if (filterGender !== 'all') users = users.filter(u => u.gender === filterGender);
+
+            // Ordenar: primero los que tienen distancia (más cerca), luego los sin ubicación
+            users.sort((a, b) => {
+                if (a.distance === null && b.distance === null) return 0;
+                if (a.distance === null) return 1;
+                if (b.distance === null) return -1;
+                return a.distance - b.distance;
+            });
+
+            nearbyUsers = users;
             renderDynamicView();
         }
 
         function calcDistance(lat1, lon1, lat2, lon2) {
             const R = 6371;
-            const dLat = deg2rad(lat2 - lat1);
-            const dLon = deg2rad(lon2 - lon1);
-            const a = Math.sin(dLat/2)**2 + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2)**2;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
-        function deg2rad(deg) { return deg * Math.PI / 180; }
 
-        // Vistas
+        // ---------- VISTAS ----------
         function renderDynamicView() {
             const container = document.getElementById('dynamicContainer');
             container.innerHTML = '';
@@ -727,25 +732,33 @@
                 container.style.flex = '1';
                 renderMapView(container);
             }
-            checkViewLimit();
+            checkPremiumStatus();
         }
+
         function renderGridView(container) {
-            container.innerHTML = nearbyUsers.map((user, index) => {
-                const initials = getInitials(user.name || '?');
-                const [c1, c2] = getAvatarColors(user.name || '?');
-                return `<div class="profile-card" style="animation-delay:${index*0.04}s;" data-uid="${user.uid}">
-                    <div class="profile-img" style="background:linear-gradient(135deg, ${c1}, ${c2});">${initials}${user.online ? '<span class="online-indicator"></span>' : ''}</div>
-                    <div class="profile-info"><div class="profile-name">${user.name}, ${user.age}</div><div class="profile-distance">${user.distance != null ? '📍 '+user.distance.toFixed(1)+' km' : '🌍'}</div></div>
+            container.innerHTML = nearbyUsers.map((u, i) => {
+                const bgStyle = u.profilePic ? `background-image:url(${u.profilePic});` : '';
+                const initials = !u.profilePic ? getInitials(u.name) : '';
+                const gradient = !u.profilePic ? `background:linear-gradient(135deg, ${getAvatarColors(u.name)[0]}, ${getAvatarColors(u.name)[1]});` : '';
+                return `<div class="profile-card" style="animation-delay:${i*0.04}s;" data-uid="${u.uid}">
+                    <div class="profile-img" style="${bgStyle} ${gradient}">
+                        ${initials}
+                        ${u.online ? '<span class="online-indicator"></span>' : ''}
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name">${u.name}, ${u.age}</div>
+                        <div class="profile-distance">${u.distance ? '📍 '+u.distance.toFixed(1)+' km' : '🌍'}</div>
+                    </div>
                 </div>`;
             }).join('');
-            container.querySelectorAll('.profile-card').forEach(card => card.addEventListener('click', () => openProfile(card.dataset.uid)));
+            container.querySelectorAll('.profile-card').forEach(c => c.addEventListener('click', () => openProfile(c.dataset.uid)));
         }
 
         function renderMapView(container) {
             container.innerHTML = '<div id="map"></div>';
             if (!map) {
                 map = L.map('map').setView([0,0], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(map);
             } else {
                 document.getElementById('map').appendChild(map.getContainer());
                 map.invalidateSize();
@@ -754,17 +767,18 @@
             mapMarkers = [];
             if (userProfile?.lat && userProfile?.lng) {
                 map.setView([userProfile.lat, userProfile.lng], 13);
-                const myMarker = L.marker([userProfile.lat, userProfile.lng], {
-                    icon: L.divIcon({ className: 'custom-div-icon', html: '<div style="background:#E5383B; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>', iconSize: [20,20] })
-                }).addTo(map).bindPopup('Yo');
-                mapMarkers.push(myMarker);
+                const myIcon = L.divIcon({html:'<div style="background:#E5383B; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>', iconSize:[20,20]});
+                mapMarkers.push(L.marker([userProfile.lat, userProfile.lng], {icon:myIcon}).addTo(map).bindPopup('Yo'));
             }
-            nearbyUsers.forEach(user => {
-                if (user.lat && user.lng) {
-                    const marker = L.marker([user.lat, user.lng], {
-                        icon: L.divIcon({ html: `<div style="background:#7B2CBF; width:20px; height:20px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:10px;">${getInitials(user.name)}</div>`, iconSize: [20,20] })
-                    }).addTo(map);
-                    marker.on('click', () => openProfile(user.uid));
+            nearbyUsers.forEach(u => {
+                if (u.lat && u.lng) {
+                    const imgHtml = u.profilePic ? `<img src="${u.profilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : getInitials(u.name);
+                    const icon = L.divIcon({
+                        html: `<div style="width:30px; height:30px; border-radius:50%; overflow:hidden; border:2px solid white; background:${u.profilePic?'transparent':'#7B2CBF'}; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; color:white;">${imgHtml}</div>`,
+                        iconSize:[30,30]
+                    });
+                    const marker = L.marker([u.lat, u.lng], {icon}).addTo(map);
+                    marker.on('click', () => openProfile(u.uid));
                     mapMarkers.push(marker);
                 }
             });
@@ -776,75 +790,81 @@
             renderDynamicView();
         });
 
-        // Filtros
+        // ---------- FILTROS DE GÉNERO ----------
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
             const chip = e.target;
             if (chip.dataset.gender) filterGender = chip.dataset.gender;
-            if (chip.dataset.distance) filterMaxDistance = parseInt(chip.dataset.distance);
-            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-            if (chip.dataset.gender) document.querySelector(`.filter-chip[data-gender="${filterGender}"]`).classList.add('active');
-            if (chip.dataset.distance) chip.classList.add('active');
-            else document.querySelector(`.filter-chip[data-distance="${filterMaxDistance}"]`)?.classList.add('active');
+            document.querySelectorAll('#filtersContainer .filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
             loadNearbyUsers();
         });
 
-        // Modal perfil y límite
+        // ---------- PERFIL MODAL (con fotos) ----------
         async function openProfile(uid) {
             if (!userProfile.premium) {
-                const canView = await incrementViewCount();
-                if (!canView) { limitWarning.style.display = 'block'; return; }
+                const can = await incrementViewCount();
+                if (!can) { limitWarning.style.display = 'block'; return; }
             }
             const user = nearbyUsers.find(u => u.uid === uid);
             if (!user) return;
-            const initials = getInitials(user.name || '?');
-            const [c1, c2] = getAvatarColors(user.name || '?');
+            const initials = getInitials(user.name);
+            const [c1, c2] = getAvatarColors(user.name);
+            const mainPic = user.profilePic ? `<img src="${user.profilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : initials;
+            const album = user.album || [];
+            let albumHtml = '';
+            if (album.length > 0) {
+                albumHtml = '<div class="album-title">📸 Álbum</div><div class="album-grid">' +
+                    album.map(url => `<div class="album-item" style="background-image:url(${url});"></div>`).join('') +
+                    '</div>';
+            }
             modalContent.innerHTML = `
                 <div class="modal-header">
                     <button class="modal-close" id="closeModalBtn">✕</button>
-                    <div class="modal-avatar" style="background:linear-gradient(135deg, ${c1}, ${c2});">${initials}</div>
+                    <div class="modal-avatar" style="${!user.profilePic ? `background:linear-gradient(135deg, ${c1}, ${c2});` : ''}">${mainPic}</div>
                     <h3>${user.name}, ${user.age}</h3>
-                    <p>${user.distance ? '📍 '+user.distance.toFixed(1)+' km' : '🌍'} • ${user.online ? '🟢 En línea' : '⏳ Visto recientemente'}</p>
+                    <p>${user.distance ? '📍 '+user.distance.toFixed(1)+' km' : '🌍'} • ${user.online ? '🟢 En línea' : '⏳ Visto'}</p>
                 </div>
-                <div class="modal-body"><p class="bio">${user.bio || 'Sin descripción'}</p></div>
+                <div class="modal-body">
+                    <p class="bio">${user.bio || 'Sin descripción'}</p>
+                    ${albumHtml}
+                </div>
                 <div class="modal-actions">
                     <button class="btn-like">❤️ Me gusta</button>
-                    <button class="btn-message" id="openChatFromModalBtn">💬 Mensaje</button>
+                    <button class="btn-message" id="openChatBtn">💬 Mensaje</button>
                 </div>`;
             document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-            document.getElementById('openChatFromModalBtn').addEventListener('click', () => { closeModal(); openChat(uid); });
+            document.getElementById('openChatBtn').addEventListener('click', () => { closeModal(); openChat(uid); });
             profileModal.classList.add('active');
         }
 
         window.closeModal = () => profileModal.classList.remove('active');
-        profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeModal(); });
+        profileModal.addEventListener('click', e => { if (e.target === profileModal) closeModal(); });
 
+        // ---------- LÍMITE DIARIO ----------
         function getTodayString() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         }
-
         async function incrementViewCount() {
-            const userRef = ref(db, 'users/' + currentUser.uid);
-            const snap = await get(userRef);
+            const uRef = ref(db, 'users/' + currentUser.uid);
+            const snap = await get(uRef);
             if (!snap.exists()) return false;
             const data = snap.val();
             const today = getTodayString();
             let views = data.dailyViews || 0;
             if (data.lastResetDate !== today) {
                 views = 0;
-                await update(userRef, { dailyViews: 0, lastResetDate: today });
+                await update(uRef, { dailyViews: 0, lastResetDate: today });
             }
             if (views >= dailyLimit) return false;
-            await update(userRef, { dailyViews: views + 1 });
+            await update(uRef, { dailyViews: views + 1 });
             userProfile.dailyViews = views + 1;
             return true;
         }
-
         function checkPremiumStatus() {
             limitWarning.style.display = (userProfile && !userProfile.premium && userProfile.dailyViews >= dailyLimit) ? 'block' : 'none';
         }
-
         document.getElementById('upgradeBtn').addEventListener('click', async () => {
             await update(ref(db, 'users/' + currentUser.uid), { premium: true });
             userProfile.premium = true;
@@ -852,7 +872,65 @@
             showToast('¡Ahora eres Premium!');
         });
 
-        // Chat
+        // ---------- MI PERFIL (edición) ----------
+        document.getElementById('myProfileBtn').addEventListener('click', () => {
+            if (!userProfile) return;
+            document.getElementById('editName').value = userProfile.name || '';
+            document.getElementById('editAge').value = userProfile.age || '';
+            document.getElementById('editGender').value = userProfile.gender || 'male';
+            document.getElementById('editInterested').value = userProfile.interestedIn || 'female';
+            document.getElementById('editBio').value = userProfile.bio || '';
+            document.getElementById('editProfilePic').value = userProfile.profilePic || '';
+            const album = userProfile.album || [];
+            document.getElementById('editAlbum1').value = album[0] || '';
+            document.getElementById('editAlbum2').value = album[1] || '';
+            document.getElementById('editAlbum3').value = album[2] || '';
+            updateProfilePicPreview();
+            showScreen('myProfileScreen');
+        });
+        document.getElementById('backFromProfileBtn').addEventListener('click', () => showScreen('mainScreen'));
+
+        document.getElementById('editProfilePic').addEventListener('input', updateProfilePicPreview);
+        function updateProfilePicPreview() {
+            const url = document.getElementById('editProfilePic').value.trim();
+            const preview = document.getElementById('profilePicPreview');
+            if (url) {
+                preview.style.backgroundImage = `url(${url})`;
+                preview.textContent = '';
+            } else {
+                preview.style.backgroundImage = '';
+                preview.textContent = getInitials(userProfile?.name || '?');
+                const [c1, c2] = getAvatarColors(userProfile?.name || '?');
+                preview.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+            }
+        }
+
+        document.getElementById('saveMyProfileBtn').addEventListener('click', async () => {
+            const name = document.getElementById('editName').value.trim();
+            const age = parseInt(document.getElementById('editAge').value);
+            const gender = document.getElementById('editGender').value;
+            const interestedIn = document.getElementById('editInterested').value;
+            const bio = document.getElementById('editBio').value.trim();
+            const profilePic = document.getElementById('editProfilePic').value.trim();
+            const album = [
+                document.getElementById('editAlbum1').value.trim(),
+                document.getElementById('editAlbum2').value.trim(),
+                document.getElementById('editAlbum3').value.trim()
+            ].filter(url => url !== '');
+
+            if (!name || !age || age < 18) return document.getElementById('profileEditError').textContent = 'Nombre y edad válidos.';
+            if (!bio) return document.getElementById('profileEditError').textContent = 'Escribe una biografía.';
+
+            const updates = { name, age, gender, interestedIn, bio, profilePic, album };
+            await update(ref(db, 'users/' + currentUser.uid), updates);
+            // Actualizar userProfile local
+            Object.assign(userProfile, updates);
+            document.getElementById('profileEditError').textContent = '';
+            showToast('Perfil actualizado');
+            showScreen('mainScreen');
+            loadNearbyUsers(); // Refrescar para ver cambios en fotos
+        });
+        // ---------- CHAT ----------
         function openChat(uid) {
             activeChatId = uid;
             const partner = nearbyUsers.find(u => u.uid === uid) || {};
@@ -860,109 +938,87 @@
             showScreen('chatScreen');
             loadMessages();
         }
-
         function loadMessages() {
             const chatId = getChatId(currentUser.uid, activeChatId);
-            onValue(ref(db, 'chats/' + chatId + '/messages'), (snapshot) => {
+            onValue(ref(db, 'chats/' + chatId + '/messages'), snap => {
                 const container = document.getElementById('chatMessages');
                 container.innerHTML = '';
-                if (snapshot.exists()) {
-                    const msgs = Object.values(snapshot.val()).sort((a,b) => a.timestamp - b.timestamp);
-                    msgs.forEach(msg => {
+                if (snap.exists()) {
+                    Object.values(snap.val()).sort((a,b) => a.timestamp - b.timestamp).forEach(m => {
                         const div = document.createElement('div');
-                        div.className = `message ${msg.sender === currentUser.uid ? 'sent' : 'received'}`;
-                        div.textContent = msg.text;
+                        div.className = `message ${m.sender === currentUser.uid ? 'sent' : 'received'}`;
+                        div.textContent = m.text;
                         container.appendChild(div);
                     });
                     container.scrollTop = container.scrollHeight;
                 }
             });
         }
-
         function getChatId(uid1, uid2) { return uid1 < uid2 ? uid1+'_'+uid2 : uid2+'_'+uid1; }
-
         document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
-        document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key==='Enter') sendMessage(); });
-
+        document.getElementById('messageInput').addEventListener('keypress', e => { if (e.key==='Enter') sendMessage(); });
         async function sendMessage() {
             const text = document.getElementById('messageInput').value.trim();
             if (!text || !activeChatId) return;
             const chatId = getChatId(currentUser.uid, activeChatId);
-            const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
-            await set(msgRef, { sender: currentUser.uid, text, timestamp: serverTimestamp() });
+            await push(ref(db, 'chats/' + chatId + '/messages'), {
+                sender: currentUser.uid, text, timestamp: serverTimestamp()
+            });
             document.getElementById('messageInput').value = '';
         }
 
         // Lista de chats
-        document.getElementById('chatListBtn').addEventListener('click', showChatList);
+        document.getElementById('chatListBtn').addEventListener('click', () => { showScreen('chatListScreen'); loadChatList(); });
         document.getElementById('backFromChatListBtn').addEventListener('click', () => showScreen('mainScreen'));
         document.getElementById('backFromChatBtn').addEventListener('click', () => { activeChatId = null; showScreen('chatListScreen'); loadChatList(); });
-
-        async function showChatList() {
-            showScreen('chatListScreen');
-            await loadChatList();
-        }
-
         async function loadChatList() {
-            if (!currentUser) return;
             const container = document.getElementById('chatListContainer');
-            container.innerHTML = '<div style="padding:1rem; text-align:center;">Cargando...</div>';
+            container.innerHTML = '<div style="padding:1rem;text-align:center;">Cargando...</div>';
             const snap = await get(ref(db, 'chats'));
-            container.innerHTML = '';
-            if (!snap.exists()) return container.innerHTML = '<div class="empty-state">Aún no tienes conversaciones</div>';
+            if (!snap.exists()) { container.innerHTML = '<div class="empty-state">No tienes chats</div>'; return; }
             const chats = snap.val();
             const items = [];
-            for (const chatId in chats) {
-                if (!chatId.includes(currentUser.uid)) continue;
-                const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
-                const msgs = Object.values(chats[chatId].messages||{}).sort((a,b)=>b.timestamp-a.timestamp);
-                const lastMsg = msgs[0];
+            for (const id in chats) {
+                if (!id.includes(currentUser.uid)) continue;
+                const partnerId = id.split('_').find(p => p !== currentUser.uid);
+                const msgs = Object.values(chats[id].messages||{}).sort((a,b)=>b.timestamp-a.timestamp);
                 const profile = await getUserProfile(partnerId);
                 items.push({
-                    partnerId, name: profile?.name||'Usuario', lastMsg: lastMsg?.text||'',
-                    online: profile?.online||false, initials: getInitials(profile?.name||'?'), colors: getAvatarColors(profile?.name||'?')
+                    partnerId, name: profile?.name||'Usuario', lastMsg: msgs[0]?.text||'',
+                    online: profile?.online||false, profilePic: profile?.profilePic||'',
+                    initials: getInitials(profile?.name||'?'), colors: getAvatarColors(profile?.name||'?')
                 });
             }
-            if (!items.length) return container.innerHTML = '<div class="empty-state">Aún no tienes conversaciones</div>';
-            container.innerHTML = items.map(item => `
+            container.innerHTML = items.length ? items.map(item => `
                 <div class="chat-item" data-uid="${item.partnerId}">
-                    <div class="chat-avatar" style="background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});">${item.initials}</div>
+                    <div class="chat-avatar" style="background-image:url(${item.profilePic}); ${!item.profilePic ? `background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});` : ''}">${!item.profilePic ? item.initials : ''}</div>
                     <div class="chat-info">
-                        <div class="chat-name">${item.name} ${item.online?'<span style="color:var(--online)">●</span>':''}</div>
+                        <div class="chat-name">${item.name} ${item.online?'●':''}</div>
                         <div class="chat-preview">${item.lastMsg.substring(0,30)}</div>
                     </div>
                 </div>
-            `).join('');
-            container.querySelectorAll('.chat-item').forEach(item => item.addEventListener('click', () => openChat(item.dataset.uid)));
+            `).join('') : '<div class="empty-state">No tienes chats</div>';
+            container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
         }
+        async function getUserProfile(uid) { const s = await get(ref(db, 'users/'+uid)); return s.exists() ? s.val() : null; }
 
-        async function getUserProfile(uid) {
-            const snap = await get(ref(db, 'users/'+uid));
-            return snap.exists() ? snap.val() : null;
-        }
-
-        // Utilidades
+        // ---------- UTILIDADES ----------
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             if (id === 'mainScreen') checkPremiumStatus();
         }
-
         function showToast(msg) {
-            toast.textContent = msg;
-            toast.style.display = 'block';
-            toast.style.animation = 'none';
-            void toast.offsetWidth;
+            toast.textContent = msg; toast.style.display = 'block';
+            toast.style.animation = 'none'; void toast.offsetWidth;
             toast.style.animation = 'toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            setTimeout(() => toast.style.display = 'none', 3000);
         }
-
         function getInitials(name) { return name?.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || '?'; }
         function getAvatarColors(name) {
-            const palettes = [['#7B2CBF','#E5383B'],['#9D4EDD','#FF686B'],['#5A189A','#D00000'],['#3C096C','#FF4D6D'],['#7209B7','#F72585'],['#560BAD','#B5179E']];
-            let hash = 0;
-            for (let i=0; i<name.length; i++) hash = name.charCodeAt(i) + ((hash<<5)-hash);
-            return palettes[Math.abs(hash) % palettes.length];
+            const p = [['#7B2CBF','#E5383B'],['#9D4EDD','#FF686B'],['#5A189A','#D00000'],['#3C096C','#FF4D6D'],['#7209B7','#F72585']];
+            let h = 0; for (let i=0; i<name.length; i++) h = name.charCodeAt(i) + ((h<<5)-h);
+            return p[Math.abs(h) % p.length];
         }
     </script>
 </body>
