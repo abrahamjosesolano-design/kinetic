@@ -316,10 +316,10 @@
             font-size: 0.7rem;
             color: var(--text-secondary);
         }
+
         /* ---------- MAPA ---------- */
         #mapContainer { flex: 1; width: 100%; position: relative; }
         #map { width: 100%; height: 100%; z-index: 1; }
-
         /* ---------- MODAL ---------- */
         .modal {
             position: fixed;
@@ -622,7 +622,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-        // Configuración exacta con databaseURL
+        // Configuración exacta con databaseURL obligatorio
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -1150,7 +1150,6 @@
             container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
         }
         async function getUserProfile(uid) { const s = await get(ref(db, 'users/'+uid)); return s.exists() ? s.val() : null; }
-
         // ---------- PANTALLA AJUSTES ----------
         function updateSettingsUI() {
             if (!userProfile) return;
@@ -1160,7 +1159,6 @@
 
         document.getElementById('settingsGenderFilter').addEventListener('change', (e) => {
             filterGender = e.target.value;
-            // También actualizar chips visuales si estamos en mainScreen
             document.querySelectorAll('#filtersContainer .filter-chip').forEach(c => c.classList.remove('active'));
             const activeChip = document.querySelector(`#filtersContainer .filter-chip[data-gender="${filterGender}"]`);
             if (activeChip) activeChip.classList.add('active');
@@ -1182,6 +1180,7 @@
         });
 
         document.querySelector('.back-from-settings-btn').addEventListener('click', () => showScreen('mainScreen'));
+
         // ---------- NAVEGACIÓN INFERIOR ----------
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
