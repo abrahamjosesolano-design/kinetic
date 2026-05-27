@@ -1,566 +1,1151 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kinetic | Radar de Conexión</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kinetic – Conecta con quien quieras</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* DISPOSITIVO MÓVIL BLINDADO */
-        body { 
-            margin: 0; 
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
-            background-color: #050508; 
-            color: #ffffff;
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh; 
-            overflow-x: hidden;
+        :root {
+            --purple: #7B2CBF;
+            --purple-dark: #3C096C;
+            --red: #E5383B;
+            --red-light: #FF6B6B;
+            --bg: #10002B;
+            --card-bg: #1A0033;
+            --text: #FFFFFF;
+            --text-secondary: #B8B8D4;
+            --online: #2ECC71;
+            --streak: #FF9F1C;
+            --shadow: 0 4px 20px rgba(123, 44, 191, 0.3);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            position: relative;
+            user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-        
-        .phone-container { 
-            width: 100%; 
-            max-width: 412px; 
-            background: #0f0f19; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-        }
 
-        /* CONFIGURACIÓN ANIMACIÓN SPLASH */
-        #splash-screen { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            position: absolute; 
-            top: 0; left: 0; right: 0; bottom: 0; 
-            background: #050508; 
-            z-index: 9999; 
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            background: var(--bg);
+            overflow-y: auto;
         }
-        
-        .spinner { 
-            border: 4px solid rgba(255,255,255,0.1); 
-            width: 42px; 
-            height: 42px; 
-            border-radius: 50%; 
-            border-left-color: #ff2e63; 
-            animation: spin 0.8s linear infinite; 
-            margin-top: 25px; 
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .screen.active { display: flex; }
 
-        /* FORMULARIO DE ACCESO Y GÉNEROS */
-        #login-screen { 
-            display: none; 
-            flex-direction: column; 
-            justify-content: center; 
-            padding: 35px 25px; 
-            flex-grow: 1; 
-            box-sizing: border-box; 
+        /* ---------- LOGIN ---------- */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 2rem;
+            background: linear-gradient(145deg, var(--purple-dark) 0%, var(--bg) 100%);
         }
-        
-        .welcome-text { text-align: center; margin-bottom: 35px; }
-        .welcome-text h2 { 
-            font-size: 36px; 
-            font-weight: 900; 
-            margin: 0; 
-            background: linear-gradient(45deg, #7a26f2, #ff2e63); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            letter-spacing: 1px;
+        .logo {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, var(--red-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
-        .input-group { margin-bottom: 22px; }
-        .input-group label { 
-            display: block; 
-            color: #8e8e9f; 
-            font-size: 11px; 
-            font-weight: 700; 
-            margin-bottom: 9px; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .tagline {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            text-align: center;
         }
-        
-        .input-group input, .input-group select { 
-            width: 100%; 
-            padding: 15px; 
-            background: rgba(255, 255, 255, 0.04); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 14px; 
-            color: #ffffff; 
-            font-size: 15px; 
-            box-sizing: border-box; 
+        .input-group {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            border: 2px solid var(--purple);
+            background: rgba(26, 0, 51, 0.8);
+            color: var(--text);
+            font-size: 1rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.3s;
         }
-        .input-group input:focus { border-color: #7a26f2; }
-        
-        .gender-selector { display: flex; gap: 12px; }
-        .gender-box { 
-            flex: 1; 
-            padding: 14px; 
-            background: rgba(255, 255, 255, 0.04); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            text-align: center; 
-            border-radius: 14px; 
-            cursor: pointer; 
-            color: #7e7e8f; 
-            font-weight: 700; 
-            transition: all 0.2s ease; 
+        .input-group input:focus {
+            border-color: var(--red-light);
+            box-shadow: 0 0 18px rgba(230, 56, 59, 0.5);
         }
-        .gender-box.selected { background: #7a26f2; color: #ffffff; border-color: #a16eff; box-shadow: 0 0 15px rgba(122,38,242,0.4); }
-        
-        .action-btn { 
-            background: linear-gradient(45deg, #7a26f2, #ff2e63); 
-            color: #ffffff; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 16px; 
-            font-size: 16px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-top: 12px;
-            box-shadow: 0 4px 15px rgba(255,46,99,0.2);
-            transition: transform 0.1s;
-        }
-        .action-btn:active { transform: scale(0.98); }
-
-        /* VISTAS PRINCIPALES DE LA APLICACIÓN */
-        #main-app { display: none; flex-direction: column; flex-grow: 1; height: 100vh; position: relative; }
-        .app-section { display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; padding-bottom: 95px; box-sizing: border-box; }
-        .app-section.active-view { display: flex; }
-        
-        /* INTERFAZ DE FILTROS SUPERIORES */
-        header { padding: 20px 16px 12px 16px; background: #11111f; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .logo { font-size: 26px; font-weight: 900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic; }
-        .streak-badge { background: linear-gradient(135deg, #ff9500, #ff2e63); padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(255,46,99,0.3); }
-        
-        .filter-bar { display: flex; gap: 8px; }
-        .filter-chip { 
-            flex: 1; 
-            padding: 10px 6px; 
-            background: #1d1d2e; 
-            border: 1px solid transparent; 
-            border-radius: 50px; 
-            color: #8e8e9f; 
-            text-align: center; 
-            font-size: 13px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-        }
-        .filter-chip.active-chip { background: #ffffff; color: #000000; font-weight: 800; box-shadow: 0 4px 12px rgba(255,255,255,0.25); }
-
-        /* REJILLA (GRID) DEL RADAR */
-        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px; }
-        .profile-card { 
-            position: relative; 
-            aspect-ratio: 1/1; 
-            background: #161626; 
-            border-radius: 14px; 
-            overflow: hidden; 
-            background-size: cover; 
-            background-position: center; 
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
         }
-        .profile-info { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0) 100%); padding: 10px 8px 6px 8px; }
-        .name-age { font-size: 12px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .distance { color: #00e5ff; font-size: 10px; font-weight: 600; margin-top: 1px; }
-        .online-dot { width: 9px; height: 9px; background: #34c759; border-radius: 50%; position: absolute; top: 8px; right: 8px; box-shadow: 0 0 8px #34c759; border: 1.5px solid #161626; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple), var(--red));
+            color: white;
+            box-shadow: 0 4px 15px rgba(229, 56, 59, 0.5);
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--purple);
+            color: var(--text);
+        }
+        .divider {
+            color: var(--text-secondary);
+            margin: 1.2rem 0;
+            font-size: 0.8rem;
+        }
 
-        /* LISTADO DE CHATS ESTILO BANDEJA */
-        .chat-header { padding: 25px 20px 15px 20px; font-size: 24px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.04); }
-        .chat-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .chat-item { display: flex; align-items: center; gap: 14px; padding: 14px; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px solid rgba(255,255,255,0.02); cursor: pointer; transition: background 0.2s; }
-        .chat-item:active { background: rgba(255,255,255,0.06); }
-        .chat-avatar { width: 48px; height: 48px; border-radius: 50%; background-size: cover; background-position: center; border: 1.5px solid rgba(255,255,255,0.1); }
-        .chat-info { flex-grow: 1; min-width: 0; }
-        .chat-info strong { display: block; font-size: 15px; color: #ffffff; }
-        .chat-info p { margin: 3px 0 0 0; color: #7e7e8f; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* ---------- HEADER ---------- */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid rgba(123, 44, 191, 0.4);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            min-height: 56px;
+        }
+        .header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--red-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .icon-btn {
+            background: rgba(123, 44, 191, 0.25);
+            border: none;
+            color: var(--text);
+            font-size: 1.3rem;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .icon-btn:active { background: rgba(123, 44, 191, 0.6); }
+        /* ---------- FILTROS ---------- */
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            background: var(--card-bg);
+            overflow-x: auto;
+            white-space: nowrap;
+            align-items: center;
+            scrollbar-width: none;
+        }
+        .filters::-webkit-scrollbar { display: none; }
+        .filter-chip {
+            background: rgba(123, 44, 191, 0.2);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            flex-shrink: 0;
+        }
+        .filter-chip.active {
+            background: var(--purple);
+            border-color: var(--red-light);
+            box-shadow: 0 0 12px rgba(230,56,59,0.5);
+            font-weight: 600;
+        }
 
-        /* VISTA MI PERFIL LOCAL */
-        .profile-container-view { padding: 35px 20px; display: flex; flex-direction: column; align-items: center; }
-        .my-avatar { width: 110px; height: 110px; border-radius: 50%; border: 3px solid #ff2e63; background-size: cover; background-position: center; box-shadow: 0 0 25px rgba(255,46,99,0.35); }
-        .stats-row { display: flex; width: 100%; gap: 10px; margin-top: 25px; text-align: center; }
-        .stat-box { flex: 1; background: rgba(255,255,255,0.03); padding: 14px 8px; border-radius: 14px; font-size: 11px; color: #7e7e8f; border: 1px solid rgba(255,255,255,0.02); }
-        .stat-box strong { display: block; font-size: 17px; color: #ffffff; margin-bottom: 2px; }
+        /* ---------- GRID PERFILES ---------- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.7rem;
+            padding: 0.8rem;
+            flex: 1;
+            overflow-y: auto;
+            align-content: start;
+        }
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            position: relative;
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .profile-card:active { transform: scale(0.95); }
+        .profile-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: white;
+            position: relative;
+        }
+        .online-indicator {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 12px; height: 12px;
+            background: var(--online);
+            border-radius: 50%;
+            border: 2px solid var(--card-bg);
+            box-shadow: 0 0 10px rgba(46,204,113,0.6);
+        }
+        .profile-info {
+            padding: 0.5rem;
+            text-align: center;
+        }
+        .profile-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-distance {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
 
-        /* BARRA DE NAVEGACIÓN INFERIOR FLOTANTE */
-        .nav-bar { position: absolute; bottom: 18px; left: 16px; right: 16px; height: 64px; background: #11111f; border-radius: 22px; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.06); z-index: 99; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
-        .nav-item { color: #47475a; font-size: 24px; cursor: pointer; padding: 12px 20px; transition: color 0.2s ease; display: flex; justify-content: center; align-items: center; }
-        .nav-item.active { color: #ff2e63; text-shadow: 0 0 10px rgba(255,46,99,0.4); }
+        /* ---------- MAPA ---------- */
+        #mapContainer {
+            flex: 1;
+            width: 100%;
+            position: relative;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
 
-        /* VENTANA MODAL (VISTA DETALLADA) */
-        .profile-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; justify-content: center; align-items: flex-end; }
-        .modal-content { width: 100%; max-width: 412px; background: #121220; border-radius: 28px 28px 0 0; padding: 20px 20px 30px 20px; box-sizing: border-box; border-top: 1px solid rgba(255,255,255,0.08); }
-        .modal-img { width: 100%; aspect-ratio: 1.15/1; border-radius: 18px; background-size: cover; background-position: center; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .modal-close { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.6); color: #ffffff; border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-        .modal-bio { color: #a1a1b5; font-size: 14px; background: rgba(255,255,255,0.02); padding: 16px; border-radius: 14px; line-height: 1.45; border: 1px solid rgba(255,255,255,0.02); }
+        /* ---------- MODAL ---------- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px var(--purple-dark);
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(60px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header {
+            padding: 1.8rem 1.5rem 1rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--purple), var(--red));
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            background: rgba(0,0,0,0.3);
+            border: none;
+            color: white;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .modal-avatar {
+            width: 85px; height: 85px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            margin: 0 auto 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            border: 3px solid rgba(255,255,255,0.4);
+        }
+        .modal-body { padding: 1.5rem; text-align: center; }
+        .modal-body .bio { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            padding: 0 1.5rem 1.8rem;
+        }
+        .btn-like {
+            flex: 1;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 30px;
+            font-weight: 700;
+            background: var(--red);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-message {
+            flex: 1;
+            padding: 0.9rem;
+            border: 2px solid var(--purple);
+            border-radius: 30px;
+            font-weight: 700;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-message:active { background: var(--purple); }
+         /* ---------- CHAT ---------- */
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem 0.8rem;
+        }
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            border-radius: 14px;
+            margin-bottom: 0.4rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .chat-item:active { background: rgba(123,44,191,0.2); }
+        .chat-avatar {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .streak-badge {
+            font-size: 0.75rem;
+            background: var(--streak);
+            color: #000;
+            padding: 0.15rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+        .chat-preview {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            background: var(--bg);
+        }
+        .message {
+            max-width: 80%;
+            padding: 0.8rem 1rem;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 0.95rem;
+            animation: msgPop 0.3s ease;
+        }
+        @keyframes msgPop {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .message.received {
+            align-self: flex-start;
+            background: var(--card-bg);
+            border-bottom-left-radius: 5px;
+        }
+        .message.sent {
+            align-self: flex-end;
+            background: var(--purple);
+            border-bottom-right-radius: 5px;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 0.7rem 0.8rem;
+            gap: 0.5rem;
+            background: var(--card-bg);
+            border-top: 1px solid rgba(123,44,191,0.4);
+            align-items: center;
+            padding-bottom: calc(0.7rem + var(--safe-bottom));
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border-radius: 25px;
+            border: 1px solid var(--purple);
+            background: var(--bg);
+            color: white;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        .send-btn {
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            background: var(--red);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .send-btn:active { transform: scale(0.9); }
+
+        .toast {
+            position: fixed;
+            bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            color: var(--text);
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            z-index: 300;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards;
+            pointer-events: none;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="phone-container">
-        
-        <div id="splash-screen">
-            <h2 style="font-weight:900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; font-size: 38px; letter-spacing: 2px; font-style: italic;">KINETIC</h2>
-            <div class="spinner"></div>
-        </div>
-
-        <div id="login-screen">
-            <div class="welcome-text">
-                <h2>KINETIC</h2>
-                <p style="color: #5c5c70; margin: 6px 0 0 0; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">CONEXIÓN SATELITAL INMEDIATA</p>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="logo">K</div>
+            <h1 style="font-size:2.2rem; margin-bottom:0.3rem;">Kinetic</h1>
+            <p class="tagline">La energía que te mueve</p>
+            <div class="input-group">
+                <input type="email" id="emailInput" placeholder="Correo electrónico" autocomplete="email">
             </div>
             <div class="input-group">
-                <label>Tu Apodo o Nombre</label>
-                <input type="text" id="user-name" placeholder="Ej. Dante">
+                <input type="password" id="passwordInput" placeholder="Contraseña" autocomplete="current-password">
             </div>
-            <div class="input-group">
-                <label>Edad</label>
-                <input type="number" id="user-age" placeholder="Mínimo 18 años" min="18">
-            </div>
-            <div class="input-group">
-                <label>Identidad de Género</label>
-                <div class="gender-selector">
-                    <div class="gender-box" id="gender-h" onclick="selectGender('H')">Hombre</div>
-                    <div class="gender-box" id="gender-m" onclick="selectGender('M')">Mujer</div>
-                </div>
-            </div>
-            <div class="input-group">
-                <label>Preferencia de Búsqueda</label>
-                <select id="user-search">
-                    <option value="todos">Mostrar Ambos (Todos)</option>
-                    <option value="mujeres">Ver Solo Mujeres</option>
-                    <option value="hombres">Ver Solo Hombres</option>
-                </select>
-            </div>
-            <button class="action-btn" onclick="entrarAlRadar()">Encender Radar Satelital ⚡</button>
+            <button class="btn btn-primary" id="loginBtn">Iniciar Sesión</button>
+            <p class="divider">o</p>
+            <button class="btn btn-secondary" id="registerBtn">Crear cuenta gratis</button>
+            <p id="authError" style="color:var(--red-light); margin-top:1rem; font-size:0.9rem;"></p>
         </div>
-
-        <div id="main-app">
-            
-            <div id="vista-radar" class="app-section active-view">
-                <header>
-                    <div class="top-bar">
-                        <div class="logo">KINETIC</div>
-                        <div class="streak-badge">⚡ RACHA X7</div>
-                    </div>
-                    <div class="filter-bar">
-                        <div class="filter-chip active-chip" id="chip-todos" onclick="filtrarPorBoton('todos')">Cerca</div>
-                        <div class="filter-chip" id="chip-mujeres" onclick="filtrarPorBoton('mujeres')">Mujeres</div>
-                        <div class="filter-chip" id="chip-hombres" onclick="filtrarPorBoton('hombres')">Hombres</div>
-                    </div>
-                </header>
-                <main class="grid-container" id="usuarios-dinamicos">
-                    </main>
-            </div>
-
-            <div id="vista-mensajes" class="app-section">
-                <div class="chat-header">Mensajes Privados</div>
-                <div class="chat-list" id="lista-de-chats">
-                    </div>
-            </div>
-
-            <div id="vista-perfil" class="app-section">
-                <div class="profile-container-view">
-                    <div class="my-avatar" id="mi-perfil-foto"></div>
-                    <h2 id="mi-perfil-nombre" style="margin-top: 18px; margin-bottom: 4px; font-weight: 800; font-size: 22px;"></h2>
-                    <span style="color:#00e5ff; font-size:11px; font-weight:800; letter-spacing:1px;">ESTADO: RADAR ACTIVO</span>
-                    
-                    <div class="stats-row">
-                        <div class="stat-box"><strong>1.5 KM</strong>Rango Máximo</div>
-                        <div class="stat-box"><strong>PREMIUM</strong>Nivel Cuenta</div>
-                        <div class="stat-box"><strong>✔ PRO</strong>Estado</div>
-                    </div>
-                    <button class="action-btn" style="background: rgba(255,46,99,0.08); color:#ff2e63; border: 1px solid rgba(255,46,99,0.15); margin-top: 45px; box-shadow: none;" onclick="cerrarSesionLocal()">Desconectar del Radar</button>
-                </div>
-            </div>
-
-            <nav class="nav-bar">
-                <div class="nav-item active" id="nav-radar" onclick="cambiarSeccion('radar')">⌖</div>
-                <div class="nav-item" id="nav-mensajes" onclick="cambiarSeccion('mensajes')">💬</div>
-                <div class="nav-item" id="nav-perfil" onclick="cambiarSeccion('perfil')">👤</div>
-            </nav>
-        </div>
-
-        <div id="profile-modal" class="profile-modal" onclick="if(event.target.id==='profile-modal') cerrarPerfil()">
-            <div class="modal-content">
-                <div class="modal-img" id="modal-img">
-                    <button class="modal-close" onclick="cerrarPerfil()">×</button>
-                </div>
-                <h3 id="modal-name-age" style="margin-top:18px; margin-bottom: 4px; font-size: 20px; font-weight: 800;"></h3>
-                <div id="modal-distance" style="color:#00e5ff; font-size:12px; font-weight:700; margin-bottom:16px; letter-spacing: 0.3px;"></div>
-                <div id="modal-bio" class="modal-bio"></div>
-                <button class="action-btn" id="btn-enviar-mensaje" style="margin-top:22px;">Enviar Mensaje Directo 💬</button>
-            </div>
-        </div>
-
     </div>
-        <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    <!-- MAIN SCREEN -->
+    <div id="mainScreen" class="screen">
+        <div class="header">
+            <h2>⚡ Kinetic</h2>
+            <div style="display:flex; gap:0.5rem;">
+                <button class="icon-btn" id="toggleViewBtn" title="Vista mapa/grid">🗺️</button>
+                <button class="icon-btn" id="chatListBtn" title="Mensajes">💬</button>
+                <button class="icon-btn" id="logoutBtn" title="Salir">🚪</button>
+            </div>
+        </div>
+        <div class="filters" id="filtersContainer">
+            <span class="filter-chip active" data-gender="all">🌐 Todos</span>
+            <span class="filter-chip" data-gender="female">👩 Mujeres</span>
+            <span class="filter-chip" data-gender="male">👨 Hombres</span>
+            <span class="filter-chip" data-distance="5">📍 <5 km</span>
+            <span class="filter-chip" data-distance="20">📍 <20 km</span>
+            <span class="filter-chip" data-distance="50">📍 <50 km</span>
+        </div>
+        <!-- Contenedor dinámico: grid o mapa -->
+        <div id="dynamicContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
+        <div id="limitWarning" style="display:none; background:var(--purple-dark); padding:0.5rem; text-align:center; font-size:0.8rem;">
+            Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
+        </div>
+    </div>
 
-        // Configuración oficial extraída de tu consola Firebase
+    <!-- MODAL PERFIL -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <!-- CHAT LIST SCREEN -->
+    <div id="chatListScreen" class="screen">
+        <div class="header">
+            <button class="icon-btn" id="backFromChatListBtn">←</button>
+            <h2>Mensajes</h2>
+            <div></div>
+        </div>
+        <div class="chat-list" id="chatListContainer"></div>
+    </div>
+
+    <!-- CHAT SCREEN -->
+    <div id="chatScreen" class="screen">
+        <div class="header">
+            <button class="icon-btn" id="backFromChatBtn">←</button>
+            <h2 id="chatPartnerName">Chat</h2>
+            <div></div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje..." autocomplete="off">
+            <button class="send-btn" id="sendMsgBtn">➤</button>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast" style="display:none;"></div>
+
+    <!-- Firebase SDK y Leaflet -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+        // Inicializar Firebase
         const firebaseConfig = {
-          apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-          authDomain: "kinetic-app-67ae5.firebaseapp.com",
-          databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com",
-          projectId: "kinetic-app-67ae5",
-          storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-          messagingSenderId: "825570718975",
-          appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+            authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            projectId: "kinetic-app-67ae5",
+            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+            messagingSenderId: "825570718975",
+            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
         };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-        let db = null;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getDatabase(app);
-        } catch(e) { 
-            console.error("Firebase Initialization Safely Bypassed to prevent app freezing."); 
-        }
+        // ==================== VARIABLES GLOBALES ====================
+        let currentUser = null;
+        let userProfile = null; // Datos del perfil del usuario actual
+        let nearbyUsers = [];    // Lista de perfiles cercanos
+        let currentView = 'grid'; // 'grid' o 'map'
+        let map = null;
+        let mapMarkers = [];
+        let activeChatId = null;
+        let dailyLimit = 10;      // Perfiles gratuitos por día
 
-        // Variables de estado globales alojadas en el objeto window para acceso inter-script
-        window.filtroActivoGlobal = 'todos';
-        window.listaCompletaUsuarios = [];
+        // Filtros
+        let filterGender = 'all';
+        let filterMaxDistance = 50;
 
-        // Bandeja de entrada simulada inicial
-        window.chatsAbiertos = [
-            {nombre: "Camila", edad: 22, msg: "¡Hola! Vi tu señal cinética, ¿hablamos?", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"}
-        ];
+        // ==================== REFERENCIAS DOM ====================
+        const loginScreen = document.getElementById('loginScreen');
+        const mainScreen = document.getElementById('mainScreen');
+        const profileModal = document.getElementById('profileModal');
+        const modalContent = document.getElementById('modalContent');
+        const chatListScreen = document.getElementById('chatListScreen');
+        const chatScreen = document.getElementById('chatScreen');
+        const toast = document.getElementById('toast');
+        const limitWarning = document.getElementById('limitWarning');
 
-        // Perfiles de respaldo con fotos optimizadas de Unsplash para el Radar Satelital
-        window.backupsRadar = [
-            {nombre: "Camila", edad: 22, genero: "M", dist: "A 50 metros", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200"},
-            {nombre: "Carlos", edad: 25, genero: "H", dist: "A 120 metros", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200"},
-            {nombre: "Valeria", edad: 24, genero: "M", dist: "A 400 metros", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200"},
-            {nombre: "Andrés", edad: 21, genero: "H", dist: "A 600 metros", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200"},
-            {nombre: "Sofía", edad: 23, genero: "M", dist: "A 1.1 km", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200"},
-            {nombre: "Mateo", edad: 26, genero: "H", dist: "A 1.5 km", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200"}
-        ];
-
-        // Verificación de sesión al cargar el DOM de manera asíncrona
-        document.addEventListener("DOMContentLoaded", () => {
-            const localUser = localStorage.getItem("kinetic_user");
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                if(splash) splash.style.display = 'none';
-                
-                if (localUser) {
-                    const u = JSON.parse(localUser);
-                    window.filtroActivoGlobal = u.busqueda || 'todos';
-                    actualizarEstiloChips(window.filtroActivoGlobal);
-                    montarApp(u.nombre, u.edad, u.genero);
-                } else {
-                    document.getElementById('login-screen').style.display = 'flex';
-                }
-            }, 1200); // 1.2 segundos exactos de animación splash elegante
+        // ==================== AUTENTICACIÓN ====================
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            if (!email || !password) return showError('Completa todos los campos');
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                showError('Error al iniciar sesión: ' + error.message);
+            }
         });
 
-        // Función de registro e inserción segura en Firebase Realtime Database
-        window.entrarAlRadar = function() {
-            const nombre = document.getElementById('user-name').value.trim();
-            const edad = document.getElementById('user-age').value;
-            const filtro = document.getElementById('user-search').value;
-
-            if(!nombre || !edad || !window.generoSeleccionado) {
-                alert('Por favor, rellena todos los campos e indica tu género.');
-                return;
-            }
-
-            if(parseInt(edad) < 18) {
-                alert('Debes ser mayor de 18 años para encender el radar.');
-                return;
-            }
-
-            const nuevoUsuario = {
-                nombre: nombre,
-                edad: parseInt(edad),
-                genero: window.generoSeleccionado,
-                busqueda: filtro,
-                time: Date.now()
-            };
-
-            localStorage.setItem("kinetic_user", JSON.stringify(nuevoUsuario));
-            window.filtroActivoGlobal = filtro;
-            actualizarEstiloChips(filtro);
-            montarApp(nombre, edad, window.generoSeleccionado);
-
-            if(db) {
-                try {
-                    const userRef = push(ref(db, 'usuarios'));
-                    set(userRef, nuevoUsuario);
-                } catch(e) { 
-                    console.log("Database Sync Skipped. Working on Local/Sandbox Mode."); 
-                }
-            }
-        };
-
-        // Activación de la interfaz principal de usuario
-        function montarApp(nombre, edad, genero) {
-            document.getElementById('mi-perfil-nombre').innerText = `${nombre}, ${edad}`;
-            document.getElementById('mi-perfil-foto').style.backgroundImage = genero === 'M' ? 
-                "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')" : 
-                "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150')";
-
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
-            
-            conectarYLimpiarRegistros();
-            window.actualizarBandejaMensajes();
-        }
-                    // Función de conexión a base de datos y control de duplicados
-        function conectarYLimpiarRegistros() {
-            if(db) {
-                try {
-                    onValue(ref(db, 'usuarios'), (snapshot) => {
-                        let listaFirebase = [];
-                        let nombresVistos = new Set();
-                        
-                        if(snapshot.exists()) {
-                            const datos = snapshot.val();
-                            Object.keys(datos).forEach(key => {
-                                const u = datos[key];
-                                const localUser = JSON.parse(localStorage.getItem("kinetic_user") || "{}");
-                                
-                                // Lógica anti-duplicados y exclusión del propio usuario
-                                if(u.nombre && u.nombre !== localUser.nombre && !nombresVistos.has(u.nombre.toLowerCase())) {
-                                    nombresVistos.add(u.nombre.toLowerCase());
-                                    u.img = u.genero === 'M' ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200" : "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200";
-                                    u.dist = "Cerca tuyo";
-                                    listaFirebase.push(u);
-                                }
-                            });
-                        }
-                        window.listaCompletaUsuarios = [...listaFirebase, ...window.backupsRadar];
-                        window.renderizarRadar();
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            if (!email || !password) return showError('Completa todos los campos');
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                // Crear perfil en Realtime Database
+                const user = auth.currentUser;
+                if (user) {
+                    await set(ref(db, 'users/' + user.uid), {
+                        email: email,
+                        name: email.split('@')[0],
+                        age: 25,
+                        gender: 'male',   // Por defecto, luego el usuario puede cambiar
+                        interestedIn: 'female',
+                        premium: false,
+                        dailyViews: 0,
+                        lastResetDate: getTodayString(),
+                        lat: null,
+                        lng: null,
+                        online: true
                     });
-                    return;
-                } catch(e) { console.log("Database streaming read handled."); }
+                }
+            } catch (error) {
+                showError('Error al registrarse: ' + error.message);
             }
-            window.listaCompletaUsuarios = [...window.backupsRadar];
-            window.renderizarRadar();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+        });
+
+        function showError(msg) {
+            document.getElementById('authError').textContent = msg;
+            setTimeout(() => { document.getElementById('authError').textContent = ''; }, 4000);
+        }
+         // ==================== ESTADO DE AUTENTICACIÓN ====================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Cargar perfil del usuario
+                const userRef = ref(db, 'users/' + user.uid);
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    userProfile = snapshot.val();
+                    userProfile.uid = user.uid;
+                    // Actualizar online
+                    update(userRef, { online: true });
+                    // Iniciar geolocalización y carga de datos
+                    initApp();
+                } else {
+                    // Perfil no existe (raro), forzar logout
+                    await signOut(auth);
+                }
+            } else {
+                currentUser = null;
+                userProfile = null;
+                nearbyUsers = [];
+                showScreen('loginScreen');
+                if (map) map.remove();
+                map = null;
+            }
+        });
+
+        function initApp() {
+            showScreen('mainScreen');
+            getUserLocation();
+            // Si el usuario es premium, ocultar límite
+            checkPremiumStatus();
+            loadNearbyUsers();
         }
 
-        // Renderizado dinámico de tarjetas en el radar
-        window.renderizarRadar = function() {
-            const contenedor = document.getElementById('usuarios-dinamicos');
-            if(!contenedor) return;
-            contenedor.innerHTML = '';
-
-            const listaFiltrada = window.listaCompletaUsuarios.filter(user => {
-                if (window.filtroActivoGlobal === 'mujeres') return user.genero === 'M';
-                if (window.filtroActivoGlobal === 'hombres') return user.genero === 'H';
-                return true;
-            });
-
-            if(listaFiltrada.length === 0) {
-                contenedor.innerHTML = '<div style="color:#5c5c70; text-align:center; grid-column:1/-1; padding:40px 10px; font-size:14px; font-weight:700;">Buscando señales cinéticas...</div>';
+        // ==================== GEOLOCALIZACIÓN ====================
+        function getUserLocation() {
+            if (!navigator.geolocation) {
+                showToast('Geolocalización no soportada');
                 return;
             }
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    // Actualizar ubicación en BD
+                    if (currentUser) {
+                        await update(ref(db, 'users/' + currentUser.uid), { lat, lng });
+                    }
+                    // Recargar usuarios cercanos
+                    loadNearbyUsers();
+                },
+                (error) => {
+                    console.error('Error obteniendo ubicación:', error);
+                    showToast('Activa la ubicación para ver personas cerca');
+                },
+                { enableHighAccuracy: true }
+            );
+        }
 
-            listaFiltrada.forEach(user => {
-                contenedor.innerHTML += `
-                    <div class="profile-card" style="background-image: url('${user.img}');" onclick="window.verPerfil('${user.nombre}', '${user.edad}', '${user.dist}', '${user.img}')">
-                        <div class="online-dot"></div>
-                        <div class="profile-info">
-                            <div class="name-age">${user.nombre}, ${user.edad} ✔</div>
-                            <div class="distance">${user.dist}</div>
-                        </div>
-                    </div>
-                `;
-            });
-        };
-
-        window.filtrarPorBoton = function(tipo) {
-            window.filtroActivoGlobal = tipo;
-            actualizarEstiloChips(tipo);
-            window.renderizarRadar();
-        };
-
-        function actualizarEstiloChips(tipo) {
-            const t = document.getElementById('chip-todos');
-            const m = document.getElementById('chip-mujeres');
-            const h = document.getElementById('chip-hombres');
-            if(t && m && h) {
-                t.classList.remove('active-chip');
-                m.classList.remove('active-chip');
-                h.classList.remove('active-chip');
-                document.getElementById(`chip-${tipo}`).classList.add('active-chip');
+        // ==================== CARGAR USUARIOS CERCANOS ====================
+        async function loadNearbyUsers() {
+            if (!currentUser || !userProfile) return;
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            if (!snapshot.exists()) {
+                nearbyUsers = [];
+                renderDynamicView();
+                return;
             }
-        }
+            const allUsers = snapshot.val();
+            const me = currentUser.uid;
+            const now = Date.now();
+            const myLat = userProfile.lat;
+            const myLng = userProfile.lng;
 
-        window.actualizarBandejaMensajes = function() {
-            const contenedorChats = document.getElementById('lista-de-chats');
-            if(!contenedorChats) return;
-            contenedorChats.innerHTML = '';
-            window.chatsAbiertos.forEach(c => {
-                contenedorChats.innerHTML += `
-                    <div class="chat-item">
-                        <div class="chat-avatar" style="background-image: url('${c.img}');"></div>
-                        <div class="chat-info">
-                            <strong>${c.nombre}, ${c.edad}</strong>
-                            <p>${c.msg}</p>
-                        </div>
-                    </div>
-                `;
-            });
-        };
+            // Filtrar: no yo, género que me interesa (según interestedIn), cercanía (si tengo coordenadas)
+            nearbyUsers = Object.entries(allUsers)
+                .filter(([uid, profile]) => {
+                    if (uid === me) return false;
+                    // Filtrar por género que interesa al usuario actual
+                    if (userProfile.interestedIn === 'female' && profile.gender !== 'female') return false;
+                    if (userProfile.interestedIn === 'male' && profile.gender !== 'male') return false;
+                    // Si no tengo ubicación, incluir a todos (sin filtro de distancia)
+                    if (myLat == null || myLng == null || profile.lat == null || profile.lng == null) return true;
+                    const distance = calcDistance(myLat, myLng, profile.lat, profile.lng);
+                    return distance <= filterMaxDistance;
+                })
+                .map(([uid, profile]) => {
+                    const distance = (myLat != null && myLng != null && profile.lat != null && profile.lng != null)
+                        ? calcDistance(myLat, myLng, profile.lat, profile.lng)
+                        : null;
+                    return { uid, ...profile, distance };
+                })
+                .sort((a, b) => {
+                    if (a.distance == null && b.distance == null) return 0;
+                    if (a.distance == null) return 1;
+                    if (b.distance == null) return -1;
+                    return a.distance - b.distance;
+                });
 
-        window.cerrarSesionLocal = function() {
-            localStorage.removeItem("kinetic_user");
-            window.location.reload();
-        };
-    </script>
-
-    <script>
-        window.generoSeleccionado = '';
-
-        function selectGender(g) {
-            const h = document.getElementById('gender-h');
-            const m = document.getElementById('gender-m');
-            if(h && m) {
-                h.classList.remove('selected');
-                m.classList.remove('selected');
-                if(g === 'H') h.classList.add('selected');
-                else m.classList.add('selected');
-                window.generoSeleccionado = g;
+            // Aplicar filtros de UI (género adicional y distancia)
+            if (filterGender !== 'all') {
+                nearbyUsers = nearbyUsers.filter(u => u.gender === filterGender);
             }
+            // Ya aplicamos filterMaxDistance en el primer filtro, pero por si acaso:
+            nearbyUsers = nearbyUsers.filter(u => u.distance == null || u.distance <= filterMaxDistance);
+
+            renderDynamicView();
         }
 
-        function cambiarSeccion(vista) {
-            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active-view'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(`vista-${vista}`).classList.add('active-view');
-            document.getElementById(`nav-${vista}`).classList.add('active');
+        function calcDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        function deg2rad(deg) { return deg * (Math.PI/180); }
+
+        // ==================== INTERFAZ DINÁMICA (GRID / MAPA) ====================
+        function renderDynamicView() {
+            const container = document.getElementById('dynamicContainer');
+            container.innerHTML = '';
+            if (currentView === 'grid') {
+                container.className = 'grid';
+                renderGridView(container);
+            } else {
+                container.className = '';
+                container.style.flex = '1';
+                container.style.position = 'relative';
+                renderMapView(container);
+            }
+            // Mostrar u ocultar aviso de límite
+            checkViewLimit();
         }
 
-        window.verPerfil = function(nombre, edad, dist, img) {
-            document.getElementById('modal-img').style.backgroundImage = `url('${img}')`;
-            document.getElementById('modal-name-age').innerText = `${nombre}, ${edad} ✔`;
-            document.getElementById('modal-distance').innerText = dist;
-            document.getElementById('modal-bio').innerText = `¡Qué tal! Soy ${nombre}. Mi radar está encendido buscando interactuar en Kinetic y expandir mi red de contactos hoy mismo. ⚡`;
-            
-            document.getElementById('btn-enviar-mensaje').onclick = function() {
-                const existe = window.chatsAbiertos.some(c => c.nombre.toLowerCase() === nombre.toLowerCase());
-                if(!existe) {
-                    window.chatsAbiertos.unshift({nombre, edad, msg: "¡Has iniciado un chat! Di hola...", img});
-                    window.actualizarBandejaMensajes();
+        function renderGridView(container) {
+            container.innerHTML = nearbyUsers.map((user, index) => {
+                const initials = getInitials(user.name || '?');
+                const [c1, c2] = getAvatarColors(user.name || '?');
+                const delay = index * 0.04;
+                return `
+                <div class="profile-card" style="animation-delay:${delay}s;" data-uid="${user.uid}">
+                    <div class="profile-img" style="background:linear-gradient(135deg, ${c1}, ${c2});">
+                        ${initials}
+                        ${user.online ? '<span class="online-indicator"></span>' : ''}
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name">${user.name || 'Anónimo'}, ${user.age || '?'}</div>
+                        <div class="profile-distance">${user.distance != null ? '📍 ' + user.distance.toFixed(1) + ' km' : '🌍 Ubicación desconocida'}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            // Eventos click
+            container.querySelectorAll('.profile-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const uid = card.dataset.uid;
+                    openProfile(uid);
+                });
+            });
+        }
+
+        function renderMapView(container) {
+            container.innerHTML = '<div id="map"></div>';
+            // Inicializar Leaflet si no existe
+            if (!map) {
+                map = L.map('map').setView([0, 0], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+            } else {
+                // Mover el mapa al contenedor actual
+                document.getElementById('map').appendChild(map.getContainer());
+                map.invalidateSize();
+            }
+
+            // Limpiar marcadores anteriores
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+
+            if (userProfile && userProfile.lat && userProfile.lng) {
+                map.setView([userProfile.lat, userProfile.lng], 13);
+                // Marcador propio
+                const myMarker = L.marker([userProfile.lat, userProfile.lng], {
+                    icon: L.divIcon({ className: 'custom-div-icon', html: '<div style="background:#E5383B; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>', iconSize: [20,20] })
+                }).addTo(map).bindPopup('Yo');
+                mapMarkers.push(myMarker);
+        }
+            nearbyUsers.forEach(user => {
+                if (user.lat && user.lng) {
+                    const marker = L.marker([user.lat, user.lng], {
+                        icon: L.divIcon({ className: 'custom-div-icon', html: `<div style="background:#7B2CBF; width:20px; height:20px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:10px;">${getInitials(user.name)}</div>`, iconSize: [20,20] })
+                    }).addTo(map);
+                    marker.on('click', () => openProfile(user.uid));
+                    mapMarkers.push(marker);
                 }
-                cerrarPerfil();
-                cambiarSeccion('mensajes');
-            };
-            document.getElementById('profile-modal').style.display = 'flex';
-        };
+            });
+        }
 
-        function cerrarPerfil() { document.getElementById('profile-modal').style.display = 'none'; }
-        window.cerrarPerfil = cerrarPerfil;
+        // ==================== CAMBIO DE VISTA ====================
+        document.getElementById('toggleViewBtn').addEventListener('click', () => {
+            currentView = currentView === 'grid' ? 'map' : 'grid';
+            document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
+            renderDynamicView();
+        });
+
+        // ==================== FILTROS ====================
+        document.getElementById('filtersContainer').addEventListener('click', (e) => {
+            if (!e.target.classList.contains('filter-chip')) return;
+            const chip = e.target;
+            const gender = chip.dataset.gender;
+            const distance = chip.dataset.distance;
+            // Actualizar estado
+            if (gender) filterGender = gender;
+            if (distance) filterMaxDistance = parseInt(distance);
+            // Reflejar activos
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            if (gender) document.querySelector(`.filter-chip[data-gender="${gender}"]`).classList.add('active');
+            if (distance) chip.classList.add('active');
+            else if (gender) {
+                // Si cambiamos género, mantener distancia activa
+                const distChip = document.querySelector(`.filter-chip[data-distance="${filterMaxDistance}"]`);
+                if (distChip) distChip.classList.add('active');
+            }
+            // Recargar lista
+            loadNearbyUsers();
+        });
+
+        // ==================== PERFIL MODAL Y LÍMITE DIARIO ====================
+        async function openProfile(uid) {
+            // Verificar límite diario
+            if (!userProfile.premium) {
+                const canView = await incrementViewCount();
+                if (!canView) {
+                    // Mostrar advertencia de límite
+                    limitWarning.style.display = 'block';
+                    return;
+                }
+            }
+            const user = nearbyUsers.find(u => u.uid === uid);
+            if (!user) return;
+            const initials = getInitials(user.name || '?');
+            const [c1, c2] = getAvatarColors(user.name || '?');
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <button class="modal-close" id="closeModalBtn">✕</button>
+                    <div class="modal-avatar" style="background:linear-gradient(135deg, ${c1}, ${c2});">${initials}</div>
+                    <h3 style="margin-top:0.5rem;">${user.name || 'Anónimo'}, ${user.age || '?'}</h3>
+                    <p style="color:rgba(255,255,255,0.8);">${user.distance ? '📍 A ' + user.distance.toFixed(1) + ' km' : '🌍'} • ${user.online ? '🟢 En línea' : '⏳ Visto recientemente'}</p>
+                </div>
+                <div class="modal-body">
+                    <p class="bio">${user.bio || 'Sin descripción'}</p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-like">❤️ Me gusta</button>
+                    <button class="btn-message" id="openChatFromModalBtn">💬 Mensaje</button>
+                </div>
+            `;
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('openChatFromModalBtn').addEventListener('click', () => {
+                closeModal();
+                openChat(uid);
+            });
+            profileModal.classList.add('active');
+        }
+
+        window.closeModal = function() {
+            profileModal.classList.remove('active');
+        };
+        profileModal.addEventListener('click', (e) => {
+            if (e.target === profileModal) closeModal();
+        });
+
+        // Límite diario
+        function getTodayString() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        async function incrementViewCount() {
+            const userRef = ref(db, 'users/' + currentUser.uid);
+            const snap = await get(userRef);
+            if (!snap.exists()) return false;
+            const data = snap.val();
+            const today = getTodayString();
+            let dailyViews = data.dailyViews || 0;
+            let lastReset = data.lastResetDate || '';
+
+            if (lastReset !== today) {
+                // Reiniciar contador
+                dailyViews = 0;
+                await update(userRef, { dailyViews: 0, lastResetDate: today });
+            }
+
+            if (dailyViews >= dailyLimit) {
+                return false; // Límite alcanzado
+            }
+
+            await update(userRef, { dailyViews: dailyViews + 1 });
+            // Actualizar localmente
+            userProfile.dailyViews = dailyViews + 1;
+            return true;
+        }
+
+        function checkPremiumStatus() {
+            if (userProfile && userProfile.premium) {
+                limitWarning.style.display = 'none';
+            } else {
+                limitWarning.style.display = userProfile && userProfile.dailyViews >= dailyLimit ? 'block' : 'none';
+            }
+        }
+
+        document.getElementById('upgradeBtn').addEventListener('click', async () => {
+            // Simular actualización a premium (en producción integrarías Stripe)
+            await update(ref(db, 'users/' + currentUser.uid), { premium: true });
+            userProfile.premium = true;
+            limitWarning.style.display = 'none';
+            showToast('¡Ahora eres Premium! Disfruta de acceso ilimitado.');
+        });
+
+        // ==================== CHAT ====================
+        function openChat(uid) {
+            activeChatId = uid;
+            const partner = nearbyUsers.find(u => u.uid === uid) || {};
+            document.getElementById('chatPartnerName').textContent = partner.name || 'Chat';
+            showScreen('chatScreen');
+            loadMessages();
+        }
+
+        async function loadMessages() {
+            const chatId = getChatId(currentUser.uid, activeChatId);
+            const messagesRef = ref(db, 'chats/' + chatId + '/messages');
+            onValue(messagesRef, (snapshot) => {
+                const container = document.getElementById('chatMessages');
+                container.innerHTML = '';
+                if (snapshot.exists()) {
+                    const messages = snapshot.val();
+                    Object.values(messages).sort((a,b) => a.timestamp - b.timestamp).forEach(msg => {
+                        const div = document.createElement('div');
+                        div.className = `message ${msg.sender === currentUser.uid ? 'sent' : 'received'}`;
+                        div.textContent = msg.text;
+                        container.appendChild(div);
+                    });
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
+        }
+
+        function getChatId(uid1, uid2) {
+            return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
+        }
+
+        document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text || !activeChatId || !currentUser) return;
+            const chatId = getChatId(currentUser.uid, activeChatId);
+            const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
+            await set(msgRef, {
+                sender: currentUser.uid,
+                text: text,
+                timestamp: serverTimestamp()
+            });
+            input.value = '';
+                }
+        // ==================== LISTA DE CHATS ====================
+        document.getElementById('chatListBtn').addEventListener('click', showChatList);
+        document.getElementById('backFromChatListBtn').addEventListener('click', () => showScreen('mainScreen'));
+        document.getElementById('backFromChatBtn').addEventListener('click', () => {
+            activeChatId = null;
+            showScreen('chatListScreen');
+            loadChatList();
+        });
+
+        async function showChatList() {
+            showScreen('chatListScreen');
+            await loadChatList();
+        }
+
+        async function loadChatList() {
+            if (!currentUser) return;
+            const container = document.getElementById('chatListContainer');
+            container.innerHTML = '<div style="padding:1rem; text-align:center;">Cargando conversaciones...</div>';
+            // Obtener todos los chats donde participa el usuario
+            const chatsRef = ref(db, 'chats');
+            const snapshot = await get(chatsRef);
+            container.innerHTML = '';
+            if (!snapshot.exists()) {
+                container.innerHTML = '<div class="empty-state" style="padding:2rem; text-align:center; color:var(--text-secondary);">Aún no tienes conversaciones</div>';
+                return;
+            }
+            const chats = snapshot.val();
+            const chatItems = [];
+            for (const chatId in chats) {
+                const participants = chatId.split('_');
+                if (participants.includes(currentUser.uid)) {
+                    const partnerId = participants.find(p => p !== currentUser.uid);
+                    const messagesObj = chats[chatId].messages || {};
+                    const lastMsg = Object.values(messagesObj).sort((a,b) => b.timestamp - a.timestamp)[0];
+                    const partnerProfile = await getUserProfile(partnerId);
+                    chatItems.push({
+                        partnerId,
+                        name: partnerProfile?.name || 'Usuario',
+                        lastMsg: lastMsg ? lastMsg.text : '',
+                        online: partnerProfile?.online || false,
+                        initials: getInitials(partnerProfile?.name || '?'),
+                        colors: getAvatarColors(partnerProfile?.name || '?')
+                    });
+                }
+            }
+            if (chatItems.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding:2rem; text-align:center; color:var(--text-secondary);">Aún no tienes conversaciones</div>';
+                return;
+            }
+            container.innerHTML = chatItems.map(item => `
+                <div class="chat-item" data-uid="${item.partnerId}">
+                    <div class="chat-avatar" style="background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});">${item.initials}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${item.name} ${item.online ? '<span style="color:var(--online); font-size:0.8rem;">●</span>' : ''}</div>
+                        <div class="chat-preview">${item.lastMsg.substring(0,30)}</div>
+                    </div>
+                </div>
+            `).join('');
+            container.querySelectorAll('.chat-item').forEach(item => {
+                item.addEventListener('click', () => openChat(item.dataset.uid));
+            });
+        }
+
+        async function getUserProfile(uid) {
+            const snap = await get(ref(db, 'users/' + uid));
+            return snap.exists() ? snap.val() : null;
+        }
+
+        // ==================== UTILIDADES ====================
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            if (screenId === 'mainScreen') checkPremiumStatus();
+        }
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            toast.style.animation = 'none';
+            void toast.offsetWidth;
+            toast.style.animation = 'toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+        }
+
+        function getAvatarColors(name) {
+            const palettes = [
+                ['#7B2CBF','#E5383B'], ['#9D4EDD','#FF686B'], ['#5A189A','#D00000'],
+                ['#3C096C','#FF4D6D'], ['#7209B7','#F72585'], ['#560BAD','#B5179E'],
+                ['#6A0572','#FF477E'], ['#480CA8','#F15BB5']
+            ];
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return palettes[Math.abs(hash) % palettes.length];
+        }
+
+        // ==================== REGLAS DE SEGURIDAD RECOMENDADAS (Firebase Console) ====================
+        /*
+        {
+          "rules": {
+            "users": {
+              "$uid": {
+                ".read": "auth != null",
+                ".write": "auth != null && auth.uid === $uid"
+              }
+            },
+            "chats": {
+              "$chat_id": {
+                ".read": "auth != null && $chat_id.contains(auth.uid)",
+                ".write": "auth != null && $chat_id.contains(auth.uid)",
+                "messages": {
+                  ".indexOn": ["timestamp"]
+                }
+              }
+            }
+          }
+        }
+        */
     </script>
 </body>
 </html>
+```
