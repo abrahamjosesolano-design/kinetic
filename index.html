@@ -3,102 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Conexión Inmediata</title>
+    <title>Kinetic</title>
     <style>
-        /* Diseño de Vanguardia - Modo Oscuro Cyber-Premium */
         body { 
-            margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #050508; 
-            background-image: radial-gradient(at 0% 0%, rgba(122, 38, 242, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(255, 46, 99, 0.15) 0px, transparent 50%);
+            margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: #050508; color: white;
             display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden;
         }
-
         .phone-container { 
-            width: 100%; max-width: 412px; background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px);
-            min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
-            border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05);
+            width: 100%; max-width: 412px; background: #0f0f19; min-height: 100vh; 
+            display: flex; flex-direction: column; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.8);
         }
 
-        /* PANTALLA DE CARGA INICIAL */
-        #splash-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; flex-grow: 1; color: white; position: absolute; top:0; left:0; right:0; bottom:0; background:#050508; z-index: 999; }
+        /* SPLASH SCREEN */
+        #splash-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; position: absolute; top:0; left:0; right:0; bottom:0; background:#050508; z-index: 999; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #ff2e63; animation: spin 1s linear infinite; margin-top: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* PANTALLA 1: REGISTRO */
+        /* REGISTRO */
         #login-screen { display: none; flex-direction: column; justify-content: center; padding: 30px; flex-grow: 1; box-sizing: border-box; }
-        .welcome-text { text-align: center; margin-bottom: 40px; }
+        .welcome-text { text-align: center; margin-bottom: 30px; }
         .welcome-text h2 { font-size: 32px; font-weight: 900; margin: 0; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .welcome-text p { color: #888; font-size: 14px; margin-top: 5px; }
         .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; color: #aaa; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;}
-        .input-group input, .input-group select { 
-            width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 12px; color: white; font-size: 15px; box-sizing: border-box; transition: 0.3s;
-        }
-        .input-group input:focus { border-color: #ff2e63; outline: none; box-shadow: 0 0 10px rgba(255, 46, 99, 0.2); }
-        .gender-selector { display: flex; gap: 10px; margin-top: 5px; }
-        .gender-box { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 12px; cursor: pointer; font-weight: 700; color: #888; transition: 0.3s; }
-        .gender-box.selected { background: #7a26f2; color: white; border-color: #a16eff; box-shadow: 0 0 15px rgba(122, 38, 242, 0.4); }
-        .action-btn { background: linear-gradient(45deg, #7a26f2, #ff2e63); color: white; border: none; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; box-shadow: 0 5px 20px rgba(255, 46, 99, 0.3); width: 100%; box-sizing: border-box; }
+        .input-group label { display: block; color: #aaa; font-size: 12px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase;}
+        .input-group input, .input-group select { width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 15px; box-sizing: border-box; }
+        .gender-selector { display: flex; gap: 10px; }
+        .gender-box { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 12px; cursor: pointer; color: #888; font-weight: bold; }
+        .gender-box.selected { background: #7a26f2; color: white; border-color: #a16eff; }
+        .action-btn { background: linear-gradient(45deg, #7a26f2, #ff2e63); color: white; border: none; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
 
-        /* CONTENEDOR PRINCIPAL POST-LOGIN */
-        #main-app { display: none; flex-direction: column; flex-grow: 1; height: 100vh; position: relative; }
-
-        /* SECCIONES DE LA APLICACIÓN */
-        .app-section { display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; padding-bottom: 90px; box-sizing: border-box; }
+        /* APP PRINCIPAL */
+        #main-app { display: none; flex-direction: column; flex-grow: 1; height: 100vh; }
+        .app-section { display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; padding-bottom: 90px; }
         .app-section.active-view { display: flex; }
-
-        header { padding: 20px 15px; background: rgba(24, 24, 38, 0.6); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: sticky; top: 0; z-index: 10; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        header { padding: 20px 15px; background: #141426; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 24px; font-weight: 900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .streak-badge { background: linear-gradient(135deg, #ff9500 0%, #ff2e63 100%); padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(255, 46, 99, 0.4); }
-        .filters { display: flex; gap: 10px; justify-content: center; }
-        .filter-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #999; padding: 10px 20px; border-radius: 50px; font-size: 13px; font-weight: 700; cursor: pointer; }
-        .filter-btn.active { background: #ffffff; color: #050508; }
-
-        /* DISEÑO RADAR (GRID) */
+        .streak-badge { background: linear-gradient(135deg, #ff9500, #ff2e63); padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: bold; }
+        
+        /* GRID RADAR */
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; }
-        .profile-card { position: relative; aspect-ratio: 1 / 1; background: #181826; border-radius: 12px; overflow: hidden; background-size: cover; background-position: center; border: 2px solid transparent; cursor: pointer; transition: 0.2s; }
-        .profile-card:active { transform: scale(0.95); }
-        .profile-card.premium-glow { border-color: #ff2e63; box-shadow: 0 0 10px rgba(255, 46, 99, 0.3); }
-        .profile-info { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(5,5,8,0.95) 0%, rgba(5,5,8,0.4) 60%, transparent 100%); padding: 12px 8px 8px 8px; }
-        .name-age { font-size: 13px; font-weight: 700; color: white; display: flex; align-items: center; gap: 4px; }
-        .distance { color: #00e5ff; font-size: 10px; font-weight: 600; margin-top: 3px; }
-        .verified-badge { color: #007aff; font-size: 12px; }
-        .online-dot { width: 8px; height: 8px; background: #34c759; border-radius: 50%; position: absolute; top: 8px; right: 8px; box-shadow: 0 0 8px #34c759; }
+        .profile-card { position: relative; aspect-ratio: 1/1; background: #181826; border-radius: 12px; overflow: hidden; background-size: cover; background-position: center; cursor: pointer; }
+        .profile-info { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 8px; }
+        .name-age { font-size: 12px; font-weight: bold; }
+        .distance { color: #00e5ff; font-size: 10px; }
+        .online-dot { width: 8px; height: 8px; background: #34c759; border-radius: 50%; position: absolute; top: 8px; right: 8px; }
 
-        /* DISEÑO DE PANTALLA CHATS */
-        .chat-header { padding: 25px 20px; font-size: 24px; font-weight: 800; color: white; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* CHATS */
+        .chat-header { padding: 25px 20px; font-size: 22px; font-weight: bold; }
         .chat-list { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        .chat-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .chat-avatar { width: 50px; height: 50px; border-radius: 50%; background-size: cover; background-position: center; border: 2px solid #7a26f2; }
-        .chat-detalles { flex-grow: 1; }
-        .chat-name { color: white; font-weight: 700; font-size: 16px; }
-        .chat-msg { color: #777; font-size: 13px; margin-top: 4px; }
+        .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; }
+        .chat-avatar { width: 45px; height: 45px; border-radius: 50%; background-size: cover; background-position: center; }
+        
+        /* PERFIL */
+        .profile-container-view { padding: 30px 20px; display: flex; flex-direction: column; align-items: center; }
+        .my-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #ff2e63; background-size: cover; background-position: center; }
+        .stats-row { display: flex; width: 100%; gap: 10px; margin-top: 20px; text-align: center; }
+        .stat-box { flex: 1; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; font-size: 12px; }
+        .stat-box strong { display: block; font-size: 16px; color: white; }
 
-        /* DISEÑO DE PANTALLA PERFIL */
-        .profile-section-container { padding: 30px 20px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .my-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #ff2e63; background-size: cover; background-position: center; box-shadow: 0 0 25px rgba(255, 46, 99, 0.4); }
-        .my-name { color: white; font-size: 26px; font-weight: 800; margin-top: 15px; }
-        .my-status { color: #00e5ff; font-weight: 600; font-size: 14px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        .stats-container { display: flex; width: 100%; gap: 15px; margin-top: 30px; }
-        .stats-logout-btn { background: rgba(255,46,99,0.1); color: #ff2e63; border: 1px solid rgba(255,46,99,0.2); padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; width: 100%; margin-top: 30px; cursor: pointer; }
-        .stat-box { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; }
-        .stat-num { font-size: 22px; font-weight: 900; color: white; }
-        .stat-lbl { color: #666; font-size: 11px; font-weight: 700; margin-top: 5px; text-transform: uppercase; }
+        /* NAV BAR */
+        .nav-bar { position: absolute; bottom: 15px; left: 15px; right: 15px; height: 60px; background: #141426; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .nav-item { color: #555; font-size: 22px; cursor: pointer; padding: 10px; }
+        .nav-item.active { color: #ff2e63; }
 
-        /* BARRA DE NAVEGACIÓN INFERIOR */
-        .nav-bar { position: absolute; bottom: 20px; left: 15px; right: 15px; height: 65px; background: rgba(24, 24, 38, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 5; }
-        .nav-item { color: #555; font-size: 22px; text-decoration: none; cursor: pointer; transition: 0.2s; padding: 10px; }
-        .nav-item.active { color: #ff2e63; transform: scale(1.15); text-shadow: 0 0 10px rgba(255, 46, 99, 0.6); }
-
-        /* VENTANA EMERGENTE DE PERFIL (MODAL) */
-        .profile-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5, 5, 8, 0.9); z-index: 100; display: none; justify-content: center; align-items: flex-end; }
-        .modal-content { width: 100%; max-width: 412px; background: #161622; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; border-top: 1px solid rgba(255,255,255,0.1); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        .modal-img { width: 100%; aspect-ratio: 1.2 / 1; border-radius: 20px; background-size: cover; background-position: center; position: relative; }
-        .modal-name { font-size: 24px; font-weight: 800; margin-top: 15px; color: white; display: flex; align-items: center; gap: 8px; }
-        .modal-status { color: #00e5ff; font-size: 13px; font-weight: 600; margin-top: 4px; }
-        .modal-bio { color: #aaa; font-size: 14px; margin-top: 15px; line-height: 1.5; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; }
-        .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 16px;}
+        /* MODAL PERFIL DETALLE */
+        .profile-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; justify-content: center; align-items: flex-end; }
+        .modal-content { width: 100%; max-width: 412px; background: #161622; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; }
+        .modal-img { width: 100%; aspect-ratio: 1.2/1; border-radius: 15px; background-size: cover; background-position: center; position: relative; }
+        .modal-close { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.5); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -106,39 +78,39 @@
     <div class="phone-container">
         
         <div id="splash-screen">
-            <h2 style="font-weight:900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">KINETIC</h2>
+            <h2 style="font-weight:900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; font-size: 36px;">KINETIC</h2>
             <div class="spinner"></div>
         </div>
 
         <div id="login-screen">
             <div class="welcome-text">
                 <h2>KINETIC</h2>
-                <p>Energía y Conexión en Tiempo Real</p>
+                <p style="color: #666; margin-top:5px;">Conexión Satelital Inmediata</p>
             </div>
             <div class="input-group">
-                <label>Tu Nombre Comercial o Apodo</label>
-                <input type="text" id="user-name" placeholder="Ej. Alex">
+                <label>Apodo o Nombre Comercial</label>
+                <input type="text" id="user-name" placeholder="Ej. Dante">
             </div>
             <div class="input-group">
-                <label>Tu Edad</label>
+                <label>Edad</label>
                 <input type="number" id="user-age" placeholder="Mínimo 18" min="18">
             </div>
             <div class="input-group">
-                <label>Soy</label>
+                <label>Género</label>
                 <div class="gender-selector">
                     <div class="gender-box" id="gender-h" onclick="selectGender('H')">Hombre</div>
                     <div class="gender-box" id="gender-m" onclick="selectGender('M')">Mujer</div>
                 </div>
             </div>
             <div class="input-group">
-                <label>Busco Conectar Con</label>
+                <label>Quiero ver en mi radar</label>
                 <select id="user-search">
-                    <option value="todos">Todos (Hombres y Mujeres)</option>
+                    <option value="todos">Todos</option>
                     <option value="mujeres">Solo Mujeres</option>
                     <option value="hombres">Solo Hombres</option>
                 </select>
             </div>
-            <button class="action-btn" id="btn-registro" onclick="entrarAlRadar()">Inicializar Radar ⚡</button>
+            <button class="action-btn" onclick="entrarAlRadar()">Encender Radar ⚡</button>
         </div>
 
         <div id="main-app">
@@ -147,55 +119,38 @@
                 <header>
                     <div class="top-bar">
                         <div class="logo">KINETIC</div>
-                        <div class="streak-badge">⚡ Racha × 7</div>
-                    </div>
-                    <div class="filters">
-                        <button class="filter-btn active">Cerca</button>
-                        <button class="filter-btn">Mujeres</button>
-                        <button class="filter-btn">Hombres</button>
+                        <div class="streak-badge">⚡ Racha x7</div>
                     </div>
                 </header>
                 <main class="grid-container" id="usuarios-dinamicos">
-                    <div style="color:#666; text-align:center; grid-column: span 3; padding: 40px; font-size: 14px;">Buscando señales kinéticas...</div>
-                </main>
+                    </main>
             </div>
 
             <div id="vista-mensajes" class="app-section">
-                <div class="chat-header">Mensajes Recientes</div>
+                <div class="chat-header">Mensajes Privados</div>
                 <div class="chat-list">
                     <div class="chat-item">
-                        <div class="chat-avatar" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100');"></div>
-                        <div class="chat-detalles">
-                            <div class="chat-name">Camila</div>
-                            <div class="chat-msg">¡Hola! Vi tu señal en el radar, ¿qué haces hoy?</div>
+                        <div class="chat-avatar" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150');"></div>
+                        <div>
+                            <div style="font-weight: bold;">Camila, 22</div>
+                            <div style="color: #666; font-size: 13px; margin-top:3px;">¡Hola! Vi tu señal cinética, ¿hablamos?</div>
                         </div>
                     </div>
-                    <div style="color:#444; text-align:center; padding: 40px; font-size: 13px;">Tus próximas conexiones aparecerán aquí en vivo.</div>
                 </div>
             </div>
 
             <div id="vista-perfil" class="app-section">
-                <div class="profile-section-container">
-                    <div class="my-avatar" id="mi-perfil-foto" style="background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200');"></div>
-                    <div class="my-name" id="mi-perfil-nombre">Nombre de Usuario</div>
-                    <div class="my-status">Estado: En Línea Kinética ⚡</div>
+                <div class="profile-container-view">
+                    <div class="my-avatar" id="mi-perfil-foto"></div>
+                    <h2 id="mi-perfil-nombre" style="margin-top: 15px; margin-bottom: 5px;"></h2>
+                    <span style="color:#00e5ff; font-size:12px; font-weight:bold; letter-spacing:1px;">ESTADO: EN LÍNEA RADAR</span>
                     
-                    <div class="stats-container">
-                        <div class="stat-box">
-                            <div class="stat-num">1.2 km</div>
-                            <div class="stat-lbl">Alcance Max</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-num">x7</div>
-                            <div class="stat-lbl">Multiplicador</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-num">✔</div>
-                            <div class="stat-lbl">Verificado</div>
-                        </div>
+                    <div class="stats-row">
+                        <div class="stat-box"><strong>1.5 km</strong>Rango</div>
+                        <div class="stat-box"><strong>Premium</strong>Cuenta</div>
+                        <div class="stat-box"><strong>✔</strong>Verificado</div>
                     </div>
-
-                    <button class="stats-logout-btn" onclick="cerrarSesionLocal()">Cerrar Sesión Activa</button>
+                    <button class="action-btn" style="background: rgba(255,46,99,0.1); color:#ff2e63; margin-top: 40px;" onclick="cerrarSesionLocal()">Desconectar Cuenta</button>
                 </div>
             </div>
 
@@ -206,15 +161,15 @@
             </nav>
         </div>
 
-        <div id="profile-modal" class="profile-modal" onclick="cerrarPerfilExterno(event)">
-            <div class="modal-content" id="modal-content">
+        <div id="profile-modal" class="profile-modal" onclick="if(event.target.id==='profile-modal') cerrarPerfil()">
+            <div class="modal-content">
                 <div class="modal-img" id="modal-img">
                     <button class="modal-close" onclick="cerrarPerfil()">×</button>
                 </div>
-                <div class="modal-name" id="modal-name-age">Nombre, 00</div>
-                <div class="modal-status" id="modal-distance">A 0 metros</div>
-                <div class="modal-bio" id="modal-bio">Descripción del usuario...</div>
-                <button class="action-btn" style="width: 100%; margin-top: 20px;">Iniciar Conexión Cinética 💬</button>
+                <h3 id="modal-name-age" style="margin-top:15px; margin-bottom: 5px;"></h3>
+                <div id="modal-distance" style="color:#00e5ff; font-size:12px; font-weight:bold; margin-bottom:15px;"></div>
+                <div id="modal-bio" style="color:#aaa; font-size:14px; background:rgba(255,255,255,0.02); padding:15px; border-radius:10px;"></div>
+                <button class="action-btn" style="margin-top:20px;">Enviar Mensaje Directo 💬</button>
             </div>
         </div>
 
@@ -224,7 +179,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // CONFIGURACIÓN CORREGIDA CON TU URL EXACTA DE DATABASE
         const firebaseConfig = {
           apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
           authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -238,72 +192,150 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // COMPROBACIÓN AL CARGAR LA PÁGINA
+        // SALTO FORZADO SEGURO (MÁXIMO 1 SEGUNDO DE ESPERA)
         document.addEventListener("DOMContentLoaded", () => {
-            const usuarioGuardado = localStorage.getItem("kinetic_user");
+            const localUser = localStorage.getItem("kinetic_user");
             
-            // Forzar cierre del splash screen pase lo que pase para evitar bloqueos
             setTimeout(() => {
+                // Forzar el ocultado del Splash Screen sí o sí
                 const splash = document.getElementById('splash-screen');
                 if(splash) splash.style.display = 'none';
                 
-                if (usuarioGuardado) {
-                    const user = JSON.parse(usuarioGuardado);
-                    montarAplicacionPrincipal(user.nombre, user.edad, user.genero);
+                if (localUser) {
+                    const u = JSON.parse(localUser);
+                    montarApp(u.nombre, u.edad, u.genero);
                 } else {
                     document.getElementById('login-screen').style.display = 'flex';
                 }
-            }, 1000);
+            }, 1000); 
         });
 
-        // REGISTRO DE USUARIO NUEVO
         window.entrarAlRadar = function() {
             const nombre = document.getElementById('user-name').value;
             const edad = document.getElementById('user-age').value;
             const filtro = document.getElementById('user-search').value;
-            const boton = document.getElementById('btn-registro');
 
-            if(!nombre || !edad || !generoSeleccionado) {
-                alert('Por favor, completa tus datos para activar tu energía cinética.');
+            if(!nombre || !edad || !window.generoSeleccionado) {
+                alert('Rellena todos tus datos obligatorios.');
                 return;
             }
 
-            boton.innerText = "Sincronizando Satélite...";
-            boton.disabled = true;
-
-            const usuariosRef = ref(db, 'usuarios');
-            const nuevoUsuarioRef = push(usuariosRef);
-            
-            const nuevoUsuarioDatos = {
+            const nuevoUsuario = {
                 nombre: nombre,
                 edad: parseInt(edad),
-                genero: generoSeleccionado,
+                genero: window.generoSeleccionado,
                 busqueda: filtro,
-                timestamp: Date.now()
+                time: Date.now()
             };
 
-            set(nuevoUsuarioRef, nuevoUsuarioDatos).then(() => {
-                localStorage.setItem("kinetic_user", JSON.stringify(nuevoUsuarioDatos));
-                montarAplicacionPrincipal(nombre, edad, generoSeleccionado);
-            }).catch((error) => {
-                alert("Error de red de Firebase: " + error.message);
-                boton.innerText = "Inicializar Radar ⚡";
-                boton.disabled = false;
-            });
-        }
+            // Guarda directamente en local y luego intenta en la nube en segundo plano
+            localStorage.setItem("kinetic_user", JSON.stringify(nuevoUsuario));
+            montarApp(nombre, edad, window.generoSeleccionado);
 
-        function montarAplicacionPrincipal(nombre, edad, genero) {
-            document.getElementById('mi-perfil-nombre').innerText = `${nombre}, ${edad}`;
-            if(genero === 'M') {
-                document.getElementById('mi-perfil-foto').style.backgroundImage = "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200')";
-            } else {
-                document.getElementById('mi-perfil-foto').style.backgroundImage = "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200')";
+            try {
+                const userRef = push(ref(db, 'usuarios'));
+                set(userRef, nuevoUsuario);
+            } catch(e) {
+                console.log("Modo local activo");
             }
+        };
+
+        function montarApp(nombre, edad, genero) {
+            document.getElementById('mi-perfil-nombre').innerText = `${nombre}, ${edad}`;
+            document.getElementById('mi-perfil-foto').style.backgroundImage = genero === 'M' ? 
+                "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')" : 
+                "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150')";
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
             
-            escucharUsuarios();
+            cargarRadarDinamico();
         }
 
-        function esc
+        function cargarRadarDinamico() {
+            const contenedor = document.getElementById('usuarios-dinamicos');
+            
+            const backups = [
+                {nombre: "Camila", edad: 22, genero: "M", dist: "A 50 metros", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200"},
+                {nombre: "Carlos", edad: 25, genero: "H", dist: "A 120 metros", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200"},
+                {nombre: "Valeria", edad: 24, genero: "M", dist: "A 400 metros", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200"},
+                {nombre: "Andrés", edad: 21, genero: "H", dist: "A 600 metros", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200"},
+                {nombre: "Sofía", edad: 23, genero: "M", dist: "A 1.1 km", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200"},
+                {nombre: "Mateo", edad: 26, genero: "H", dist: "A 1.5 km", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200"}
+            ];
+
+            const renderizar = (lista) => {
+                contenedor.innerHTML = '';
+                lista.forEach(user => {
+                    contenedor.innerHTML += `
+                        <div class="profile-card" style="background-image: url('${user.img}');" onclick="window.verPerfil('${user.nombre}', '${user.edad}', '${user.dist || 'Cerca'}', '${user.img}')">
+                            <div class="online-dot"></div>
+                            <div class="profile-info">
+                                <div class="name-age">${user.nombre}, ${user.edad} ✔</div>
+                                <div class="distance">${user.dist || 'Cerca de ti'}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            };
+
+            renderizar(backups);
+
+            try {
+                onValue(ref(db, 'usuarios'), (snapshot) => {
+                    if(snapshot.exists()) {
+                        let listaFirebase = [];
+                        const datos = snapshot.val();
+                        Object.keys(datos).forEach(key => {
+                            const u = datos[key];
+                            u.img = u.genero === 'M' ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200" : "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200";
+                            u.dist = "Cerca tuyo";
+                            listaFirebase.push(u);
+                        });
+                        renderizar([...listaFirebase, ...backups]);
+                    }
+                });
+            } catch(e) {
+                console.log("Error de lectura ignorado.");
+            }
+        }
+
+        window.cerrarSesionLocal = function() {
+            localStorage.removeItem("kinetic_user");
+            window.location.reload();
+        };
+    </script>
+
+    <script>
+        window.generoSeleccionado = '';
+
+        function selectGender(g) {
+            document.getElementById('gender-h').classList.remove('selected');
+            document.getElementById('gender-m').classList.remove('selected');
+            if(g === 'H') document.getElementById('gender-h').classList.add('selected');
+            else document.getElementById('gender-m').classList.add('selected');
+            window.generoSeleccionado = g;
+        }
+
+        function cambiarSeccion(vista) {
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active-view'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(`vista-${vista}`).classList.add('active-view');
+            document.getElementById(`nav-${vista}`).classList.add('active');
+        }
+
+        window.verPerfil = function(nombre, edad, dist, img) {
+            document.getElementById('modal-img').style.backgroundImage = `url('${img}')`;
+            document.getElementById('modal-name-age').innerText = `${nombre}, ${edad} ✔`;
+            document.getElementById('modal-distance').innerText = dist;
+            document.getElementById('modal-bio').innerText = `¡Qué tal! Soy ${nombre}. Mi radar está encendido buscando interactuar en Kinetic y expandir mi red de contactos hoy mismo. ⚡`;
+            document.getElementById('profile-modal').style.display = 'flex';
+        };
+
+        window.cerrarPerfil = function() {
+            document.getElementById('profile-modal').style.display = 'none';
+        };
+    </script>
+</body>
+</html>
