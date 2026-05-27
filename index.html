@@ -18,8 +18,13 @@
             border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05);
         }
 
+        /* PANTALLA DE CARGA INICIAL */
+        #splash-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; flex-grow: 1; color: white; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #ff2e63; animation: spin 1s linear infinite; margin-top: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* PANTALLA 1: REGISTRO */
-        #login-screen { display: flex; flex-direction: column; justify-content: center; padding: 30px; flex-grow: 1; box-sizing: border-box; }
+        #login-screen { display: none; flex-direction: column; justify-content: center; padding: 30px; flex-grow: 1; box-sizing: border-box; }
         .welcome-text { text-align: center; margin-bottom: 40px; }
         .welcome-text h2 { font-size: 32px; font-weight: 900; margin: 0; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .welcome-text p { color: #888; font-size: 14px; margin-top: 5px; }
@@ -76,6 +81,7 @@
         .my-name { color: white; font-size: 26px; font-weight: 800; margin-top: 15px; }
         .my-status { color: #00e5ff; font-weight: 600; font-size: 14px; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
         .stats-container { display: flex; width: 100%; gap: 15px; margin-top: 30px; }
+        .stats-logout-btn { background: rgba(255,46,99,0.1); color: #ff2e63; border: 1px solid rgba(255,46,99,0.2); padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; width: 100%; margin-top: 30px; cursor: pointer; }
         .stat-box { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; }
         .stat-num { font-size: 22px; font-weight: 900; color: white; }
         .stat-lbl { color: #666; font-size: 11px; font-weight: 700; margin-top: 5px; text-transform: uppercase; }
@@ -99,6 +105,11 @@
 
     <div class="phone-container">
         
+        <div id="splash-screen">
+            <h2 style="font-weight:900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">KINETIC</h2>
+            <div class="spinner"></div>
+        </div>
+
         <div id="login-screen">
             <div class="welcome-text">
                 <h2>KINETIC</h2>
@@ -183,6 +194,8 @@
                             <div class="stat-lbl">Verificado</div>
                         </div>
                     </div>
+
+                    <button class="stats-logout-btn" onclick="cerrarSesionLocal()">Cerrar Sesión Activa</button>
                 </div>
             </div>
 
@@ -223,6 +236,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // COMPROBACIÓN DE MEMORIA LOCAL AL CARGAR LA PÁGINA
+        document.addEventListener("DOMContentLoaded", () => {
+            const usuarioGuardado = localStorage.getItem("kinetic_user");
+            
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                if (usuarioGuardado) {
+                    const user = JSON.parse(usuarioGuardado);
+                    montarAplicacionPrincipal(user.nombre, user.edad, user.genero);
+                } else {
+                    document.getElementById('login-screen').style.display = 'flex';
+                }
+            }, 1200); // Pequeño delay estético de carga
+        });
+
+        // REGISTRO DE USUARIO NUEVO
         window.entrarAlRadar = function() {
             const nombre = document.getElementById('user-name').value;
             const edad = document.getElementById('user-age').value;
@@ -240,31 +269,37 @@
             const usuariosRef = ref(db, 'usuarios');
             const nuevoUsuarioRef = push(usuariosRef);
             
-            set(nuevoUsuarioRef, {
+            const nuevoUsuarioDatos = {
                 nombre: nombre,
                 edad: parseInt(edad),
                 genero: generoSeleccionado,
                 busqueda: filtro,
                 timestamp: Date.now()
-            }).then(() => {
-                // Sincronizar info en la pantalla de "Mi Perfil" dinámicamente
-                document.getElementById('mi-perfil-nombre').innerText = `${nombre}, ${edad}`;
-                if(generoSeleccionado === 'M') {
-                    document.getElementById('mi-perfil-foto').style.backgroundImage = "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200')";
-                } else {
-                    document.getElementById('mi-perfil-foto').style.backgroundImage = "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200')";
-                }
+            };
 
-                // Mostrar app
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'flex';
-                
-                escucharUsuarios();
+            set(nuevoUsuarioRef, nuevoUsuarioDatos).then(() => {
+                // Guardar datos en la memoria del teléfono
+                localStorage.setItem("kinetic_user", JSON.stringify(nuevoUsuarioDatos));
+                montarAplicacionPrincipal(nombre, edad, generoSeleccionado);
             }).catch((error) => {
                 alert("Error de red: " + error.message);
                 boton.innerText = "Inicializar Radar ⚡";
                 boton.disabled = false;
             });
+        }
+
+        function montarAplicacionPrincipal(nombre, edad, genero) {
+            document.getElementById('mi-perfil-nombre').innerText = `${nombre}, ${edad}`;
+            if(genero === 'M') {
+                document.getElementById('mi-perfil-foto').style.backgroundImage = "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200')";
+            } else {
+                document.getElementById('mi-perfil-foto').style.backgroundImage = "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200')";
+            }
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            
+            escucharUsuarios();
         }
 
         function escucharUsuarios() {
@@ -274,37 +309,4 @@
                 contenedor.innerHTML = '';
 
                 if (snapshot.exists()) {
-                    const datos = snapshot.val();
-                    Object.keys(datos).forEach((key) => {
-                        const user = datos[key];
-                        let fotoDefecto = user.genero === 'M' ? 
-                            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200' : 
-                            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200';
-                        
-                        let bioDefecto = `¡Hola! Soy ${user.nombre}. Estoy en Kinetic buscando activar nuevas conexiones en la zona de manera inmediata. ⚡`;
-
-                        const tarjetaHTML = `
-                            <div class="profile-card premium-glow" style="background-image: url('${fotoDefecto}');" onclick="abrirPerfil('${user.nombre}', '${user.edad}', 'A 50 metros', '${fotoDefecto}', '${bioDefecto}')">
-                                <div class="online-dot"></div>
-                                <div class="profile-info">
-                                    <div class="name-age">${user.nombre}, ${user.edad} <span class="verified-badge">✔</span></div>
-                                    <div class="distance">Cerca de ti</div>
-                                </div>
-                            </div>
-                        `;
-                        contenedor.innerHTML += tarjetaHTML;
-                    });
-                } else {
-                    contenedor.innerHTML = '<div style="color:#666; text-align:center; grid-column: span 3; padding: 40px;">No hay señales activas en la zona.</div>';
-                }
-            });
-        }
-    </script>
-
-    <script>
-        let generoSeleccionado = '';
-
-        function selectGender(genero) {
-            document.getElementById('gender-h').classList.remove('selected');
-            document.getElementById('gender-m').classList.remove('selected');
-            if(genero === 'H') { document.getElementById('gender-h').classList.add('selected'); }
+         
