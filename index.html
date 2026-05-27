@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kinetic – Conecta con quien quieras</title>
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -77,7 +76,7 @@
             width: 100%;
             margin-bottom: 1rem;
         }
-        .input-group input {
+        .input-group input, .input-group select, .input-group textarea {
             width: 100%;
             padding: 1rem 1.2rem;
             border-radius: 14px;
@@ -87,8 +86,15 @@
             font-size: 1rem;
             outline: none;
             transition: all 0.3s;
+            font-family: inherit;
         }
-        .input-group input:focus {
+        .input-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23B8B8D4' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
             border-color: var(--red-light);
             box-shadow: 0 0 18px rgba(230, 56, 59, 0.5);
         }
@@ -120,6 +126,28 @@
             color: var(--text-secondary);
             margin: 1.2rem 0;
             font-size: 0.8rem;
+        }
+
+        /* ---------- SETUP ---------- */
+        .setup-container {
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .setup-container h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--red-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.8rem;
+        }
+        .setup-container label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.2rem;
+            margin-top: 0.5rem;
         }
 
         /* ---------- HEADER ---------- */
@@ -157,6 +185,7 @@
             transition: background 0.3s;
         }
         .icon-btn:active { background: rgba(123, 44, 191, 0.6); }
+
         /* ---------- FILTROS ---------- */
         .filters {
             display: flex;
@@ -248,16 +277,8 @@
         }
 
         /* ---------- MAPA ---------- */
-        #mapContainer {
-            flex: 1;
-            width: 100%;
-            position: relative;
-        }
-        #map {
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+        #mapContainer { flex: 1; width: 100%; position: relative; }
+        #map { width: 100%; height: 100%; z-index: 1; }
 
         /* ---------- MODAL ---------- */
         .modal {
@@ -315,173 +336,40 @@
         }
         .modal-body { padding: 1.5rem; text-align: center; }
         .modal-body .bio { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            padding: 0 1.5rem 1.8rem;
-        }
+        .modal-actions { display: flex; gap: 1rem; padding: 0 1.5rem 1.8rem; }
         .btn-like {
-            flex: 1;
-            padding: 0.9rem;
-            border: none;
-            border-radius: 30px;
-            font-weight: 700;
-            background: var(--red);
-            color: white;
-            cursor: pointer;
-            font-size: 1rem;
+            flex: 1; padding: 0.9rem; border: none; border-radius: 30px;
+            font-weight: 700; background: var(--red); color: white; cursor: pointer;
         }
         .btn-message {
-            flex: 1;
-            padding: 0.9rem;
-            border: 2px solid var(--purple);
-            border-radius: 30px;
-            font-weight: 700;
-            background: transparent;
-            color: var(--text);
-            cursor: pointer;
-            font-size: 1rem;
+            flex: 1; padding: 0.9rem; border: 2px solid var(--purple); border-radius: 30px;
+            font-weight: 700; background: transparent; color: var(--text); cursor: pointer;
         }
-        .btn-message:active { background: var(--purple); }
-         /* ---------- CHAT ---------- */
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.5rem 0.8rem;
-        }
-        .chat-item {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem;
-            border-radius: 14px;
-            margin-bottom: 0.4rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .chat-item:active { background: rgba(123,44,191,0.2); }
-        .chat-avatar {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.3rem;
-            color: white;
-            flex-shrink: 0;
-        }
-        .chat-info { flex: 1; min-width: 0; }
-        .chat-name {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .streak-badge {
-            font-size: 0.75rem;
-            background: var(--streak);
-            color: #000;
-            padding: 0.15rem 0.5rem;
-            border-radius: 12px;
-            font-weight: 700;
-        }
-        .chat-preview {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .chat-messages {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.7rem;
-            background: var(--bg);
-        }
-        .message {
-            max-width: 80%;
-            padding: 0.8rem 1rem;
-            border-radius: 20px;
-            word-wrap: break-word;
-            line-height: 1.4;
-            font-size: 0.95rem;
-            animation: msgPop 0.3s ease;
-        }
-        @keyframes msgPop {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .message.received {
-            align-self: flex-start;
-            background: var(--card-bg);
-            border-bottom-left-radius: 5px;
-        }
-        .message.sent {
-            align-self: flex-end;
-            background: var(--purple);
-            border-bottom-right-radius: 5px;
-        }
-        .chat-input-area {
-            display: flex;
-            padding: 0.7rem 0.8rem;
-            gap: 0.5rem;
-            background: var(--card-bg);
-            border-top: 1px solid rgba(123,44,191,0.4);
-            align-items: center;
-            padding-bottom: calc(0.7rem + var(--safe-bottom));
-        }
-        .chat-input-area input {
-            flex: 1;
-            padding: 0.8rem 1.2rem;
-            border-radius: 25px;
-            border: 1px solid var(--purple);
-            background: var(--bg);
-            color: white;
-            outline: none;
-            font-size: 0.95rem;
-        }
-        .send-btn {
-            width: 46px; height: 46px;
-            border-radius: 50%;
-            background: var(--red);
-            border: none;
-            color: white;
-            font-size: 1.3rem;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .send-btn:active { transform: scale(0.9); }
 
-        .toast {
-            position: fixed;
-            bottom: 20px; left: 50%;
-            transform: translateX(-50%);
-            background: var(--card-bg);
-            color: var(--text);
-            padding: 0.8rem 1.5rem;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            z-index: 300;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.6);
-            animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards;
-            pointer-events: none;
-        }
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-        @keyframes toastOut {
-            from { opacity: 1; }
-            to { opacity: 0; transform: translateX(-50%) translateY(20px); }
-        }
+        /* ---------- CHAT ---------- */
+        .chat-list { flex: 1; overflow-y: auto; padding: 0.5rem 0.8rem; }
+        .chat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; border-radius: 14px; margin-bottom: 0.4rem; cursor: pointer; }
+        .chat-item:active { background: rgba(123,44,191,0.2); }
+        .chat-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3rem; color: white; flex-shrink: 0; }
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-name { font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+        .streak-badge { font-size: 0.75rem; background: var(--streak); color: #000; padding: 0.15rem 0.5rem; border-radius: 12px; font-weight: 700; }
+        .chat-preview { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.7rem; background: var(--bg); }
+        .message { max-width: 80%; padding: 0.8rem 1rem; border-radius: 20px; word-wrap: break-word; line-height: 1.4; animation: msgPop 0.3s ease; }
+        @keyframes msgPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .message.received { align-self: flex-start; background: var(--card-bg); border-bottom-left-radius: 5px; }
+        .message.sent { align-self: flex-end; background: var(--purple); border-bottom-right-radius: 5px; }
+        .chat-input-area { display: flex; padding: 0.7rem 0.8rem; gap: 0.5rem; background: var(--card-bg); border-top: 1px solid rgba(123,44,191,0.4); align-items: center; padding-bottom: calc(0.7rem + var(--safe-bottom)); }
+        .chat-input-area input { flex: 1; padding: 0.8rem 1.2rem; border-radius: 25px; border: 1px solid var(--purple); background: var(--bg); color: white; outline: none; font-size: 0.95rem; }
+        .send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--red); border: none; color: white; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; }
+
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--card-bg); color: var(--text); padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 0.9rem; z-index: 300; box-shadow: 0 5px 20px rgba(0,0,0,0.6); animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards; pointer-events: none; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(30px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
     </style>
 </head>
 <body>
-
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
@@ -500,6 +388,44 @@
             <p id="authError" style="color:var(--red-light); margin-top:1rem; font-size:0.9rem;"></p>
         </div>
     </div>
+
+    <!-- SETUP PROFILE SCREEN (NUEVA) -->
+    <div id="setupScreen" class="screen">
+        <div class="setup-container">
+            <h2>Completa tu perfil</h2>
+            <label for="setupName">Nombre</label>
+            <div class="input-group">
+                <input type="text" id="setupName" placeholder="Tu nombre" autocomplete="name">
+            </div>
+            <label for="setupAge">Edad</label>
+            <div class="input-group">
+                <input type="number" id="setupAge" placeholder="18" min="18" max="99">
+            </div>
+            <label for="setupGender">Género</label>
+            <div class="input-group">
+                <select id="setupGender">
+                    <option value="male">Hombre</option>
+                    <option value="female">Mujer</option>
+                    <option value="non-binary">No binario</option>
+                </select>
+            </div>
+            <label for="setupInterested">Qué buscas</label>
+            <div class="input-group">
+                <select id="setupInterested">
+                    <option value="female">Mujeres</option>
+                    <option value="male">Hombres</option>
+                    <option value="all">Todos</option>
+                </select>
+            </div>
+            <label for="setupBio">Biografía / Intereses</label>
+            <div class="input-group">
+                <textarea id="setupBio" rows="3" placeholder="Cuéntanos qué te gusta..."></textarea>
+            </div>
+            <button class="btn btn-primary" id="saveProfileBtn">Guardar Perfil</button>
+            <p id="setupError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
+        </div>
+    </div>
+
     <!-- MAIN SCREEN -->
     <div id="mainScreen" class="screen">
         <div class="header">
@@ -518,7 +444,6 @@
             <span class="filter-chip" data-distance="20">📍 <20 km</span>
             <span class="filter-chip" data-distance="50">📍 <50 km</span>
         </div>
-        <!-- Contenedor dinámico: grid o mapa -->
         <div id="dynamicContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
         <div id="limitWarning" style="display:none; background:var(--purple-dark); padding:0.5rem; text-align:center; font-size:0.8rem;">
             Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
@@ -563,7 +488,6 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-        // Inicializar Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -576,22 +500,21 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // ==================== VARIABLES GLOBALES ====================
+        // Variables globales
         let currentUser = null;
-        let userProfile = null; // Datos del perfil del usuario actual
-        let nearbyUsers = [];    // Lista de perfiles cercanos
-        let currentView = 'grid'; // 'grid' o 'map'
+        let userProfile = null;
+        let nearbyUsers = [];
+        let currentView = 'grid';
         let map = null;
         let mapMarkers = [];
         let activeChatId = null;
-        let dailyLimit = 10;      // Perfiles gratuitos por día
-
-        // Filtros
+        let dailyLimit = 10;
         let filterGender = 'all';
         let filterMaxDistance = 50;
 
-        // ==================== REFERENCIAS DOM ====================
+        // Referencias DOM
         const loginScreen = document.getElementById('loginScreen');
+        const setupScreen = document.getElementById('setupScreen');
         const mainScreen = document.getElementById('mainScreen');
         const profileModal = document.getElementById('profileModal');
         const modalContent = document.getElementById('modalContent');
@@ -600,43 +523,27 @@
         const toast = document.getElementById('toast');
         const limitWarning = document.getElementById('limitWarning');
 
-        // ==================== AUTENTICACIÓN ====================
+        // Autenticación
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
-            if (!email || !password) return showError('Completa todos los campos');
+            if (!email || !password) return showAuthError('Completa todos los campos');
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
-                showError('Error al iniciar sesión: ' + error.message);
+                showAuthError('Error al iniciar sesión: ' + error.message);
             }
         });
 
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
-            if (!email || !password) return showError('Completa todos los campos');
+            if (!email || !password) return showAuthError('Completa todos los campos');
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
-                // Crear perfil en Realtime Database
-                const user = auth.currentUser;
-                if (user) {
-                    await set(ref(db, 'users/' + user.uid), {
-                        email: email,
-                        name: email.split('@')[0],
-                        age: 25,
-                        gender: 'male',   // Por defecto, luego el usuario puede cambiar
-                        interestedIn: 'female',
-                        premium: false,
-                        dailyViews: 0,
-                        lastResetDate: getTodayString(),
-                        lat: null,
-                        lng: null,
-                        online: true
-                    });
-                }
+                // No creamos perfil en BD aún, se hará en setup
             } catch (error) {
-                showError('Error al registrarse: ' + error.message);
+                showAuthError('Error al registrarse: ' + error.message);
             }
         });
 
@@ -644,27 +551,39 @@
             await signOut(auth);
         });
 
-        function showError(msg) {
+        function showAuthError(msg) {
             document.getElementById('authError').textContent = msg;
             setTimeout(() => { document.getElementById('authError').textContent = ''; }, 4000);
         }
-         // ==================== ESTADO DE AUTENTICACIÓN ====================
+
+        // Estado de autenticación
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                // Cargar perfil del usuario
                 const userRef = ref(db, 'users/' + user.uid);
                 const snapshot = await get(userRef);
                 if (snapshot.exists()) {
                     userProfile = snapshot.val();
                     userProfile.uid = user.uid;
-                    // Actualizar online
-                    update(userRef, { online: true });
-                    // Iniciar geolocalización y carga de datos
-                    initApp();
+                    // Verificar que tenga todos los campos obligatorios
+                    if (!userProfile.name || !userProfile.age || !userProfile.gender || !userProfile.interestedIn || userProfile.bio === undefined) {
+                        // Perfil incompleto: mostrar setup
+                        showScreen('setupScreen');
+                        // Precargar email si existe
+                        document.getElementById('setupName').value = userProfile.name || '';
+                        document.getElementById('setupAge').value = userProfile.age || '';
+                        document.getElementById('setupGender').value = userProfile.gender || 'male';
+                        document.getElementById('setupInterested').value = userProfile.interestedIn || 'female';
+                        document.getElementById('setupBio').value = userProfile.bio || '';
+                    } else {
+                        // Perfil completo
+                        update(userRef, { online: true });
+                        initApp();
+                    }
                 } else {
-                    // Perfil no existe (raro), forzar logout
-                    await signOut(auth);
+                    // No existe perfil: nuevo usuario, mostrar setup
+                    userProfile = { uid: user.uid, email: user.email };
+                    showScreen('setupScreen');
                 }
             } else {
                 currentUser = null;
@@ -676,71 +595,104 @@
             }
         });
 
+        // Guardar perfil desde setup
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const name = document.getElementById('setupName').value.trim();
+            const age = parseInt(document.getElementById('setupAge').value);
+            const gender = document.getElementById('setupGender').value;
+            const interestedIn = document.getElementById('setupInterested').value;
+            const bio = document.getElementById('setupBio').value.trim();
+            const errorEl = document.getElementById('setupError');
+
+            if (!name || !age || age < 18) {
+                errorEl.textContent = 'Completa nombre y edad (mínimo 18 años).';
+                return;
+            }
+            if (!gender || !interestedIn) {
+                errorEl.textContent = 'Selecciona género y qué buscas.';
+                return;
+            }
+            if (!bio) {
+                errorEl.textContent = 'Escribe una breve biografía.';
+                return;
+            }
+
+            // Obtener ubicación
+            let lat = null, lng = null;
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
+                });
+                lat = position.coords.latitude;
+                lng = position.coords.longitude;
+            } catch (e) {
+                console.warn('Geolocalización no disponible en setup, se guardará sin coordenadas.');
+            }
+
+            const profileData = {
+                email: currentUser.email,
+                name,
+                age,
+                gender,
+                interestedIn,
+                bio,
+                premium: false,
+                dailyViews: 0,
+                lastResetDate: getTodayString(),
+                lat,
+                lng,
+                online: true
+            };
+
+            await set(ref(db, 'users/' + currentUser.uid), profileData);
+            userProfile = { uid: currentUser.uid, ...profileData };
+            showScreen('mainScreen');
+            initApp();
+        });
+
         function initApp() {
             showScreen('mainScreen');
             getUserLocation();
-            // Si el usuario es premium, ocultar límite
             checkPremiumStatus();
             loadNearbyUsers();
         }
 
-        // ==================== GEOLOCALIZACIÓN ====================
         function getUserLocation() {
-            if (!navigator.geolocation) {
-                showToast('Geolocalización no soportada');
-                return;
-            }
+            if (!navigator.geolocation) return showToast('Geolocalización no soportada');
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
-                    // Actualizar ubicación en BD
-                    if (currentUser) {
-                        await update(ref(db, 'users/' + currentUser.uid), { lat, lng });
-                    }
-                    // Recargar usuarios cercanos
+                    if (currentUser) await update(ref(db, 'users/' + currentUser.uid), { lat, lng });
                     loadNearbyUsers();
                 },
-                (error) => {
-                    console.error('Error obteniendo ubicación:', error);
-                    showToast('Activa la ubicación para ver personas cerca');
-                },
+                (error) => showToast('Activa la ubicación para ver personas cerca'),
                 { enableHighAccuracy: true }
             );
         }
 
-        // ==================== CARGAR USUARIOS CERCANOS ====================
         async function loadNearbyUsers() {
             if (!currentUser || !userProfile) return;
             const usersRef = ref(db, 'users');
             const snapshot = await get(usersRef);
-            if (!snapshot.exists()) {
-                nearbyUsers = [];
-                renderDynamicView();
-                return;
-            }
+            if (!snapshot.exists()) { nearbyUsers = []; renderDynamicView(); return; }
             const allUsers = snapshot.val();
             const me = currentUser.uid;
-            const now = Date.now();
             const myLat = userProfile.lat;
             const myLng = userProfile.lng;
 
-            // Filtrar: no yo, género que me interesa (según interestedIn), cercanía (si tengo coordenadas)
             nearbyUsers = Object.entries(allUsers)
                 .filter(([uid, profile]) => {
                     if (uid === me) return false;
-                    // Filtrar por género que interesa al usuario actual
                     if (userProfile.interestedIn === 'female' && profile.gender !== 'female') return false;
                     if (userProfile.interestedIn === 'male' && profile.gender !== 'male') return false;
-                    // Si no tengo ubicación, incluir a todos (sin filtro de distancia)
                     if (myLat == null || myLng == null || profile.lat == null || profile.lng == null) return true;
                     const distance = calcDistance(myLat, myLng, profile.lat, profile.lng);
                     return distance <= filterMaxDistance;
                 })
                 .map(([uid, profile]) => {
                     const distance = (myLat != null && myLng != null && profile.lat != null && profile.lng != null)
-                        ? calcDistance(myLat, myLng, profile.lat, profile.lng)
-                        : null;
+                        ? calcDistance(myLat, myLng, profile.lat, profile.lng) : null;
                     return { uid, ...profile, distance };
                 })
                 .sort((a, b) => {
@@ -750,29 +702,20 @@
                     return a.distance - b.distance;
                 });
 
-            // Aplicar filtros de UI (género adicional y distancia)
-            if (filterGender !== 'all') {
-                nearbyUsers = nearbyUsers.filter(u => u.gender === filterGender);
-            }
-            // Ya aplicamos filterMaxDistance en el primer filtro, pero por si acaso:
-            nearbyUsers = nearbyUsers.filter(u => u.distance == null || u.distance <= filterMaxDistance);
-
+            if (filterGender !== 'all') nearbyUsers = nearbyUsers.filter(u => u.gender === filterGender);
             renderDynamicView();
         }
 
         function calcDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // km
+            const R = 6371;
             const dLat = deg2rad(lat2 - lat1);
             const dLon = deg2rad(lon2 - lon1);
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+            const a = Math.sin(dLat/2)**2 + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
-        function deg2rad(deg) { return deg * (Math.PI/180); }
+        function deg2rad(deg) { return deg * Math.PI / 180; }
 
-        // ==================== INTERFAZ DINÁMICA (GRID / MAPA) ====================
+        // Vistas
         function renderDynamicView() {
             const container = document.getElementById('dynamicContainer');
             container.innerHTML = '';
@@ -782,69 +725,44 @@
             } else {
                 container.className = '';
                 container.style.flex = '1';
-                container.style.position = 'relative';
                 renderMapView(container);
             }
-            // Mostrar u ocultar aviso de límite
             checkViewLimit();
         }
-
         function renderGridView(container) {
             container.innerHTML = nearbyUsers.map((user, index) => {
                 const initials = getInitials(user.name || '?');
                 const [c1, c2] = getAvatarColors(user.name || '?');
-                const delay = index * 0.04;
-                return `
-                <div class="profile-card" style="animation-delay:${delay}s;" data-uid="${user.uid}">
-                    <div class="profile-img" style="background:linear-gradient(135deg, ${c1}, ${c2});">
-                        ${initials}
-                        ${user.online ? '<span class="online-indicator"></span>' : ''}
-                    </div>
-                    <div class="profile-info">
-                        <div class="profile-name">${user.name || 'Anónimo'}, ${user.age || '?'}</div>
-                        <div class="profile-distance">${user.distance != null ? '📍 ' + user.distance.toFixed(1) + ' km' : '🌍 Ubicación desconocida'}</div>
-                    </div>
+                return `<div class="profile-card" style="animation-delay:${index*0.04}s;" data-uid="${user.uid}">
+                    <div class="profile-img" style="background:linear-gradient(135deg, ${c1}, ${c2});">${initials}${user.online ? '<span class="online-indicator"></span>' : ''}</div>
+                    <div class="profile-info"><div class="profile-name">${user.name}, ${user.age}</div><div class="profile-distance">${user.distance != null ? '📍 '+user.distance.toFixed(1)+' km' : '🌍'}</div></div>
                 </div>`;
             }).join('');
-            // Eventos click
-            container.querySelectorAll('.profile-card').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    const uid = card.dataset.uid;
-                    openProfile(uid);
-                });
-            });
+            container.querySelectorAll('.profile-card').forEach(card => card.addEventListener('click', () => openProfile(card.dataset.uid)));
         }
 
         function renderMapView(container) {
             container.innerHTML = '<div id="map"></div>';
-            // Inicializar Leaflet si no existe
             if (!map) {
-                map = L.map('map').setView([0, 0], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+                map = L.map('map').setView([0,0], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
             } else {
-                // Mover el mapa al contenedor actual
                 document.getElementById('map').appendChild(map.getContainer());
                 map.invalidateSize();
             }
-
-            // Limpiar marcadores anteriores
             mapMarkers.forEach(m => map.removeLayer(m));
             mapMarkers = [];
-
-            if (userProfile && userProfile.lat && userProfile.lng) {
+            if (userProfile?.lat && userProfile?.lng) {
                 map.setView([userProfile.lat, userProfile.lng], 13);
-                // Marcador propio
                 const myMarker = L.marker([userProfile.lat, userProfile.lng], {
                     icon: L.divIcon({ className: 'custom-div-icon', html: '<div style="background:#E5383B; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>', iconSize: [20,20] })
                 }).addTo(map).bindPopup('Yo');
                 mapMarkers.push(myMarker);
-        }
+            }
             nearbyUsers.forEach(user => {
                 if (user.lat && user.lng) {
                     const marker = L.marker([user.lat, user.lng], {
-                        icon: L.divIcon({ className: 'custom-div-icon', html: `<div style="background:#7B2CBF; width:20px; height:20px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:10px;">${getInitials(user.name)}</div>`, iconSize: [20,20] })
+                        icon: L.divIcon({ html: `<div style="background:#7B2CBF; width:20px; height:20px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:10px;">${getInitials(user.name)}</div>`, iconSize: [20,20] })
                     }).addTo(map);
                     marker.on('click', () => openProfile(user.uid));
                     mapMarkers.push(marker);
@@ -852,45 +770,30 @@
             });
         }
 
-        // ==================== CAMBIO DE VISTA ====================
         document.getElementById('toggleViewBtn').addEventListener('click', () => {
             currentView = currentView === 'grid' ? 'map' : 'grid';
             document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
             renderDynamicView();
         });
 
-        // ==================== FILTROS ====================
+        // Filtros
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
             const chip = e.target;
-            const gender = chip.dataset.gender;
-            const distance = chip.dataset.distance;
-            // Actualizar estado
-            if (gender) filterGender = gender;
-            if (distance) filterMaxDistance = parseInt(distance);
-            // Reflejar activos
+            if (chip.dataset.gender) filterGender = chip.dataset.gender;
+            if (chip.dataset.distance) filterMaxDistance = parseInt(chip.dataset.distance);
             document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-            if (gender) document.querySelector(`.filter-chip[data-gender="${gender}"]`).classList.add('active');
-            if (distance) chip.classList.add('active');
-            else if (gender) {
-                // Si cambiamos género, mantener distancia activa
-                const distChip = document.querySelector(`.filter-chip[data-distance="${filterMaxDistance}"]`);
-                if (distChip) distChip.classList.add('active');
-            }
-            // Recargar lista
+            if (chip.dataset.gender) document.querySelector(`.filter-chip[data-gender="${filterGender}"]`).classList.add('active');
+            if (chip.dataset.distance) chip.classList.add('active');
+            else document.querySelector(`.filter-chip[data-distance="${filterMaxDistance}"]`)?.classList.add('active');
             loadNearbyUsers();
         });
 
-        // ==================== PERFIL MODAL Y LÍMITE DIARIO ====================
+        // Modal perfil y límite
         async function openProfile(uid) {
-            // Verificar límite diario
             if (!userProfile.premium) {
                 const canView = await incrementViewCount();
-                if (!canView) {
-                    // Mostrar advertencia de límite
-                    limitWarning.style.display = 'block';
-                    return;
-                }
+                if (!canView) { limitWarning.style.display = 'block'; return; }
             }
             const user = nearbyUsers.find(u => u.uid === uid);
             if (!user) return;
@@ -900,33 +803,22 @@
                 <div class="modal-header">
                     <button class="modal-close" id="closeModalBtn">✕</button>
                     <div class="modal-avatar" style="background:linear-gradient(135deg, ${c1}, ${c2});">${initials}</div>
-                    <h3 style="margin-top:0.5rem;">${user.name || 'Anónimo'}, ${user.age || '?'}</h3>
-                    <p style="color:rgba(255,255,255,0.8);">${user.distance ? '📍 A ' + user.distance.toFixed(1) + ' km' : '🌍'} • ${user.online ? '🟢 En línea' : '⏳ Visto recientemente'}</p>
+                    <h3>${user.name}, ${user.age}</h3>
+                    <p>${user.distance ? '📍 '+user.distance.toFixed(1)+' km' : '🌍'} • ${user.online ? '🟢 En línea' : '⏳ Visto recientemente'}</p>
                 </div>
-                <div class="modal-body">
-                    <p class="bio">${user.bio || 'Sin descripción'}</p>
-                </div>
+                <div class="modal-body"><p class="bio">${user.bio || 'Sin descripción'}</p></div>
                 <div class="modal-actions">
                     <button class="btn-like">❤️ Me gusta</button>
                     <button class="btn-message" id="openChatFromModalBtn">💬 Mensaje</button>
-                </div>
-            `;
+                </div>`;
             document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-            document.getElementById('openChatFromModalBtn').addEventListener('click', () => {
-                closeModal();
-                openChat(uid);
-            });
+            document.getElementById('openChatFromModalBtn').addEventListener('click', () => { closeModal(); openChat(uid); });
             profileModal.classList.add('active');
         }
 
-        window.closeModal = function() {
-            profileModal.classList.remove('active');
-        };
-        profileModal.addEventListener('click', (e) => {
-            if (e.target === profileModal) closeModal();
-        });
+        window.closeModal = () => profileModal.classList.remove('active');
+        profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeModal(); });
 
-        // Límite diario
         function getTodayString() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -938,42 +830,29 @@
             if (!snap.exists()) return false;
             const data = snap.val();
             const today = getTodayString();
-            let dailyViews = data.dailyViews || 0;
-            let lastReset = data.lastResetDate || '';
-
-            if (lastReset !== today) {
-                // Reiniciar contador
-                dailyViews = 0;
+            let views = data.dailyViews || 0;
+            if (data.lastResetDate !== today) {
+                views = 0;
                 await update(userRef, { dailyViews: 0, lastResetDate: today });
             }
-
-            if (dailyViews >= dailyLimit) {
-                return false; // Límite alcanzado
-            }
-
-            await update(userRef, { dailyViews: dailyViews + 1 });
-            // Actualizar localmente
-            userProfile.dailyViews = dailyViews + 1;
+            if (views >= dailyLimit) return false;
+            await update(userRef, { dailyViews: views + 1 });
+            userProfile.dailyViews = views + 1;
             return true;
         }
 
         function checkPremiumStatus() {
-            if (userProfile && userProfile.premium) {
-                limitWarning.style.display = 'none';
-            } else {
-                limitWarning.style.display = userProfile && userProfile.dailyViews >= dailyLimit ? 'block' : 'none';
-            }
+            limitWarning.style.display = (userProfile && !userProfile.premium && userProfile.dailyViews >= dailyLimit) ? 'block' : 'none';
         }
 
         document.getElementById('upgradeBtn').addEventListener('click', async () => {
-            // Simular actualización a premium (en producción integrarías Stripe)
             await update(ref(db, 'users/' + currentUser.uid), { premium: true });
             userProfile.premium = true;
             limitWarning.style.display = 'none';
-            showToast('¡Ahora eres Premium! Disfruta de acceso ilimitado.');
+            showToast('¡Ahora eres Premium!');
         });
 
-        // ==================== CHAT ====================
+        // Chat
         function openChat(uid) {
             activeChatId = uid;
             const partner = nearbyUsers.find(u => u.uid === uid) || {};
@@ -982,15 +861,14 @@
             loadMessages();
         }
 
-        async function loadMessages() {
+        function loadMessages() {
             const chatId = getChatId(currentUser.uid, activeChatId);
-            const messagesRef = ref(db, 'chats/' + chatId + '/messages');
-            onValue(messagesRef, (snapshot) => {
+            onValue(ref(db, 'chats/' + chatId + '/messages'), (snapshot) => {
                 const container = document.getElementById('chatMessages');
                 container.innerHTML = '';
                 if (snapshot.exists()) {
-                    const messages = snapshot.val();
-                    Object.values(messages).sort((a,b) => a.timestamp - b.timestamp).forEach(msg => {
+                    const msgs = Object.values(snapshot.val()).sort((a,b) => a.timestamp - b.timestamp);
+                    msgs.forEach(msg => {
                         const div = document.createElement('div');
                         div.className = `message ${msg.sender === currentUser.uid ? 'sent' : 'received'}`;
                         div.textContent = msg.text;
@@ -1001,36 +879,24 @@
             });
         }
 
-        function getChatId(uid1, uid2) {
-            return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
-        }
+        function getChatId(uid1, uid2) { return uid1 < uid2 ? uid1+'_'+uid2 : uid2+'_'+uid1; }
 
         document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+        document.getElementById('messageInput').addEventListener('keypress', (e) => { if (e.key==='Enter') sendMessage(); });
 
         async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if (!text || !activeChatId || !currentUser) return;
+            const text = document.getElementById('messageInput').value.trim();
+            if (!text || !activeChatId) return;
             const chatId = getChatId(currentUser.uid, activeChatId);
             const msgRef = push(ref(db, 'chats/' + chatId + '/messages'));
-            await set(msgRef, {
-                sender: currentUser.uid,
-                text: text,
-                timestamp: serverTimestamp()
-            });
-            input.value = '';
-                }
-        // ==================== LISTA DE CHATS ====================
+            await set(msgRef, { sender: currentUser.uid, text, timestamp: serverTimestamp() });
+            document.getElementById('messageInput').value = '';
+        }
+
+        // Lista de chats
         document.getElementById('chatListBtn').addEventListener('click', showChatList);
         document.getElementById('backFromChatListBtn').addEventListener('click', () => showScreen('mainScreen'));
-        document.getElementById('backFromChatBtn').addEventListener('click', () => {
-            activeChatId = null;
-            showScreen('chatListScreen');
-            loadChatList();
-        });
+        document.getElementById('backFromChatBtn').addEventListener('click', () => { activeChatId = null; showScreen('chatListScreen'); loadChatList(); });
 
         async function showChatList() {
             showScreen('chatListScreen');
@@ -1040,62 +906,46 @@
         async function loadChatList() {
             if (!currentUser) return;
             const container = document.getElementById('chatListContainer');
-            container.innerHTML = '<div style="padding:1rem; text-align:center;">Cargando conversaciones...</div>';
-            // Obtener todos los chats donde participa el usuario
-            const chatsRef = ref(db, 'chats');
-            const snapshot = await get(chatsRef);
+            container.innerHTML = '<div style="padding:1rem; text-align:center;">Cargando...</div>';
+            const snap = await get(ref(db, 'chats'));
             container.innerHTML = '';
-            if (!snapshot.exists()) {
-                container.innerHTML = '<div class="empty-state" style="padding:2rem; text-align:center; color:var(--text-secondary);">Aún no tienes conversaciones</div>';
-                return;
-            }
-            const chats = snapshot.val();
-            const chatItems = [];
+            if (!snap.exists()) return container.innerHTML = '<div class="empty-state">Aún no tienes conversaciones</div>';
+            const chats = snap.val();
+            const items = [];
             for (const chatId in chats) {
-                const participants = chatId.split('_');
-                if (participants.includes(currentUser.uid)) {
-                    const partnerId = participants.find(p => p !== currentUser.uid);
-                    const messagesObj = chats[chatId].messages || {};
-                    const lastMsg = Object.values(messagesObj).sort((a,b) => b.timestamp - a.timestamp)[0];
-                    const partnerProfile = await getUserProfile(partnerId);
-                    chatItems.push({
-                        partnerId,
-                        name: partnerProfile?.name || 'Usuario',
-                        lastMsg: lastMsg ? lastMsg.text : '',
-                        online: partnerProfile?.online || false,
-                        initials: getInitials(partnerProfile?.name || '?'),
-                        colors: getAvatarColors(partnerProfile?.name || '?')
-                    });
-                }
+                if (!chatId.includes(currentUser.uid)) continue;
+                const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
+                const msgs = Object.values(chats[chatId].messages||{}).sort((a,b)=>b.timestamp-a.timestamp);
+                const lastMsg = msgs[0];
+                const profile = await getUserProfile(partnerId);
+                items.push({
+                    partnerId, name: profile?.name||'Usuario', lastMsg: lastMsg?.text||'',
+                    online: profile?.online||false, initials: getInitials(profile?.name||'?'), colors: getAvatarColors(profile?.name||'?')
+                });
             }
-            if (chatItems.length === 0) {
-                container.innerHTML = '<div class="empty-state" style="padding:2rem; text-align:center; color:var(--text-secondary);">Aún no tienes conversaciones</div>';
-                return;
-            }
-            container.innerHTML = chatItems.map(item => `
+            if (!items.length) return container.innerHTML = '<div class="empty-state">Aún no tienes conversaciones</div>';
+            container.innerHTML = items.map(item => `
                 <div class="chat-item" data-uid="${item.partnerId}">
                     <div class="chat-avatar" style="background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});">${item.initials}</div>
                     <div class="chat-info">
-                        <div class="chat-name">${item.name} ${item.online ? '<span style="color:var(--online); font-size:0.8rem;">●</span>' : ''}</div>
+                        <div class="chat-name">${item.name} ${item.online?'<span style="color:var(--online)">●</span>':''}</div>
                         <div class="chat-preview">${item.lastMsg.substring(0,30)}</div>
                     </div>
                 </div>
             `).join('');
-            container.querySelectorAll('.chat-item').forEach(item => {
-                item.addEventListener('click', () => openChat(item.dataset.uid));
-            });
+            container.querySelectorAll('.chat-item').forEach(item => item.addEventListener('click', () => openChat(item.dataset.uid)));
         }
 
         async function getUserProfile(uid) {
-            const snap = await get(ref(db, 'users/' + uid));
+            const snap = await get(ref(db, 'users/'+uid));
             return snap.exists() ? snap.val() : null;
         }
 
-        // ==================== UTILIDADES ====================
-        function showScreen(screenId) {
+        // Utilidades
+        function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            if (screenId === 'mainScreen') checkPremiumStatus();
+            document.getElementById(id).classList.add('active');
+            if (id === 'mainScreen') checkPremiumStatus();
         }
 
         function showToast(msg) {
@@ -1107,44 +957,13 @@
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
 
-        function getInitials(name) {
-            if (!name) return '?';
-            return name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-        }
-
+        function getInitials(name) { return name?.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || '?'; }
         function getAvatarColors(name) {
-            const palettes = [
-                ['#7B2CBF','#E5383B'], ['#9D4EDD','#FF686B'], ['#5A189A','#D00000'],
-                ['#3C096C','#FF4D6D'], ['#7209B7','#F72585'], ['#560BAD','#B5179E'],
-                ['#6A0572','#FF477E'], ['#480CA8','#F15BB5']
-            ];
+            const palettes = [['#7B2CBF','#E5383B'],['#9D4EDD','#FF686B'],['#5A189A','#D00000'],['#3C096C','#FF4D6D'],['#7209B7','#F72585'],['#560BAD','#B5179E']];
             let hash = 0;
-            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            for (let i=0; i<name.length; i++) hash = name.charCodeAt(i) + ((hash<<5)-hash);
             return palettes[Math.abs(hash) % palettes.length];
         }
-
-        // ==================== REGLAS DE SEGURIDAD RECOMENDADAS (Firebase Console) ====================
-        /*
-        {
-          "rules": {
-            "users": {
-              "$uid": {
-                ".read": "auth != null",
-                ".write": "auth != null && auth.uid === $uid"
-              }
-            },
-            "chats": {
-              "$chat_id": {
-                ".read": "auth != null && $chat_id.contains(auth.uid)",
-                ".write": "auth != null && $chat_id.contains(auth.uid)",
-                "messages": {
-                  ".indexOn": ["timestamp"]
-                }
-              }
-            }
-          }
-        }
-        */
     </script>
 </body>
 </html>
