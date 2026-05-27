@@ -186,7 +186,7 @@
         }
         .icon-btn:active { background: rgba(123, 44, 191, 0.6); }
 
-        /* ---------- FILTROS (solo género, sin distancia) ---------- */
+        /* ---------- FILTROS (solo género) ---------- */
         .filters {
             display: flex;
             gap: 0.5rem;
@@ -214,6 +214,7 @@
             box-shadow: 0 0 12px rgba(230,56,59,0.5);
             font-weight: 600;
         }
+
         /* ---------- GRID PERFILES ---------- */
         .grid {
             display: grid;
@@ -363,7 +364,6 @@
             flex: 1; padding: 0.9rem; border: 2px solid var(--purple); border-radius: 30px;
             font-weight: 700; background: transparent; color: var(--text); cursor: pointer;
         }
-
         /* ---------- MI PERFIL ---------- */
         .profile-screen-container {
             padding: 1.5rem;
@@ -444,6 +444,7 @@
             <p id="setupError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
         </div>
     </div>
+
     <!-- MAIN SCREEN -->
     <div id="mainScreen" class="screen">
         <div class="header">
@@ -588,8 +589,7 @@
             document.getElementById('authError').textContent = msg;
             setTimeout(() => document.getElementById('authError').textContent = '', 4000);
         }
-
-        // ---------- ESTADO DE AUTENTICACIÓN ----------
+        / ---------- ESTADO DE AUTENTICACIÓN ----------
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -673,34 +673,91 @@
                 { enableHighAccuracy: true }
             );
         }
-        // ---------- CARGAR USUARIOS (sin límite de distancia) ----------
+
+        // ---------- FUNCIÓN loadNearbyUsers CON DIAGNÓSTICO ----------
         async function loadNearbyUsers() {
-            if (!currentUser || !userProfile) return;
+            if (!currentUser || !userProfile) {
+                alert('⛔ No hay currentUser o userProfile');
+                return;
+            }
+
+            alert('📡 Iniciando carga de usuarios...');
+            console.log('🔍 currentUser.uid:', currentUser.uid);
+            console.log('🔍 userProfile:', JSON.stringify(userProfile, null, 2));
+
             const snap = await get(ref(db, 'users'));
-            if (!snap.exists()) { nearbyUsers = []; renderDynamicView(); return; }
+            if (!snap.exists()) {
+                alert('❌ No hay datos en /users');
+                nearbyUsers = [];
+                renderDynamicView();
+                return;
+            }
+
             const all = snap.val();
+            const totalEnDB = Object.keys(all).length;
+            alert(`📊 Usuarios totales en BD: ${totalEnDB}`);
+            console.log('📋 Datos crudos de /users:', all);
+
             const me = currentUser.uid;
-            const myLat = userProfile.lat, myLng = userProfile.lng;
+            const myLat = userProfile.lat;
+            const myLng = userProfile.lng;
+            console.log('📍 Mi ubicación:', { myLat, myLng });
 
             let users = Object.entries(all)
-                .filter(([uid]) => uid !== me)
+                .filter(([uid, p]) => {
+                    const isMe = uid === me;
+                    if (isMe) console.log(`🚫 Descartado (soy yo): ${uid}`);
+                    return !isMe;
+                })
                 .map(([uid, p]) => {
                     let distance = null;
                     if (myLat != null && myLng != null && p.lat != null && p.lng != null) {
-                        distance = calcDistance(myLat, myLng, p.lat, p.lng);
+                        try {
+                            distance = calcDistance(myLat, myLng, p.lat, p.lng);
+                            console.log(`📏 Distancia a ${p.name || uid}: ${distance.toFixed(2)} km`);
+                        } catch (e) {
+                            alert(`🧨 Error calculando distancia con ${p.name || uid}: ${e.message}`);
+                            console.error('Error en Haversine:', e);
+                        }
+                    } else {
+                        console.log(`🌍 Sin coordenadas para ${p.name || uid} (o para mí)`);
                     }
                     return { uid, ...p, distance };
                 });
 
-            // Filtrar por género de interés
-            if (userProfile.interestedIn === 'female') users = users.filter(u => u.gender === 'female');
-            else if (userProfile.interestedIn === 'male') users = users.filter(u => u.gender === 'male');
-            // Si es 'all', no filtramos por género
+            console.log('👥 Usuarios antes de filtrar por interestedIn:', users.length);
+            alert(`👥 Usuarios antes de filtros: ${users.length}`);
 
-            // Filtro adicional del usuario (chip de género)
-            if (filterGender !== 'all') users = users.filter(u => u.gender === filterGender);
+            // Filtro por interestedIn (lo que busco)
+            const interestedIn = userProfile.interestedIn;
+            console.log('🎯 Mi interestedIn:', interestedIn);
+            users = users.filter(u => {
+                const match = (interestedIn === 'female' && u.gender === 'female') ||
+                              (interestedIn === 'male' && u.gender === 'male') ||
+                              (interestedIn === 'all');
+                if (!match) {
+                    console.log(`❌ Descartado por interestedIn: ${u.name || u.uid} (gender: ${u.gender}, interestedIn: ${interestedIn})`);
+                }
+                return match;
+            });
 
-            // Ordenar: primero los que tienen distancia (más cerca), luego los sin ubicación
+            alert(`👥 Después de interestedIn: ${users.length}`);
+            console.log('👥 Usuarios tras filtro interestedIn:', users.length);
+
+            // Filtro adicional de género (chip UI)
+            console.log('🎚️ filterGender (chip seleccionado):', filterGender);
+            users = users.filter(u => {
+                const match = (filterGender === 'all' || u.gender === filterGender);
+                if (!match) {
+                    console.log(`❌ Descartado por filterGender: ${u.name || u.uid} (gender: ${u.gender}, filterGender: ${filterGender})`);
+                }
+                return match;
+            });
+
+            alert(`👥 Después de filterGender: ${users.length}`);
+            console.log('👥 Usuarios tras filterGender:', users.length);
+
+            // Ordenar por distancia
             users.sort((a, b) => {
                 if (a.distance === null && b.distance === null) return 0;
                 if (a.distance === null) return 1;
@@ -709,6 +766,8 @@
             });
 
             nearbyUsers = users;
+            console.log('✅ nearbyUsers final:', nearbyUsers);
+            alert(`✅ Carga completada. Usuarios en radar: ${nearbyUsers.length}`);
             renderDynamicView();
         }
 
@@ -789,8 +848,7 @@
             document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
             renderDynamicView();
         });
-
-        // ---------- FILTROS DE GÉNERO ----------
+        / ---------- FILTROS DE GÉNERO ----------
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
             const chip = e.target;
@@ -923,13 +981,13 @@
 
             const updates = { name, age, gender, interestedIn, bio, profilePic, album };
             await update(ref(db, 'users/' + currentUser.uid), updates);
-            // Actualizar userProfile local
             Object.assign(userProfile, updates);
             document.getElementById('profileEditError').textContent = '';
             showToast('Perfil actualizado');
             showScreen('mainScreen');
-            loadNearbyUsers(); // Refrescar para ver cambios en fotos
+            loadNearbyUsers();
         });
+
         // ---------- CHAT ----------
         function openChat(uid) {
             activeChatId = uid;
@@ -1024,3 +1082,4 @@
 </body>
 </html>
 ```
+        
