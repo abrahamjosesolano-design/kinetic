@@ -7,46 +7,22 @@
     <style>
         /* Diseño de Vanguardia - Modo Oscuro Cyber-Premium */
         body { 
-            margin: 0; 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            background-color: #050508; 
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(122, 38, 242, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(255, 46, 99, 0.15) 0px, transparent 50%);
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh;
-            overflow-x: hidden;
+            margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #050508; 
+            background-image: radial-gradient(at 0% 0%, rgba(122, 38, 242, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(255, 46, 99, 0.15) 0px, transparent 50%);
+            display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden;
         }
 
         .phone-container { 
-            width: 100%; 
-            max-width: 412px; 
-            background: rgba(15, 15, 25, 0.8); 
-            backdrop-filter: blur(20px);
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
-            border-left: 1px solid rgba(255,255,255,0.05);
-            border-right: 1px solid rgba(255,255,255,0.05);
+            width: 100%; max-width: 412px; background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px);
+            min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+            border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* PANTALLA 1: REGISTRO/LOGIN FUTURISTA */
-        #login-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 30px;
-            flex-grow: 1;
-            box-sizing: border-box;
-        }
-
+        /* PANTALLA 1: REGISTRO */
+        #login-screen { display: flex; flex-direction: column; justify-content: center; padding: 30px; flex-grow: 1; box-sizing: border-box; }
         .welcome-text { text-align: center; margin-bottom: 40px; }
         .welcome-text h2 { font-size: 32px; font-weight: 900; margin: 0; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .welcome-text p { color: #888; font-size: 14px; margin-top: 5px; }
-
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; color: #aaa; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;}
         .input-group input, .input-group select { 
@@ -54,45 +30,24 @@
             border-radius: 12px; color: white; font-size: 15px; box-sizing: border-box; transition: 0.3s;
         }
         .input-group input:focus { border-color: #ff2e63; outline: none; box-shadow: 0 0 10px rgba(255, 46, 99, 0.2); }
-
-        /* Selector de Género Estilo Botón Gamer */
         .gender-selector { display: flex; gap: 10px; margin-top: 5px; }
-        .gender-box { 
-            flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
-            text-align: center; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 14px; color: #888; transition: 0.3s;
-        }
+        .gender-box { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 12px; cursor: pointer; font-weight: 700; color: #888; transition: 0.3s; }
         .gender-box.selected { background: #7a26f2; color: white; border-color: #a16eff; box-shadow: 0 0 15px rgba(122, 38, 242, 0.4); }
+        .action-btn { background: linear-gradient(45deg, #7a26f2, #ff2e63); color: white; border: none; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; box-shadow: 0 5px 20px rgba(255, 46, 99, 0.3); }
 
-        .action-btn {
-            background: linear-gradient(45deg, #7a26f2, #ff2e63); color: white; border: none; padding: 16px; 
-            border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; transition: 0.3s;
-            box-shadow: 0 5px 20px rgba(255, 46, 99, 0.3);
-        }
-        .action-btn:hover { transform: scale(1.02); box-shadow: 0 5px 25px rgba(255, 46, 99, 0.5); }
-
-        /* PANTALLA 2: EL RADAR (Oculto al inicio) */
+        /* PANTALLA 2: EL RADAR */
         #radar-screen { display: none; flex-direction: column; flex-grow: 1; }
-        
-        header { 
-            padding: 20px 15px; background: rgba(24, 24, 38, 0.6); backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: sticky; top: 0; z-index: 10;
-        }
+        header { padding: 20px 15px; background: rgba(24, 24, 38, 0.6); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: sticky; top: 0; z-index: 10; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .logo { font-size: 24px; font-weight: 900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .streak-badge { 
-            background: linear-gradient(135deg, #ff9500 0%, #ff2e63 100%); padding: 6px 14px; border-radius: 50px; 
-            font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(255, 46, 99, 0.4);
-            animation: pulse 1.5s infinite; 
-        }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        
+        .streak-badge { background: linear-gradient(135deg, #ff9500 0%, #ff2e63 100%); padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(255, 46, 99, 0.4); animation: pulse 1.5s infinite; }
         .filters { display: flex; gap: 10px; justify-content: center; }
         .filter-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #999; padding: 10px 20px; border-radius: 50px; font-size: 13px; font-weight: 700; cursor: pointer; }
         .filter-btn.active { background: #ffffff; color: #050508; }
 
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; flex-grow: 1; overflow-y: auto; padding-bottom: 90px; }
-        .profile-card { position: relative; aspect-ratio: 1 / 1; background: #181826; border-radius: 12px; overflow: hidden; background-size: cover; background-position: center; border: 2px solid transparent; }
+        .profile-card { position: relative; aspect-ratio: 1 / 1; background: #181826; border-radius: 12px; overflow: hidden; background-size: cover; background-position: center; border: 2px solid transparent; cursor: pointer; transition: 0.2s; }
+        .profile-card:active { transform: scale(0.95); }
         .profile-card.premium-glow { border-color: #ff2e63; box-shadow: 0 0 10px rgba(255, 46, 99, 0.3); }
         .profile-info { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(5,5,8,0.95) 0%, rgba(5,5,8,0.4) 60%, transparent 100%); padding: 12px 8px 8px 8px; }
         .name-age { font-size: 13px; font-weight: 700; color: white; display: flex; align-items: center; gap: 4px; }
@@ -100,12 +55,25 @@
         .verified-badge { color: #007aff; font-size: 12px; }
         .online-dot { width: 8px; height: 8px; background: #34c759; border-radius: 50%; position: absolute; top: 8px; right: 8px; box-shadow: 0 0 8px #34c759; }
 
-        .nav-bar {
-            position: absolute; bottom: 20px; left: 15px; right: 15px; height: 65px; background: rgba(24, 24, 38, 0.85);
-            backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 25px; display: flex; justify-content: space-around; align-items: center;
-        }
+        .nav-bar { position: absolute; bottom: 20px; left: 15px; right: 15px; height: 65px; background: rgba(24, 24, 38, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 5; }
         .nav-item { color: #666; font-size: 20px; text-decoration: none; }
-        .nav-item.active { color: #ff2e63; text-shadow: 0 0 10px rgba(255, 46, 99, 0.5); }
+        .nav-item.active { color: #ff2e63; }
+
+        /* NUEVO: VENTANA EMERGENTE DE PERFIL (MODAL) */
+        .profile-modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5, 5, 8, 0.9);
+            z-index: 100; display: none; justify-content: center; align-items: flex-end;
+        }
+        .modal-content {
+            width: 100%; max-width: 412px; background: #161622; border-radius: 30px 30px 0 0;
+            padding: 25px; box-sizing: border-box; border-top: 1px solid rgba(255,255,255,0.1);
+            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .modal-img { width: 100%; aspect-ratio: 1.2 / 1; border-radius: 20px; background-size: cover; background-position: center; position: relative; }
+        .modal-name { font-size: 24px; font-weight: 800; margin-top: 15px; color: white; display: flex; align-items: center; gap: 8px; }
+        .modal-status { color: #00e5ff; font-size: 13px; font-weight: 600; margin-top: 4px; }
+        .modal-bio { color: #aaa; font-size: 14px; margin-top: 15px; line-height: 1.5; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; }
+        .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 16px;}
     </style>
 </head>
 <body>
@@ -117,17 +85,14 @@
                 <h2>KINETIC</h2>
                 <p>Energía y Conexión en Tiempo Real</p>
             </div>
-
             <div class="input-group">
                 <label>Tu Nombre Comercial o Apodo</label>
                 <input type="text" id="user-name" placeholder="Ej. Alex">
             </div>
-
             <div class="input-group">
                 <label>Tu Edad</label>
                 <input type="number" id="user-age" placeholder="Mínimo 18" min="18">
             </div>
-
             <div class="input-group">
                 <label>Soy</label>
                 <div class="gender-selector">
@@ -135,7 +100,6 @@
                     <div class="gender-box" id="gender-m" onclick="selectGender('M')">Mujer</div>
                 </div>
             </div>
-
             <div class="input-group">
                 <label>Busco Conectar Con</label>
                 <select id="user-search">
@@ -144,7 +108,6 @@
                     <option value="hombres">Solo Hombres</option>
                 </select>
             </div>
-
             <button class="action-btn" onclick="entrarAlRadar()">Inicializar Radar ⚡</button>
         </div>
 
@@ -162,21 +125,23 @@
             </header>
 
             <main class="grid-container">
-                <div class="profile-card premium-glow" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200');">
+                <div class="profile-card premium-glow" onclick="abrirPerfil('Camila', '22', 'A 50 metros', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300', 'Activa hoy para conocer gente nueva. Me encanta la música y salir los fines de semana.')" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200');">
                     <div class="online-dot"></div>
                     <div class="profile-info">
                         <div class="name-age">Camila, 22 <span class="verified-badge">✔</span></div>
                         <div class="distance">A 50 metros</div>
                     </div>
                 </div>
-                <div class="profile-card" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200');">
+
+                <div class="profile-card" onclick="abrirPerfil('Carlos', '25', 'A 120 metros', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300', 'Buscando conversaciones interesantes. Fanático de los autos y el desarrollo de ideas.')" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200');">
                     <div class="online-dot"></div>
                     <div class="profile-info">
                         <div class="name-age">Carlos, 25 <span class="verified-badge">✔</span></div>
                         <div class="distance">A 120 metros</div>
                     </div>
                 </div>
-                <div class="profile-card" style="background-image: url('https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200');">
+
+                <div class="profile-card" onclick="abrirPerfil('Valeria', '24', 'A 400 metros', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=300', 'Hola! Pasando el rato por acá. Si quieres hablar de videojuegos o películas, escríbeme.')" style="background-image: url('https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200');">
                     <div class="profile-info">
                         <div class="name-age">Valeria, 24</div>
                         <div class="distance">A 400 metros</div>
@@ -192,37 +157,69 @@
             </nav>
         </div>
 
+        <div id="profile-modal" class="profile-modal" onclick="cerrarPerfilExterno(event)">
+            <div class="modal-content" id="modal-content">
+                <div class="modal-img" id="modal-img">
+                    <button class="modal-close" onclick="cerrarPerfil()">×</button>
+                </div>
+                <div class="modal-name" id="modal-name-age">Nombre, 00</div>
+                <div class="modal-status" id="modal-distance">A 0 metros</div>
+                <div class="modal-bio" id="modal-bio">Descripción del usuario...</div>
+                <button class="action-btn" style="width: 100%; margin-top: 20px;">Iniciar Conexión Cinética 💬</button>
+            </div>
+        </div>
+
     </div>
 
-    /* LÓGICA DE INTERACCIÓN (JAVASCRIPT) */
     <script>
         let generoSeleccionado = '';
 
         function selectGender(genero) {
             document.getElementById('gender-h').classList.remove('selected');
             document.getElementById('gender-m').classList.remove('selected');
-            
-            if(genero === 'H') {
-                document.getElementById('gender-h').classList.add('selected');
-            } else {
-                document.getElementById('gender-m').classList.add('selected');
-            }
+            if(genero === 'H') { document.getElementById('gender-h').classList.add('selected'); } 
+            else { document.getElementById('gender-m').classList.add('selected'); }
             generoSeleccionado = genero;
         }
 
         function entrarAlRadar() {
             const nombre = document.getElementById('user-name').value;
             const edad = document.getElementById('user-age').value;
-
             if(!nombre || !edad || !generoSeleccionado) {
-                alert('Por favor, completa todos tus datos para activar tu energía cinética.');
-                return;
+                alert('Por favor, completa tus datos para activar tu energía cinética.'); return;
             }
-
-            // El truco de magia: Oculta la pantalla de login y muestra el radar
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('radar-screen').style.display = 'flex';
         }
-    </script>
+
+        /* LÓGICA DE DETALLE DE PERFIL INTERACTIVO */
+        function abrirPerfil(nombre, edad, distancia, fotoUrl, bio) {
+            document.getElementById('modal-img').style.backgroundImage = `url('${fotoUrl}')`;
+            document.getElementById('modal-name-age').innerHTML = `${nombre}, ${edad} <span class="verified-badge">✔</span>`;
+            document.getElementById('modal-distance').innerText = distancia;
+            document.getElementById('modal-bio').innerText = bio;
+            
+            const modal = document.getElementById('profile-modal');
+            const content = document.getElementById('modal-content');
+            modal.display = 'flex'; // Fix para display flex
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                content.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        function cerrarPerfil() {
+            const content = document.getElementById('modal-content');
+            content.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                document.getElementById('profile-modal').style.display = 'none';
+            }, 300);
+        }
+
+        function cerrarPerfilExterno(event) {
+            if(event.target.id === 'profile-modal') { cerrarPerfil(); }
+        }
+    </style>
 </body>
-</html>
+    </html>
+        
