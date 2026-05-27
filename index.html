@@ -19,7 +19,7 @@
         }
 
         /* PANTALLA DE CARGA INICIAL */
-        #splash-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; flex-grow: 1; color: white; }
+        #splash-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; flex-grow: 1; color: white; position: absolute; top:0; left:0; right:0; bottom:0; background:#050508; z-index: 999; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #ff2e63; animation: spin 1s linear infinite; margin-top: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -106,7 +106,7 @@
     <div class="phone-container">
         
         <div id="splash-screen">
-            <h2 style="font-weight:900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">KINETIC</h2>
+            <h2 style="font-weight:900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">KINETIC</h2>
             <div class="spinner"></div>
         </div>
 
@@ -224,9 +224,11 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
+        // CONFIGURACIÓN CORREGIDA CON TU URL EXACTA DE DATABASE
         const firebaseConfig = {
           apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
           authDomain: "kinetic-app-67ae5.firebaseapp.com",
+          databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com",
           projectId: "kinetic-app-67ae5",
           storageBucket: "kinetic-app-67ae5.firebasestorage.app",
           messagingSenderId: "825570718975",
@@ -236,19 +238,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // COMPROBACIÓN DE MEMORIA LOCAL AL CARGAR LA PÁGINA
+        // COMPROBACIÓN AL CARGAR LA PÁGINA
         document.addEventListener("DOMContentLoaded", () => {
             const usuarioGuardado = localStorage.getItem("kinetic_user");
             
+            // Forzar cierre del splash screen pase lo que pase para evitar bloqueos
             setTimeout(() => {
-                document.getElementById('splash-screen').style.display = 'none';
+                const splash = document.getElementById('splash-screen');
+                if(splash) splash.style.display = 'none';
+                
                 if (usuarioGuardado) {
                     const user = JSON.parse(usuarioGuardado);
                     montarAplicacionPrincipal(user.nombre, user.edad, user.genero);
                 } else {
                     document.getElementById('login-screen').style.display = 'flex';
                 }
-            }, 1200); // Pequeño delay estético de carga
+            }, 1000);
         });
 
         // REGISTRO DE USUARIO NUEVO
@@ -278,11 +283,10 @@
             };
 
             set(nuevoUsuarioRef, nuevoUsuarioDatos).then(() => {
-                // Guardar datos en la memoria del teléfono
                 localStorage.setItem("kinetic_user", JSON.stringify(nuevoUsuarioDatos));
                 montarAplicacionPrincipal(nombre, edad, generoSeleccionado);
             }).catch((error) => {
-                alert("Error de red: " + error.message);
+                alert("Error de red de Firebase: " + error.message);
                 boton.innerText = "Inicializar Radar ⚡";
                 boton.disabled = false;
             });
@@ -302,11 +306,4 @@
             escucharUsuarios();
         }
 
-        function escucharUsuarios() {
-            const usuariosRef = ref(db, 'usuarios');
-            onValue(usuariosRef, (snapshot) => {
-                const contenedor = document.getElementById('usuarios-dinamicos');
-                contenedor.innerHTML = '';
-
-                if (snapshot.exists()) {
-         
+        function esc
