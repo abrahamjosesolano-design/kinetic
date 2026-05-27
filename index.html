@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kinetic</title>
     <style>
-        /* RESET & BASE STYLES */
+        /* BASE & PHONE LAYOUT */
         body { 
             margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: #050508; color: white;
             display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden;
@@ -16,12 +16,12 @@
             display: flex; flex-direction: column; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.8);
         }
 
-        /* SPLASH SCREEN (MÁXIMA ESTABILIDAD) */
+        /* SPLASH SCREEN ACCELERATED */
         #splash-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; position: absolute; top:0; left:0; right:0; bottom:0; background:#050508; z-index: 9999; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #ff2e63; animation: spin 1s linear infinite; margin-top: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* INTERFAZ DE REGISTRO */
+        /* REGISTRO / LOGIN ACCESIBLE */
         #login-screen { display: none; flex-direction: column; justify-content: center; padding: 30px; flex-grow: 1; box-sizing: border-box; }
         .welcome-text { text-align: center; margin-bottom: 30px; }
         .welcome-text h2 { font-size: 32px; font-weight: 900; margin: 0; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -33,12 +33,12 @@
         .gender-box.selected { background: #7a26f2; color: white; border-color: #a16eff; }
         .action-btn { background: linear-gradient(45deg, #7a26f2, #ff2e63); color: white; border: none; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
 
-        /* CONTENEDOR VISTAS PRINCIPALES */
+        /* CONTENEDORES DE VISTAS */
         #main-app { display: none; flex-direction: column; flex-grow: 1; height: 100vh; position: relative; }
         .app-section { display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; padding-bottom: 90px; box-sizing: border-box; }
         .app-section.active-view { display: flex; }
         
-        /* HEADER Y FILTROS SUPERIORES */
+        /* HEADER Y BOTONES DE FILTRO SUPERIOR */
         header { padding: 20px 15px 10px 15px; background: #141426; border-bottom: 1px solid rgba(255,255,255,0.08); }
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .logo { font-size: 24px; font-weight: 900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -47,7 +47,7 @@
         .filter-chip { flex: 1; padding: 10px; background: #222235; border: 1px solid rgba(255,255,255,0.05); border-radius: 50px; color: #aaa; text-align: center; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
         .filter-chip.active-chip { background: white; color: black; border-color: white; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
 
-        /* RADAR GRID GRAPHICS */
+        /* INTERFAZ RADAR GRID */
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; }
         .profile-card { position: relative; aspect-ratio: 1/1; background: #181826; border-radius: 12px; overflow: hidden; background-size: cover; background-position: center; cursor: pointer; }
         .profile-info { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 8px; }
@@ -55,25 +55,25 @@
         .distance { color: #00e5ff; font-size: 10px; }
         .online-dot { width: 8px; height: 8px; background: #34c759; border-radius: 50%; position: absolute; top: 8px; right: 8px; box-shadow: 0 0 6px #34c759; }
 
-        /* CHATS LIST SETUP */
+        /* CHATS LIST VIEW */
         .chat-header { padding: 25px 20px; font-size: 22px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .chat-list { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
         .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; cursor: pointer; }
         .chat-avatar { width: 45px; height: 45px; border-radius: 50%; background-size: cover; background-position: center; }
         
-        /* MI PERFIL CARD DISPLAY */
+        /* MI PERFIL SECCIÓN */
         .profile-container-view { padding: 30px 20px; display: flex; flex-direction: column; align-items: center; }
         .my-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #ff2e63; background-size: cover; background-position: center; box-shadow: 0 0 20px rgba(255,46,99,0.3); }
         .stats-row { display: flex; width: 100%; gap: 10px; margin-top: 20px; text-align: center; }
         .stat-box { flex: 1; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; font-size: 12px; }
         .stat-box strong { display: block; font-size: 16px; color: white; }
 
-        /* NAVIGATION BAR FIJA */
+        /* NAVEGACIÓN INFERIOR COHESIVA */
         .nav-bar { position: absolute; bottom: 15px; left: 15px; right: 15px; height: 60px; background: #141426; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.05); z-index: 99; }
         .nav-item { color: #555; font-size: 22px; cursor: pointer; padding: 10px; transition: color 0.2s; }
         .nav-item.active { color: #ff2e63; }
 
-        /* TARGET VIEW PROFILE MODAL */
+        /* TARJETA MODAL DETALLADA */
         .profile-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; justify-content: center; align-items: flex-end; }
         .modal-content { width: 100%; max-width: 412px; background: #161622; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; }
         .modal-img { width: 100%; aspect-ratio: 1.2/1; border-radius: 15px; background-size: cover; background-position: center; position: relative; }
@@ -193,12 +193,11 @@
           appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
         };
 
-        // INICIALIZACIÓN PROTEGIDA CONTRA CAÍDAS
         let db = null;
         try {
             const app = initializeApp(firebaseConfig);
             db = getDatabase(app);
-        } catch(e) { console.error("Firebase Init Error Bypass"); }
+        } catch(e) { console.error("Firebase Initialization Safely Bypassed."); }
 
         window.filtroActivoGlobal = 'todos';
         window.listaCompletaUsuarios = [];
@@ -216,7 +215,6 @@
             {nombre: "Mateo", edad: 26, genero: "H", dist: "A 1.5 km", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200"}
         ];
 
-        // APAGADO COMPLETO DEL SPLASH SEGURO EN 1 SEGUNDO
         document.addEventListener("DOMContentLoaded", () => {
             const localUser = localStorage.getItem("kinetic_user");
             setTimeout(() => {
@@ -261,7 +259,7 @@
                 try {
                     const userRef = push(ref(db, 'usuarios'));
                     set(userRef, nuevoUsuario);
-                } catch(e) { console.log("Cloud Push Ignored"); }
+                } catch(e) { console.log("Database Sync Skipped Temporarily."); }
             }
         };
 
@@ -278,7 +276,6 @@
             window.actualizarBandejaMensajes();
         }
 
-        // CONTROLADOR ANTIDUPLICADOS INTELIGENTE
         function conectarYLimpiarRegistros() {
             if(db) {
                 try {
@@ -292,11 +289,10 @@
                                 const u = datos[key];
                                 const localUser = JSON.parse(localStorage.getItem("kinetic_user") || "{}");
                                 
-                                // Eliminar duplicados y evitar auto-renderizado
                                 if(u.nombre && u.nombre !== localUser.nombre && !nombresVistos.has(u.nombre.toLowerCase())) {
                                     nombresVistos.add(u.nombre.toLowerCase());
                                     u.img = u.genero === 'M' ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200" : "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200";
-                                    u.dist = "Cerca de ti";
+                                    u.dist = "Cerca tuyo";
                                     listaFirebase.push(u);
                                 }
                             });
@@ -305,7 +301,7 @@
                         window.renderizarRadar();
                     });
                     return;
-                } catch(e) { console.log("Bypass database streaming read"); }
+                } catch(e) { console.log("Streaming Database read bypassed."); }
             }
             window.listaCompletaUsuarios = [...window.backupsRadar];
             window.renderizarRadar();
@@ -316,7 +312,6 @@
             if(!contenedor) return;
             contenedor.innerHTML = '';
 
-            // FILTRADO LÓGICO EXACTO
             const listaFiltrada = window.listaCompletaUsuarios.filter(user => {
                 if (window.filtroActivoGlobal === 'mujeres') return user.genero === 'M';
                 if (window.filtroActivoGlobal === 'hombres') return user.genero === 'H';
@@ -328,4 +323,119 @@
                 return;
             }
 
-            listaFiltrada.forEach(us
+            listaFiltrada.forEach(user => {
+                contenedor.innerHTML += `
+                                    <div class="profile-card" style="background-image: url('${user.img}');" onclick="window.verPerfil('${user.nombre}', '${user.edad}', '${user.dist}', '${user.img}')">
+                        <div class="online-dot"></div>
+                        <div class="profile-info">
+                            <div class="name-age">${user.nombre}, ${user.edad} ✔</div>
+                            <div class="distance">${user.dist}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        window.filtrarPorBoton = function(tipo) {
+            window.filtroActivoGlobal = tipo;
+            actualizarEstiloChips(tipo);
+            window.renderizarRadar();
+        };
+
+        function actualizarEstiloChips(tipo) {
+            const t = document.getElementById('chip-todos');
+            const m = document.getElementById('chip-mujeres');
+            const h = document.getElementById('chip-hombres');
+            if(t && m && h) {
+                t.classList.remove('active-chip');
+                m.classList.remove('active-chip');
+                h.classList.remove('active-chip');
+                document.getElementById(`chip-${tipo}`).classList.add('active-chip');
+            }
+        }
+
+        window.actualizarBandejaMensajes = function() {
+            const contenedorChats = document.getElementById('lista-de-chats');
+            if(!contenedorChats) return;
+            contenedorChats.innerHTML = '';
+            window.chatsAbiertos.forEach(c => {
+                contenedorChats.innerHTML += `
+                    <div class="chat-item">
+                        <div class="chat-avatar" style="background-image: url('${c.img}');"></div>
+                        <div>
+                            <div style="font-weight: bold;">${c.nombre}, ${c.edad}</div>
+                            <div style="color: #666; font-size: 13px; margin-top:3px;">${c.msg}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        window.cerrarSesionLocal = function() {
+            localStorage.removeItem("kinetic_user");
+            window.location.reload();
+        };
+    </script>
+
+    <script>
+        window.generoSeleccionado = '';
+
+        function selectGender(g) {
+            const h = document.getElementById('gender-h');
+            const m = document.getElementById('gender-m');
+            if(h && m) {
+                h.classList.remove('selected');
+                m.classList.remove('selected');
+                if(g === 'H') h.classList.add('selected');
+                else m.classList.add('selected');
+                window.generoSeleccionado = g;
+            }
+        }
+
+        function cambiarSeccion(vista) {
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active-view'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            const targetVista = document.getElementById(`vista-${vista}`);
+            const targetNav = document.getElementById(`nav-${vista}`);
+            if(targetVista && targetNav) {
+                targetVista.classList.add('active-view');
+                targetNav.classList.add('active');
+            }
+        }
+
+        window.verPerfil = function(nombre, edad, dist, img) {
+            document.getElementById('modal-img').style.backgroundImage = `url('${img}')`;
+            document.getElementById('modal-name-age').innerText = `${nombre}, ${edad} ✔`;
+            document.getElementById('modal-distance').innerText = dist;
+            document.getElementById('modal-bio').innerText = `¡Qué tal! Soy ${nombre}. Mi radar está encendido buscando interactuar en Kinetic y expandir mi red de contactos hoy mismo. ⚡`;
+            
+            const btnMensaje = document.getElementById('btn-enviar-mensaje');
+            if(btnMensaje) {
+                btnMensaje.onclick = function() {
+                    const existe = window.chatsAbiertos.some(c => c.nombre.toLowerCase() === nombre.toLowerCase());
+                    if(!existe) {
+                        window.chatsAbiertos.unshift({
+                            nombre: nombre,
+                            edad: edad,
+                            msg: "¡Has iniciado un chat cinético privado! Di hola...",
+                            img: img
+                        });
+                        if(window.actualizarBandejaMensajes) window.actualizarBandejaMensajes();
+                    }
+                    cerrarPerfil();
+                    cambiarSeccion('nav-mensajes');
+                };
+            }
+            document.getElementById('profile-modal').style.display = 'flex';
+        };
+
+        function cerrarPerfil() {
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+        window.cerrarPerfil = cerrarPerfil;
+    </script>
+</body>
+</html>
+
+            
