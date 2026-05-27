@@ -35,11 +35,16 @@
         #main-app { display: none; flex-direction: column; flex-grow: 1; height: 100vh; }
         .app-section { display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; padding-bottom: 90px; }
         .app-section.active-view { display: flex; }
-        header { padding: 20px 15px; background: #141426; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; }
+        header { padding: 20px 15px 10px 15px; background: #141426; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .logo { font-size: 24px; font-weight: 900; background: linear-gradient(45deg, #7a26f2, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .streak-badge { background: linear-gradient(135deg, #ff9500, #ff2e63); padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: bold; }
         
+        /* BOTONES DE FILTRO SUPERIOR (Cerca, Mujeres, Hombres) */
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 5px; }
+        .filter-chip { flex: 1; padding: 10px; background: #222235; border: 1px solid rgba(255,255,255,0.05); border-radius: 50px; color: #aaa; text-align: center; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .filter-chip.active-chip { background: white; color: black; border-color: white; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+
         /* GRID RADAR */
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; }
         .profile-card { position: relative; aspect-ratio: 1/1; background: #181826; border-radius: 12px; overflow: hidden; background-size: cover; background-position: center; cursor: pointer; }
@@ -51,8 +56,7 @@
         /* CHATS */
         .chat-header { padding: 25px 20px; font-size: 22px; font-weight: bold; }
         .chat-list { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; cursor: pointer; transition: background 0.2s; }
-        .chat-item:hover { background: rgba(255,255,255,0.06); }
+        .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; cursor: pointer; }
         .chat-avatar { width: 45px; height: 45px; border-radius: 50%; background-size: cover; background-position: center; }
         
         /* PERFIL */
@@ -122,6 +126,11 @@
                         <div class="logo">KINETIC</div>
                         <div class="streak-badge">⚡ Racha x7</div>
                     </div>
+                    <div class="filter-bar">
+                        <div class="filter-chip active-chip" id="chip-todos" onclick="filtrarPorBoton('todos')">Cerca</div>
+                        <div class="filter-chip" id="chip-mujeres" onclick="filtrarPorBoton('mujeres')">Mujeres</div>
+                        <div class="filter-chip" id="chip-hombres" onclick="filtrarPorBoton('hombres')">Hombres</div>
+                    </div>
                 </header>
                 <main class="grid-container" id="usuarios-dinamicos">
                     </main>
@@ -129,8 +138,7 @@
 
             <div id="vista-mensajes" class="app-section">
                 <div class="chat-header">Mensajes Privados</div>
-                <div class="chat-list" id="lista-de-chats">
-                    </div>
+                <div class="chat-list" id="lista-de-chats"></div>
             </div>
 
             <div id="vista-perfil" class="app-section">
@@ -150,5 +158,184 @@
 
             <nav class="nav-bar">
                 <div class="nav-item active" id="nav-radar" onclick="cambiarSeccion('radar')">⌖</div>
-                <div class="nav-item" id="nav-mensajes" onclick="cambiarSeccion('mensajes')">
-                    
+                <div class="nav-item" id="nav-mensajes" onclick="cambiarSeccion('mensajes')">💬</div>
+                <div class="nav-item" id="nav-perfil" onclick="cambiarSeccion('perfil')">👤</div>
+            </nav>
+        </div>
+
+        <div id="profile-modal" class="profile-modal" onclick="if(event.target.id==='profile-modal') cerrarPerfil()">
+            <div class="modal-content">
+                <div class="modal-img" id="modal-img">
+                    <button class="modal-close" onclick="cerrarPerfil()">×</button>
+                </div>
+                <h3 id="modal-name-age" style="margin-top:15px; margin-bottom: 5px;"></h3>
+                <div id="modal-distance" style="color:#00e5ff; font-size:12px; font-weight:bold; margin-bottom:15px;"></div>
+                <div id="modal-bio" style="color:#aaa; font-size:14px; background:rgba(255,255,255,0.02); padding:15px; border-radius:10px;"></div>
+                <button class="action-btn" id="btn-enviar-mensaje" style="margin-top:20px;">Enviar Mensaje Directo 💬</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+          authDomain: "kinetic-app-67ae5.firebaseapp.com",
+          databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com",
+          projectId: "kinetic-app-67ae5",
+          storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+          messagingSenderId: "825570718975",
+          appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.filtroActivoGlobal = 'todos';
+        window.listaCompletaUsuarios = [];
+
+        window.chatsAbiertos = [
+            {nombre: "Camila", edad: 22, msg: "¡Hola! Vi tu señal cinética, ¿hablamos?", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"}
+        ];
+
+        window.backupsRadar = [
+            {nombre: "Camila", edad: 22, genero: "M", dist: "A 50 metros", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200"},
+            {nombre: "Carlos", edad: 25, genero: "H", dist: "A 120 metros", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200"},
+            {nombre: "Valeria", edad: 24, genero: "M", dist: "A 400 metros", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200"},
+            {nombre: "Andrés", edad: 21, genero: "H", dist: "A 600 metros", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200"},
+            {nombre: "Sofía", edad: 23, genero: "M", dist: "A 1.1 km", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200"},
+            {nombre: "Mateo", edad: 26, genero: "H", dist: "A 1.5 km", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200"}
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const localUser = localStorage.getItem("kinetic_user");
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                if(splash) splash.style.display = 'none';
+                
+                if (localUser) {
+                    const u = JSON.parse(localUser);
+                    window.filtroActivoGlobal = u.busqueda || 'todos';
+                    actualizarEstiloChips(window.filtroActivoGlobal);
+                    montarApp(u.nombre, u.edad, u.genero);
+                } else {
+                    document.getElementById('login-screen').style.display = 'flex';
+                }
+            }, 1000); 
+        });
+
+        window.entrarAlRadar = function() {
+            const nombre = document.getElementById('user-name').value;
+            const edad = document.getElementById('user-age').value;
+            const filtro = document.getElementById('user-search').value;
+
+            if(!nombre || !edad || !window.generoSeleccionado) {
+                alert('Rellena todos tus datos obligatorios.');
+                return;
+            }
+
+            const nuevoUsuario = {
+                nombre: nombre,
+                edad: parseInt(edad),
+                genero: window.generoSeleccionado,
+                busqueda: filtro,
+                time: Date.now()
+            };
+
+            localStorage.setItem("kinetic_user", JSON.stringify(nuevoUsuario));
+            window.filtroActivoGlobal = filtro;
+            actualizarEstiloChips(filtro);
+            montarApp(nombre, edad, window.generoSeleccionado);
+
+            try {
+                const userRef = push(ref(db, 'usuarios'));
+                set(userRef, nuevoUsuario);
+            } catch(e) { console.log("Offline mode"); }
+        };
+
+        function montarApp(nombre, edad, genero) {
+            document.getElementById('mi-perfil-nombre').innerText = `${nombre}, ${edad}`;
+            document.getElementById('mi-perfil-foto').style.backgroundImage = genero === 'M' ? 
+                "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')" : 
+                "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150')";
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            
+            conectarFirebaseYEscuchar();
+            actualizarBandejaMensajes();
+        }
+
+        function conectarFirebaseYEscuchar() {
+            try {
+                onValue(ref(db, 'usuarios'), (snapshot) => {
+                    let listaFirebase = [];
+                    if(snapshot.exists()) {
+                        const datos = snapshot.val();
+                        Object.keys(datos).forEach(key => {
+                            const u = datos[key];
+                            const localUser = JSON.parse(localStorage.getItem("kinetic_user") || "{}");
+                            if(u.nombre !== localUser.nombre) {
+                                // Asignar fotos corregidas según el género real de Firebase
+                                u.img = u.genero === 'M' ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200" : "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200";
+                                u.dist = "Cerca tuyo";
+                                listaFirebase.push(u);
+                            }
+                        });
+                    }
+                    window.listaCompletaUsuarios = [...listaFirebase, ...window.backupsRadar];
+                    window.renderizarRadar();
+                });
+            } catch(e) {
+                window.listaCompletaUsuarios = [...window.backupsRadar];
+                window.renderizarRadar();
+            }
+        }
+
+        window.renderizarRadar = function() {
+            const contenedor = document.getElementById('usuarios-dinamicos');
+            if(!contenedor) return;
+            contenedor.innerHTML = '';
+
+            const listaFiltrada = window.listaCompletaUsuarios.filter(user => {
+                if (window.filtroActivoGlobal === 'mujeres') return user.genero === 'M';
+                if (window.filtroActivoGlobal === 'hombres') return user.genero === 'H';
+                return true;
+            });
+
+            if(listaFiltrada.length === 0) {
+                contenedor.innerHTML = '<div style="color:#666; text-align:center; grid-column: 1/-1; padding: 40px 10px;">No hay señales en este filtro.</div>';
+                return;
+            }
+
+            listaFiltrada.forEach(user => {
+                contenedor.innerHTML += `
+                    <div class="profile-card" style="background-image: url('${user.img}');" onclick="window.verPerfil('${user.nombre}', '${user.edad}', '${user.dist || 'Cerca'}', '${user.img}')">
+                        <div class="online-dot"></div>
+                        <div class="profile-info">
+                            <div class="name-age">${user.nombre}, ${user.edad} ✔</div>
+                            <div class="distance">${user.dist || 'Cerca de ti'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        window.filtrarPorBoton = function(tipo) {
+            window.filtroActivoGlobal = tipo;
+            actualizarEstiloChips(tipo);
+            window.renderizarRadar();
+        };
+
+        function actualizarEstiloChips(tipo) {
+            document.getElementById('chip-todos').classList.remove('active-chip');
+            document.getElementById('chip-mujeres').classList.remove('active-chip');
+            document.getElementById('chip-hombres').classList.remove('active-chip');
+            document.getElementById(`chip-${tipo}`).classList.add('active-chip');
+        }
+
+        window.actualizarBandejaMensajes = function() {
+            const contenedorChat
