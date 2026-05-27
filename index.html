@@ -20,12 +20,14 @@
             --streak: #FF9F1C;
             --shadow: 0 4px 20px rgba(123, 44, 191, 0.3);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --nav-height: 64px;
+            --header-height: 56px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
             background: var(--bg);
             color: var(--text);
             max-width: 480px;
@@ -45,6 +47,7 @@
             flex-direction: column;
             background: var(--bg);
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .screen.active { display: flex; }
 
@@ -65,12 +68,14 @@
             background: linear-gradient(135deg, var(--red-light), var(--purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(123,44,191,0.6));
         }
         .tagline {
             color: var(--text-secondary);
             margin-bottom: 2rem;
             font-size: 0.95rem;
             text-align: center;
+            letter-spacing: 0.3px;
         }
         .input-group {
             width: 100%;
@@ -110,6 +115,8 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
         }
         .btn-primary {
             background: linear-gradient(135deg, var(--purple), var(--red));
@@ -126,6 +133,7 @@
             color: var(--text-secondary);
             margin: 1.2rem 0;
             font-size: 0.8rem;
+            text-align: center;
         }
 
         /* ---------- SETUP ---------- */
@@ -162,7 +170,7 @@
             top: 0;
             z-index: 10;
             backdrop-filter: blur(10px);
-            min-height: 56px;
+            min-height: var(--header-height);
         }
         .header h2 {
             font-size: 1.4rem;
@@ -182,11 +190,40 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.3s, transform 0.2s;
+            backdrop-filter: blur(5px);
         }
-        .icon-btn:active { background: rgba(123, 44, 191, 0.6); }
+        .icon-btn:active { background: rgba(123, 44, 191, 0.6); transform: scale(0.92); }
 
-        /* ---------- FILTROS (solo género) ---------- */
+        /* ---------- NAV INFERIOR ---------- */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--card-bg);
+            border-top: 1px solid rgba(123,44,191,0.3);
+            height: var(--nav-height);
+            padding-bottom: calc(0.5rem + var(--safe-bottom));
+            padding-top: 0.5rem;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .nav-item.active { color: var(--red-light); transform: translateY(-2px); }
+        .nav-icon { font-size: 1.4rem; }
+
+        /* ---------- FILTROS ---------- */
         .filters {
             display: flex;
             gap: 0.5rem;
@@ -196,6 +233,7 @@
             white-space: nowrap;
             align-items: center;
             scrollbar-width: none;
+            border-bottom: 1px solid rgba(123,44,191,0.2);
         }
         .filters::-webkit-scrollbar { display: none; }
         .filter-chip {
@@ -214,7 +252,6 @@
             box-shadow: 0 0 12px rgba(230,56,59,0.5);
             font-weight: 600;
         }
-
         /* ---------- GRID PERFILES ---------- */
         .grid {
             display: grid;
@@ -234,12 +271,13 @@
             position: relative;
             animation: fadeInUp 0.4s ease forwards;
             opacity: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .profile-card:active { transform: scale(0.95); }
+        .profile-card:active { transform: scale(0.95); box-shadow: 0 0 15px var(--purple); }
         .profile-img {
             width: 100%;
             aspect-ratio: 1/1;
@@ -325,7 +363,9 @@
             border-radius: 50%;
             font-size: 1.2rem;
             cursor: pointer;
+            transition: background 0.2s;
         }
+        .modal-close:hover { background: rgba(0,0,0,0.5); }
         .modal-avatar {
             width: 100px; height: 100px;
             border-radius: 50%;
@@ -338,6 +378,7 @@
             border: 3px solid rgba(255,255,255,0.4);
             background-size: cover;
             background-position: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .modal-body { padding: 1.5rem; text-align: center; }
         .modal-body .bio { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; }
@@ -354,16 +395,22 @@
             background-color: var(--purple-dark);
             background-size: cover;
             background-position: center;
+            transition: transform 0.2s;
         }
+        .album-item:active { transform: scale(1.05); }
         .modal-actions { display: flex; gap: 1rem; padding: 0 1.5rem 1.8rem; }
         .btn-like {
             flex: 1; padding: 0.9rem; border: none; border-radius: 30px;
             font-weight: 700; background: var(--red); color: white; cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
         }
         .btn-message {
             flex: 1; padding: 0.9rem; border: 2px solid var(--purple); border-radius: 30px;
             font-weight: 700; background: transparent; color: var(--text); cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
         }
+        .btn-message:hover { background: rgba(123,44,191,0.3); }
+
         /* ---------- MI PERFIL ---------- */
         .profile-screen-container {
             padding: 1.5rem;
@@ -381,11 +428,12 @@
             font-size: 2rem;
             font-weight: bold;
             color: white;
+            box-shadow: 0 4px 15px rgba(123,44,191,0.5);
         }
 
         /* ---------- CHAT ---------- */
         .chat-list { flex: 1; overflow-y: auto; padding: 0.5rem 0.8rem; }
-        .chat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; border-radius: 14px; margin-bottom: 0.4rem; cursor: pointer; }
+        .chat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; border-radius: 14px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.2s; }
         .chat-item:active { background: rgba(123,44,191,0.2); }
         .chat-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3rem; color: white; flex-shrink: 0; background-size: cover; background-position: center; }
         .chat-info { flex: 1; min-width: 0; }
@@ -398,7 +446,8 @@
         .message.sent { align-self: flex-end; background: var(--purple); border-bottom-right-radius: 5px; }
         .chat-input-area { display: flex; padding: 0.7rem 0.8rem; gap: 0.5rem; background: var(--card-bg); border-top: 1px solid rgba(123,44,191,0.4); align-items: center; padding-bottom: calc(0.7rem + var(--safe-bottom)); }
         .chat-input-area input { flex: 1; padding: 0.8rem 1.2rem; border-radius: 25px; border: 1px solid var(--purple); background: var(--bg); color: white; outline: none; font-size: 0.95rem; }
-        .send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--red); border: none; color: white; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; }
+        .send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--red); border: none; color: white; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; transition: background 0.2s, transform 0.2s; }
+        .send-btn:active { background: var(--red-light); transform: scale(0.9); }
 
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--card-bg); color: var(--text); padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 0.9rem; z-index: 300; box-shadow: 0 5px 20px rgba(0,0,0,0.6); animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards; pointer-events: none; }
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(30px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
@@ -411,8 +460,8 @@
     <div id="loginScreen" class="screen active">
         <div class="login-container">
             <div class="logo">K</div>
-            <h1 style="font-size:2.2rem; margin-bottom:0.3rem;">Kinetic</h1>
-            <p class="tagline">La energía que te mueve</p>
+            <h1 style="font-size:2.4rem; margin-bottom:0.3rem; font-weight:700;">Kinetic</h1>
+            <p class="tagline">Encuentra personas como nunca antes</p>
             <div class="input-group"><input type="email" id="emailInput" placeholder="Correo electrónico" autocomplete="email"></div>
             <div class="input-group"><input type="password" id="passwordInput" placeholder="Contraseña" autocomplete="current-password"></div>
             <button class="btn btn-primary" id="loginBtn">Iniciar Sesión</button>
@@ -451,7 +500,6 @@
             <h2>⚡ Kinetic</h2>
             <div style="display:flex; gap:0.5rem;">
                 <button class="icon-btn" id="toggleViewBtn" title="Vista mapa/grid">🗺️</button>
-                <button class="icon-btn" id="myProfileBtn" title="Mi perfil">👤</button>
                 <button class="icon-btn" id="chatListBtn" title="Mensajes">💬</button>
                 <button class="icon-btn" id="logoutBtn" title="Salir">🚪</button>
             </div>
@@ -462,6 +510,12 @@
             <span class="filter-chip" data-gender="male">👨 Hombres</span>
         </div>
         <div id="dynamicContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
+        <div class="bottom-nav">
+            <div class="nav-item active" data-action="radar"><span class="nav-icon">📡</span><span>Radar</span></div>
+            <div class="nav-item" data-action="profile"><span class="nav-icon">👤</span><span>Perfil</span></div>
+            <div class="nav-item" data-action="chat"><span class="nav-icon">💬</span><span>Chats</span></div>
+            <div class="nav-item" data-action="settings"><span class="nav-icon">⚙️</span><span>Ajustes</span></div>
+        </div>
         <div id="limitWarning" style="display:none; background:var(--purple-dark); padding:0.5rem; text-align:center; font-size:0.8rem;">
             Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
         </div>
@@ -500,7 +554,6 @@
             <p id="profileEditError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
         </div>
     </div>
-
     <!-- MODAL PERFIL -->
     <div id="profileModal" class="modal"><div class="modal-content" id="modalContent"></div></div>
 
@@ -529,7 +582,7 @@
     <!-- TOAST -->
     <div id="toast" class="toast" style="display:none;"></div>
 
-    <!-- Firebase y Leaflet -->
+    <!-- Firebase SDK y Leaflet -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -538,11 +591,13 @@
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com",
             projectId: "kinetic-app-67ae5",
             storageBucket: "kinetic-app-67ae5.firebasestorage.app",
             messagingSenderId: "825570718975",
             appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
         };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
@@ -557,7 +612,7 @@
         const dailyLimit = 10;
         let filterGender = 'all';
 
-        // DOM
+        // DOM references
         const loginScreen = document.getElementById('loginScreen');
         const setupScreen = document.getElementById('setupScreen');
         const mainScreen = document.getElementById('mainScreen');
@@ -569,7 +624,7 @@
         const toast = document.getElementById('toast');
         const limitWarning = document.getElementById('limitWarning');
 
-        // ---------- AUTENTICACIÓN ----------
+        // ---------- AUTH ----------
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
@@ -589,7 +644,8 @@
             document.getElementById('authError').textContent = msg;
             setTimeout(() => document.getElementById('authError').textContent = '', 4000);
         }
-        / ---------- ESTADO DE AUTENTICACIÓN ----------
+
+        // ---------- AUTH STATE ----------
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -623,7 +679,7 @@
             document.getElementById('setupBio').value = userProfile.bio || '';
         }
 
-        // ---------- GUARDAR PERFIL (SETUP) ----------
+        // ---------- SETUP SAVE ----------
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('setupName').value.trim();
             const age = parseInt(document.getElementById('setupAge').value);
@@ -674,13 +730,12 @@
             );
         }
 
-        // ---------- FUNCIÓN loadNearbyUsers CON DIAGNÓSTICO ----------
+        // ---------- DIAGNÓSTICO loadNearbyUsers ----------
         async function loadNearbyUsers() {
             if (!currentUser || !userProfile) {
                 alert('⛔ No hay currentUser o userProfile');
                 return;
             }
-
             alert('📡 Iniciando carga de usuarios...');
             console.log('🔍 currentUser.uid:', currentUser.uid);
             console.log('🔍 userProfile:', JSON.stringify(userProfile, null, 2));
@@ -728,36 +783,28 @@
             console.log('👥 Usuarios antes de filtrar por interestedIn:', users.length);
             alert(`👥 Usuarios antes de filtros: ${users.length}`);
 
-            // Filtro por interestedIn (lo que busco)
             const interestedIn = userProfile.interestedIn;
             console.log('🎯 Mi interestedIn:', interestedIn);
             users = users.filter(u => {
                 const match = (interestedIn === 'female' && u.gender === 'female') ||
                               (interestedIn === 'male' && u.gender === 'male') ||
                               (interestedIn === 'all');
-                if (!match) {
-                    console.log(`❌ Descartado por interestedIn: ${u.name || u.uid} (gender: ${u.gender}, interestedIn: ${interestedIn})`);
-                }
+                if (!match) console.log(`❌ Descartado por interestedIn: ${u.name || u.uid} (gender: ${u.gender}, interestedIn: ${interestedIn})`);
                 return match;
             });
-
             alert(`👥 Después de interestedIn: ${users.length}`);
             console.log('👥 Usuarios tras filtro interestedIn:', users.length);
 
-            // Filtro adicional de género (chip UI)
             console.log('🎚️ filterGender (chip seleccionado):', filterGender);
             users = users.filter(u => {
                 const match = (filterGender === 'all' || u.gender === filterGender);
-                if (!match) {
-                    console.log(`❌ Descartado por filterGender: ${u.name || u.uid} (gender: ${u.gender}, filterGender: ${filterGender})`);
-                }
+                if (!match) console.log(`❌ Descartado por filterGender: ${u.name || u.uid} (gender: ${u.gender}, filterGender: ${filterGender})`);
                 return match;
             });
 
             alert(`👥 Después de filterGender: ${users.length}`);
             console.log('👥 Usuarios tras filterGender:', users.length);
 
-            // Ordenar por distancia
             users.sort((a, b) => {
                 if (a.distance === null && b.distance === null) return 0;
                 if (a.distance === null) return 1;
@@ -779,7 +826,7 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // ---------- VISTAS ----------
+        // ---------- VISTAS DINÁMICAS ----------
         function renderDynamicView() {
             const container = document.getElementById('dynamicContainer');
             container.innerHTML = '';
@@ -848,7 +895,8 @@
             document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
             renderDynamicView();
         });
-        / ---------- FILTROS DE GÉNERO ----------
+
+        // ---------- FILTROS DE GÉNERO ----------
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
             const chip = e.target;
@@ -858,7 +906,7 @@
             loadNearbyUsers();
         });
 
-        // ---------- PERFIL MODAL (con fotos) ----------
+        // ---------- PERFIL MODAL ----------
         async function openProfile(uid) {
             if (!userProfile.premium) {
                 const can = await incrementViewCount();
@@ -1025,7 +1073,6 @@
             document.getElementById('messageInput').value = '';
         }
 
-        // Lista de chats
         document.getElementById('chatListBtn').addEventListener('click', () => { showScreen('chatListScreen'); loadChatList(); });
         document.getElementById('backFromChatListBtn').addEventListener('click', () => showScreen('mainScreen'));
         document.getElementById('backFromChatBtn').addEventListener('click', () => { activeChatId = null; showScreen('chatListScreen'); loadChatList(); });
@@ -1059,6 +1106,22 @@
             container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
         }
         async function getUserProfile(uid) { const s = await get(ref(db, 'users/'+uid)); return s.exists() ? s.val() : null; }
+        // ---------- NAV INFERIOR ----------
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                const action = item.dataset.action;
+                if (action === 'radar') showScreen('mainScreen');
+                else if (action === 'profile') {
+                    document.getElementById('myProfileBtn').click();
+                } else if (action === 'chat') {
+                    document.getElementById('chatListBtn').click();
+                } else if (action === 'settings') {
+                    showToast('Ajustes (próximamente)');
+                }
+            });
+        });
 
         // ---------- UTILIDADES ----------
         function showScreen(id) {
@@ -1082,4 +1145,3 @@
 </body>
 </html>
 ```
-        
