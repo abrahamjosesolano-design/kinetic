@@ -456,7 +456,7 @@
 </head>
 <body>
 
-    <!-- LOGIN SCREEN -->
+    <!-- PANTALLAS (idénticas a las anteriores) -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
             <div class="logo">K</div>
@@ -471,7 +471,6 @@
         </div>
     </div>
 
-    <!-- SETUP PROFILE SCREEN -->
     <div id="setupScreen" class="screen">
         <div class="setup-container">
             <h2>Completa tu perfil</h2>
@@ -494,7 +493,6 @@
         </div>
     </div>
 
-    <!-- MAIN SCREEN -->
     <div id="mainScreen" class="screen">
         <div class="header">
             <h2>⚡ Kinetic</h2>
@@ -520,8 +518,6 @@
             Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
         </div>
     </div>
-
-    <!-- MI PERFIL SCREEN -->
     <div id="myProfileScreen" class="screen">
         <div class="header">
             <button class="icon-btn" id="backFromProfileBtn">←</button>
@@ -554,10 +550,9 @@
             <p id="profileEditError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
         </div>
     </div>
-    <!-- MODAL PERFIL -->
+
     <div id="profileModal" class="modal"><div class="modal-content" id="modalContent"></div></div>
 
-    <!-- CHAT LIST SCREEN -->
     <div id="chatListScreen" class="screen">
         <div class="header">
             <button class="icon-btn" id="backFromChatListBtn">←</button>
@@ -566,7 +561,6 @@
         <div class="chat-list" id="chatListContainer"></div>
     </div>
 
-    <!-- CHAT SCREEN -->
     <div id="chatScreen" class="screen">
         <div class="header">
             <button class="icon-btn" id="backFromChatBtn">←</button>
@@ -579,15 +573,16 @@
         </div>
     </div>
 
-    <!-- TOAST -->
     <div id="toast" class="toast" style="display:none;"></div>
 
-    <!-- Firebase SDK y Leaflet -->
+    <!-- ================== SCRIPTS ================== -->
     <script type="module">
+        // ---------- IMPORTACIONES CORRECTAS ----------
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
+        // ---------- CONFIGURACIÓN DE FIREBASE ----------
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -602,6 +597,7 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // ---------- VARIABLES GLOBALES ----------
         let currentUser = null;
         let userProfile = null;
         let nearbyUsers = [];
@@ -612,7 +608,7 @@
         const dailyLimit = 10;
         let filterGender = 'all';
 
-        // DOM references
+        // DOM
         const loginScreen = document.getElementById('loginScreen');
         const setupScreen = document.getElementById('setupScreen');
         const mainScreen = document.getElementById('mainScreen');
@@ -624,7 +620,7 @@
         const toast = document.getElementById('toast');
         const limitWarning = document.getElementById('limitWarning');
 
-        // ---------- AUTH ----------
+        // ---------- AUTENTICACIÓN ----------
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
@@ -645,7 +641,7 @@
             setTimeout(() => document.getElementById('authError').textContent = '', 4000);
         }
 
-        // ---------- AUTH STATE ----------
+        // ---------- ESTADO DE AUTENTICACIÓN ----------
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -657,7 +653,7 @@
                         showScreen('setupScreen');
                         prefillSetupForm();
                     } else {
-                        update(ref(db, 'users/' + user.uid), { online: true });
+                        await update(ref(db, 'users/' + user.uid), { online: true });
                         initApp();
                     }
                 } else {
@@ -679,7 +675,7 @@
             document.getElementById('setupBio').value = userProfile.bio || '';
         }
 
-        // ---------- SETUP SAVE ----------
+        // ---------- GUARDAR PERFIL (SETUP) ----------
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('setupName').value.trim();
             const age = parseInt(document.getElementById('setupAge').value);
@@ -730,7 +726,7 @@
             );
         }
 
-        // ---------- DIAGNÓSTICO loadNearbyUsers ----------
+        // ---------- DIAGNÓSTICO loadNearbyUsers (CORREGIDO) ----------
         async function loadNearbyUsers() {
             if (!currentUser || !userProfile) {
                 alert('⛔ No hay currentUser o userProfile');
@@ -740,82 +736,88 @@
             console.log('🔍 currentUser.uid:', currentUser.uid);
             console.log('🔍 userProfile:', JSON.stringify(userProfile, null, 2));
 
-            const snap = await get(ref(db, 'users'));
-            if (!snap.exists()) {
-                alert('❌ No hay datos en /users');
-                nearbyUsers = [];
-                renderDynamicView();
-                return;
-            }
+            try {
+                const snap = await get(ref(db, 'users'));
+                if (!snap.exists()) {
+                    alert('❌ No hay datos en /users');
+                    nearbyUsers = [];
+                    renderDynamicView();
+                    return;
+                }
 
-            const all = snap.val();
-            const totalEnDB = Object.keys(all).length;
-            alert(`📊 Usuarios totales en BD: ${totalEnDB}`);
-            console.log('📋 Datos crudos de /users:', all);
+                const all = snap.val();
+                const totalEnDB = Object.keys(all).length;
+                alert(`📊 Usuarios totales en BD: ${totalEnDB}`);
+                console.log('📋 Datos crudos de /users:', all);
 
-            const me = currentUser.uid;
-            const myLat = userProfile.lat;
-            const myLng = userProfile.lng;
-            console.log('📍 Mi ubicación:', { myLat, myLng });
+                const me = currentUser.uid;
+                const myLat = userProfile.lat;
+                const myLng = userProfile.lng;
+                console.log('📍 Mi ubicación:', { myLat, myLng });
 
-            let users = Object.entries(all)
-                .filter(([uid, p]) => {
-                    const isMe = uid === me;
-                    if (isMe) console.log(`🚫 Descartado (soy yo): ${uid}`);
-                    return !isMe;
-                })
-                .map(([uid, p]) => {
-                    let distance = null;
-                    if (myLat != null && myLng != null && p.lat != null && p.lng != null) {
-                        try {
-                            distance = calcDistance(myLat, myLng, p.lat, p.lng);
-                            console.log(`📏 Distancia a ${p.name || uid}: ${distance.toFixed(2)} km`);
-                        } catch (e) {
-                            alert(`🧨 Error calculando distancia con ${p.name || uid}: ${e.message}`);
-                            console.error('Error en Haversine:', e);
+                let users = Object.entries(all)
+                    .filter(([uid, p]) => {
+                        const isMe = uid === me;
+                        if (isMe) console.log(`🚫 Descartado (soy yo): ${uid}`);
+                        return !isMe;
+                    })
+                    .map(([uid, p]) => {
+                        let distance = null;
+                        if (myLat != null && myLng != null && p.lat != null && p.lng != null) {
+                            try {
+                                distance = calcDistance(myLat, myLng, p.lat, p.lng);
+                                console.log(`📏 Distancia a ${p.name || uid}: ${distance.toFixed(2)} km`);
+                            } catch (e) {
+                                alert(`🧨 Error calculando distancia con ${p.name || uid}: ${e.message}`);
+                                console.error('Error en Haversine:', e);
+                            }
+                        } else {
+                            console.log(`🌍 Sin coordenadas para ${p.name || uid} (o para mí)`);
                         }
-                    } else {
-                        console.log(`🌍 Sin coordenadas para ${p.name || uid} (o para mí)`);
-                    }
-                    return { uid, ...p, distance };
+                        return { uid, ...p, distance };
+                    });
+
+                console.log('👥 Usuarios antes de filtrar por interestedIn:', users.length);
+                alert(`👥 Usuarios antes de filtros: ${users.length}`);
+
+                const interestedIn = userProfile.interestedIn;
+                console.log('🎯 Mi interestedIn:', interestedIn);
+                users = users.filter(u => {
+                    const match = (interestedIn === 'female' && u.gender === 'female') ||
+                                  (interestedIn === 'male' && u.gender === 'male') ||
+                                  (interestedIn === 'all');
+                    if (!match) console.log(`❌ Descartado por interestedIn: ${u.name || u.uid} (gender: ${u.gender}, interestedIn: ${interestedIn})`);
+                    return match;
                 });
 
-            console.log('👥 Usuarios antes de filtrar por interestedIn:', users.length);
-            alert(`👥 Usuarios antes de filtros: ${users.length}`);
+                alert(`👥 Después de interestedIn: ${users.length}`);
+                console.log('👥 Usuarios tras filtro interestedIn:', users.length);
 
-            const interestedIn = userProfile.interestedIn;
-            console.log('🎯 Mi interestedIn:', interestedIn);
-            users = users.filter(u => {
-                const match = (interestedIn === 'female' && u.gender === 'female') ||
-                              (interestedIn === 'male' && u.gender === 'male') ||
-                              (interestedIn === 'all');
-                if (!match) console.log(`❌ Descartado por interestedIn: ${u.name || u.uid} (gender: ${u.gender}, interestedIn: ${interestedIn})`);
-                return match;
-            });
-            alert(`👥 Después de interestedIn: ${users.length}`);
-            console.log('👥 Usuarios tras filtro interestedIn:', users.length);
+                console.log('🎚️ filterGender (chip seleccionado):', filterGender);
+                users = users.filter(u => {
+                    const match = (filterGender === 'all' || u.gender === filterGender);
+                    if (!match) console.log(`❌ Descartado por filterGender: ${u.name || u.uid} (gender: ${u.gender}, filterGender: ${filterGender})`);
+                    return match;
+                });
 
-            console.log('🎚️ filterGender (chip seleccionado):', filterGender);
-            users = users.filter(u => {
-                const match = (filterGender === 'all' || u.gender === filterGender);
-                if (!match) console.log(`❌ Descartado por filterGender: ${u.name || u.uid} (gender: ${u.gender}, filterGender: ${filterGender})`);
-                return match;
-            });
+                alert(`👥 Después de filterGender: ${users.length}`);
+                console.log('👥 Usuarios tras filterGender:', users.length);
 
-            alert(`👥 Después de filterGender: ${users.length}`);
-            console.log('👥 Usuarios tras filterGender:', users.length);
+                users.sort((a, b) => {
+                    if (a.distance === null && b.distance === null) return 0;
+                    if (a.distance === null) return 1;
+                    if (b.distance === null) return -1;
+                    return a.distance - b.distance;
+                });
 
-            users.sort((a, b) => {
-                if (a.distance === null && b.distance === null) return 0;
-                if (a.distance === null) return 1;
-                if (b.distance === null) return -1;
-                return a.distance - b.distance;
-            });
-
-            nearbyUsers = users;
-            console.log('✅ nearbyUsers final:', nearbyUsers);
-            alert(`✅ Carga completada. Usuarios en radar: ${nearbyUsers.length}`);
-            renderDynamicView();
+                nearbyUsers = users;
+                console.log('✅ nearbyUsers final:', nearbyUsers);
+                alert(`✅ Carga completada. Usuarios en radar: ${nearbyUsers.length}`);
+                renderDynamicView();
+            } catch (error) {
+                alert('💥 Error en loadNearbyUsers: ' + error.message);
+                console.error(error);
+            }
         }
 
         function calcDistance(lat1, lon1, lat2, lon2) {
@@ -859,7 +861,6 @@
             }).join('');
             container.querySelectorAll('.profile-card').forEach(c => c.addEventListener('click', () => openProfile(c.dataset.uid)));
         }
-
         function renderMapView(container) {
             container.innerHTML = '<div id="map"></div>';
             if (!map) {
@@ -1106,6 +1107,7 @@
             container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
         }
         async function getUserProfile(uid) { const s = await get(ref(db, 'users/'+uid)); return s.exists() ? s.val() : null; }
+
         // ---------- NAV INFERIOR ----------
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -1114,16 +1116,15 @@
                 const action = item.dataset.action;
                 if (action === 'radar') showScreen('mainScreen');
                 else if (action === 'profile') {
-                    document.getElementById('myProfileBtn').click();
+                    if (document.getElementById('myProfileBtn')) document.getElementById('myProfileBtn').click();
                 } else if (action === 'chat') {
-                    document.getElementById('chatListBtn').click();
+                    if (document.getElementById('chatListBtn')) document.getElementById('chatListBtn').click();
                 } else if (action === 'settings') {
                     showToast('Ajustes (próximamente)');
                 }
             });
         });
-
-        // ---------- UTILIDADES ----------
+       // ---------- UTILIDADES ----------
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -1144,4 +1145,4 @@
     </script>
 </body>
 </html>
-```
+``` 
