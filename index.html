@@ -356,7 +356,6 @@
             font-size: 0.65rem;
             color: var(--text-secondary);
         }
-
         /* ---------- MAPA ---------- */
         #mapContainer { flex: 1; width: 100%; position: relative; }
         #map { width: 100%; height: 100%; z-index: 1; }
@@ -451,6 +450,7 @@
             transition: background 0.3s, transform 0.2s;
         }
         .btn-message:hover { background: rgba(123,44,191,0.3); }
+
         /* ---------- MI PERFIL ---------- */
         .profile-screen-container {
             padding: 1.5rem;
@@ -680,7 +680,7 @@
             <button class="icon-btn back-from-settings-btn">←</button>
             <h2>Ajustes</h2><div></div>
         </div>
-        <div class="settings-container">
+        <div class="settings-container" style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
             <div class="input-group">
                 <label>Mostrar personas de género</label>
                 <select id="settingsGenderFilter">
@@ -704,13 +704,14 @@
     <!-- TOAST -->
     <div id="toast" class="toast" style="display:none;"></div>
 
-    <!-- ================== SCRIPTS ================== -->
-    <script type="module">
+    <!-- ================== SCRIPT ================== -->
+    <!-- Continuará en la segunda parte... -->
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-        // Configuración obligatoria con databaseURL explícita
+        // Configuración OBLIGATORIA con databaseURL
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -725,7 +726,7 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Variables globales
+        // ========== VARIABLES GLOBALES ==========
         let currentUser = null;
         let userProfile = null;
         let nearbyUsers = [];
@@ -736,11 +737,10 @@
         const dailyLimit = 10;
         let filterGender = 'all';
         let filterModoExpress = false;
-        // Notificaciones de chat
-        let unreadChats = new Map(); // Map<partnerId, number>
+        let unreadChats = new Map();
         let chatListenersActive = false;
 
-        // DOM
+        // ========== REFERENCIAS DOM ==========
         const loginScreen = document.getElementById('loginScreen');
         const setupScreen = document.getElementById('setupScreen');
         const mainScreen = document.getElementById('mainScreen');
@@ -753,7 +753,8 @@
         const toast = document.getElementById('toast');
         const limitWarning = document.getElementById('limitWarning');
         const unreadBadge = document.getElementById('unreadBadge');
-    // ---------- AUTENTICACIÓN ----------
+
+        // ========== AUTENTICACIÓN ==========
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
@@ -774,34 +775,39 @@
             setTimeout(() => document.getElementById('authError').textContent = '', 4000);
         }
 
-        // ---------- ESTADO DE AUTENTICACIÓN ----------
+        // ========== ESTADO DE AUTENTICACIÓN ==========
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                const snap = await get(ref(db, 'users/' + user.uid));
-                if (snap.exists()) {
-                    userProfile = snap.val();
-                    userProfile.uid = user.uid;
-                    if (!userProfile.name || !userProfile.age || !userProfile.gender || !userProfile.interestedIn || userProfile.bio === undefined) {
-                        showScreen('setupScreen');
-                        prefillSetupForm();
+                try {
+                    const snap = await get(ref(db, 'users/' + user.uid));
+                    if (snap.exists()) {
+                        userProfile = snap.val();
+                        userProfile.uid = user.uid;
+                        if (!userProfile.name || !userProfile.age || !userProfile.gender || !userProfile.interestedIn || userProfile.bio === undefined) {
+                            showScreen('setupScreen');
+                            prefillSetupForm();
+                        } else {
+                            const userRef = ref(db, 'users/' + user.uid);
+                            await update(userRef, { online: true });
+                            onDisconnect(userRef).update({ online: false });
+                            initApp();
+                        }
                     } else {
-                        const userRef = ref(db, 'users/' + user.uid);
-                        await update(userRef, { online: true });
-                        onDisconnect(userRef).update({ online: false });
-                        initApp();
+                        userProfile = { uid: user.uid, email: user.email };
+                        showScreen('setupScreen');
                     }
-                } else {
-                    userProfile = { uid: user.uid, email: user.email };
-                    showScreen('setupScreen');
+                } catch (error) {
+                    console.error('Error al obtener perfil:', error);
+                    showToast('Error de conexión. Recarga la página.');
                 }
             } else {
                 if (currentUser) {
-                    await update(ref(db, 'users/' + currentUser.uid), { online: false });
+                    try { await update(ref(db, 'users/' + currentUser.uid), { online: false }); } catch(e) {}
                 }
                 currentUser = null; userProfile = null; nearbyUsers = [];
                 showScreen('loginScreen');
-                if (map) map.remove(); map = null;
+                if (map) { map.remove(); map = null; }
             }
         });
 
@@ -813,7 +819,7 @@
             document.getElementById('setupBio').value = userProfile.bio || '';
         }
 
-        // ---------- GUARDAR PERFIL (SETUP) ----------
+        // ========== GUARDAR PERFIL (SETUP) ==========
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('setupName').value.trim();
             const age = parseInt(document.getElementById('setupAge').value);
@@ -839,13 +845,18 @@
                 dailyViews: 0, lastResetDate: getTodayString(),
                 lat, lng, online: true
             };
-            await set(ref(db, 'users/' + currentUser.uid), data);
-            userProfile = { uid: currentUser.uid, ...data };
-            const userRef = ref(db, 'users/' + currentUser.uid);
-            await update(userRef, { online: true });
-            onDisconnect(userRef).update({ online: false });
-            showScreen('mainScreen');
-            initApp();
+            try {
+                await set(ref(db, 'users/' + currentUser.uid), data);
+                userProfile = { uid: currentUser.uid, ...data };
+                const userRef = ref(db, 'users/' + currentUser.uid);
+                await update(userRef, { online: true });
+                onDisconnect(userRef).update({ online: false });
+                showScreen('mainScreen');
+                initApp();
+            } catch (e) {
+                console.error(e);
+                showToast('Error al guardar perfil');
+            }
         });
 
         function initApp() {
@@ -862,7 +873,7 @@
             navigator.geolocation.getCurrentPosition(
                 async (pos) => {
                     const { latitude: lat, longitude: lng } = pos.coords;
-                    await update(ref(db, 'users/' + currentUser.uid), { lat, lng });
+                    try { await update(ref(db, 'users/' + currentUser.uid), { lat, lng }); } catch(e) {}
                     loadNearbyUsers();
                 },
                 () => showToast('Activa la ubicación para ver personas cerca'),
@@ -870,29 +881,20 @@
             );
         }
 
-        // ---------- FUNCIÓN loadNearbyUsers (visibilidad mutua corregida) ----------
+        // ========== RADAR ==========
         async function loadNearbyUsers() {
-            if (!currentUser || !userProfile) {
-                console.warn('⛔ No hay currentUser o userProfile');
-                return;
-            }
-            console.log('📡 Iniciando carga de usuarios...');
-
+            if (!currentUser || !userProfile) return;
             try {
                 const snap = await get(ref(db, 'users'));
                 if (!snap.exists()) {
-                    console.log('❌ No hay datos en /users');
                     nearbyUsers = [];
                     renderDynamicView();
                     return;
                 }
-
                 const all = snap.val();
                 const me = currentUser.uid;
                 const myLat = userProfile.lat;
                 const myLng = userProfile.lng;
-                console.log('📍 Mi ubicación:', { myLat, myLng });
-
                 let users = Object.entries(all)
                     .filter(([uid]) => uid !== me)
                     .map(([uid, p]) => {
@@ -903,24 +905,17 @@
                         return { uid, ...p, distance };
                     });
 
-                // Filtro recíproco: yo veo a quien me interesa y que también esté interesado en mí
                 const myGender = userProfile.gender;
                 const myInterestedIn = userProfile.interestedIn;
                 users = users.filter(u => {
                     const otherGender = u.gender;
                     const otherInterestedIn = u.interestedIn || 'all';
-                    const iLikeThem = (myInterestedIn === 'all' || myInterestedIn === otherGender);
-                    const theyLikeMe = (otherInterestedIn === 'all' || otherInterestedIn === myGender);
-                    return iLikeThem && theyLikeMe;
+                    return (myInterestedIn === 'all' || myInterestedIn === otherGender) &&
+                           (otherInterestedIn === 'all' || otherInterestedIn === myGender);
                 });
 
-                if (filterGender !== 'all') {
-                    users = users.filter(u => u.gender === filterGender);
-                }
-
-                if (filterModoExpress) {
-                    users = users.filter(u => u.modoExpress === true);
-                }
+                if (filterGender !== 'all') users = users.filter(u => u.gender === filterGender);
+                if (filterModoExpress) users = users.filter(u => u.modoExpress === true);
 
                 users.sort((a, b) => {
                     if (a.distance === null && b.distance === null) return 0;
@@ -928,12 +923,11 @@
                     if (b.distance === null) return -1;
                     return a.distance - b.distance;
                 });
-
                 nearbyUsers = users;
-                console.log('✅ nearbyUsers final:', nearbyUsers.length);
                 renderDynamicView();
-            } catch (error) {
-                console.error('💥 Error en loadNearbyUsers:', error);
+            } catch (e) {
+                console.error('Error en radar:', e);
+                showToast('Error al cargar el radar');
             }
         }
 
@@ -950,12 +944,11 @@
             if (km < 1) {
                 const metros = Math.round(km * 1000);
                 return '📍 ' + metros + ' metros';
-            } else {
-                return '📍 ' + km.toFixed(1) + ' km';
             }
+            return '📍 ' + km.toFixed(1) + ' km';
         }
 
-        // ---------- VISTAS DINÁMICAS ----------
+        // ========== VISTAS DINÁMICAS ==========
         function renderDynamicView() {
             const container = document.getElementById('dynamicContainer');
             container.innerHTML = '';
@@ -978,10 +971,7 @@
                 const onlineClass = u.online ? 'online' : 'offline';
                 const distText = formatDistance(u.distance);
                 return `<div class="profile-card" style="animation-delay:${i*0.04}s;" data-uid="${u.uid}">
-                    <div class="profile-img" style="${bgStyle} ${gradient}">
-                        ${initials}
-                        <span class="online-indicator ${onlineClass}"></span>
-                    </div>
+                    <div class="profile-img" style="${bgStyle} ${gradient}">${initials}<span class="online-indicator ${onlineClass}"></span></div>
                     <div class="profile-info">
                         <div class="profile-name">${u.name}, ${u.age}</div>
                         <div class="profile-distance">${distText}</div>
@@ -1026,29 +1016,25 @@
             document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
             renderDynamicView();
         });
-        // ---------- FILTROS (Género + Diversión Rápida) ----------
+    // ========== FILTROS ==========
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
             const chip = e.target;
             const gender = chip.dataset.gender;
             const filter = chip.dataset.filter;
-
             if (gender) {
                 document.querySelectorAll('#filtersContainer .filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 filterGender = gender;
             } else if (filter === 'modoExpress') {
                 filterModoExpress = !filterModoExpress;
-                if (filterModoExpress) {
-                    chip.classList.add('active');
-                } else {
-                    chip.classList.remove('active');
-                }
+                if (filterModoExpress) chip.classList.add('active');
+                else chip.classList.remove('active');
             }
             loadNearbyUsers();
         });
 
-        // ---------- PERFIL MODAL ----------
+        // ========== PERFIL MODAL ==========
         async function openProfile(uid) {
             if (!userProfile.premium) {
                 const can = await incrementViewCount();
@@ -1089,39 +1075,43 @@
         window.closeModal = () => profileModal.classList.remove('active');
         profileModal.addEventListener('click', e => { if (e.target === profileModal) closeModal(); });
 
-        // ---------- LÍMITE DIARIO ----------
+        // ========== LÍMITE DIARIO ==========
         function getTodayString() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         }
         async function incrementViewCount() {
-            const uRef = ref(db, 'users/' + currentUser.uid);
-            const snap = await get(uRef);
-            if (!snap.exists()) return false;
-            const data = snap.val();
-            const today = getTodayString();
-            let views = data.dailyViews || 0;
-            if (data.lastResetDate !== today) {
-                views = 0;
-                await update(uRef, { dailyViews: 0, lastResetDate: today });
-            }
-            if (views >= dailyLimit) return false;
-            await update(uRef, { dailyViews: views + 1 });
-            userProfile.dailyViews = views + 1;
-            return true;
+            try {
+                const uRef = ref(db, 'users/' + currentUser.uid);
+                const snap = await get(uRef);
+                if (!snap.exists()) return false;
+                const data = snap.val();
+                const today = getTodayString();
+                let views = data.dailyViews || 0;
+                if (data.lastResetDate !== today) {
+                    views = 0;
+                    await update(uRef, { dailyViews: 0, lastResetDate: today });
+                }
+                if (views >= dailyLimit) return false;
+                await update(uRef, { dailyViews: views + 1 });
+                userProfile.dailyViews = views + 1;
+                return true;
+            } catch (e) { return false; }
         }
         function checkPremiumStatus() {
             limitWarning.style.display = (userProfile && !userProfile.premium && userProfile.dailyViews >= dailyLimit) ? 'block' : 'none';
         }
         document.getElementById('upgradeBtn').addEventListener('click', async () => {
-            await update(ref(db, 'users/' + currentUser.uid), { premium: true });
-            userProfile.premium = true;
-            limitWarning.style.display = 'none';
-            showToast('¡Ahora eres Premium!');
-            updateSettingsUI();
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { premium: true });
+                userProfile.premium = true;
+                limitWarning.style.display = 'none';
+                showToast('¡Ahora eres Premium!');
+                updateSettingsUI();
+            } catch (e) {}
         });
 
-        // ---------- MI PERFIL (edición) ----------
+        // ========== MI PERFIL (edición) ==========
         function openMyProfile() {
             if (!userProfile) return;
             document.getElementById('editName').value = userProfile.name || '';
@@ -1138,9 +1128,7 @@
             updateProfilePicPreview();
             showScreen('myProfileScreen');
         }
-
         document.querySelector('.back-from-profile-btn').addEventListener('click', () => showScreen('mainScreen'));
-
         document.getElementById('editProfilePic').addEventListener('input', updateProfilePicPreview);
         function updateProfilePicPreview() {
             const url = document.getElementById('editProfilePic').value.trim();
@@ -1155,7 +1143,6 @@
                 preview.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
             }
         }
-
         document.getElementById('saveMyProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('editName').value.trim();
             const age = parseInt(document.getElementById('editAge').value);
@@ -1169,38 +1156,34 @@
                 document.getElementById('editAlbum2').value.trim(),
                 document.getElementById('editAlbum3').value.trim()
             ].filter(url => url !== '');
-
             if (!name || !age || age < 18) return document.getElementById('profileEditError').textContent = 'Nombre y edad válidos.';
             if (!bio) return document.getElementById('profileEditError').textContent = 'Escribe una biografía.';
-
-            const updates = { name, age, gender, interestedIn, bio, profilePic, modoExpress, album };
-            await update(ref(db, 'users/' + currentUser.uid), updates);
-            Object.assign(userProfile, updates);
-            document.getElementById('profileEditError').textContent = '';
-            showToast('Perfil actualizado');
-            showScreen('mainScreen');
-            loadNearbyUsers();
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { name, age, gender, interestedIn, bio, profilePic, modoExpress, album });
+                Object.assign(userProfile, { name, age, gender, interestedIn, bio, profilePic, modoExpress, album });
+                document.getElementById('profileEditError').textContent = '';
+                showToast('Perfil actualizado');
+                showScreen('mainScreen');
+                loadNearbyUsers();
+            } catch (e) { showToast('Error al actualizar'); }
         });
 
-        // ---------- CHAT ----------
+        // ========== CHAT ==========
         function openChat(uid) {
             activeChatId = uid;
-            const partner = nearbyUsers.find(u => u.uid === uid) || userProfile;
+            const partner = nearbyUsers.find(u => u.uid === uid) || userProfile || {};
             document.getElementById('chatPartnerName').textContent = partner.name || 'Chat';
             showScreen('chatScreen');
             loadMessages();
-            // Marcar como leído
             if (unreadChats.has(uid)) {
                 unreadChats.delete(uid);
                 updateUnreadBadge();
             }
         }
-
         function loadMessages() {
             if (!activeChatId) return;
             const chatId = getChatId(currentUser.uid, activeChatId);
-            const messagesRef = ref(db, 'chats/' + chatId + '/messages');
-            onValue(messagesRef, (snap) => {
+            onValue(ref(db, 'chats/' + chatId + '/messages'), (snap) => {
                 const container = document.getElementById('chatMessages');
                 container.innerHTML = '';
                 if (snap.exists()) {
@@ -1215,18 +1198,19 @@
                 }
             });
         }
-
         function getChatId(uid1, uid2) { return uid1 < uid2 ? uid1+'_'+uid2 : uid2+'_'+uid1; }
         document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
         document.getElementById('messageInput').addEventListener('keypress', e => { if (e.key==='Enter') sendMessage(); });
         async function sendMessage() {
             const text = document.getElementById('messageInput').value.trim();
             if (!text || !activeChatId) return;
-            const chatId = getChatId(currentUser.uid, activeChatId);
-            await push(ref(db, 'chats/' + chatId + '/messages'), {
-                sender: currentUser.uid, text, timestamp: serverTimestamp()
-            });
-            document.getElementById('messageInput').value = '';
+            try {
+                const chatId = getChatId(currentUser.uid, activeChatId);
+                await push(ref(db, 'chats/' + chatId + '/messages'), {
+                    sender: currentUser.uid, text, timestamp: serverTimestamp()
+                });
+                document.getElementById('messageInput').value = '';
+            } catch (e) {}
         }
 
         document.getElementById('chatListBtn').addEventListener('click', () => { showScreen('chatListScreen'); loadChatList(); });
@@ -1249,12 +1233,13 @@
                     const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
                     const messagesObj = chats[chatId].messages || {};
                     const msgs = Object.values(messagesObj).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    const lastMsg = msgs.length > 0 ? msgs[0].text : '';
+                    const lastMsg = msgs.length > 0 ? msgs[0] : null;
                     const profile = await getUserProfile(partnerId);
                     items.push({
                         partnerId,
                         name: profile?.name || 'Usuario desconocido',
-                        lastMsg,
+                        lastMsgText: lastMsg ? lastMsg.text : '',
+                        lastMsgTimestamp: lastMsg ? lastMsg.timestamp : 0,
                         online: profile?.online || false,
                         profilePic: profile?.profilePic || '',
                         initials: getInitials(profile?.name || '?'),
@@ -1262,24 +1247,18 @@
                         hasUnread: unreadChats.has(partnerId)
                     });
                 }
-                // Ordenar por último mensaje (reciente primero)
-                items.sort((a, b) => {
-                    const aTime = a.lastMsg ? a.lastMsg.timestamp : 0;
-                    const bTime = b.lastMsg ? b.lastMsg.timestamp : 0;
-                    return bTime - aTime;
-                });
+                items.sort((a, b) => b.lastMsgTimestamp - a.lastMsgTimestamp);
                 container.innerHTML = items.length ? items.map(item => `
                     <div class="chat-item" data-uid="${item.partnerId}">
                         <div class="chat-avatar" style="background-image:url(${item.profilePic}); ${!item.profilePic ? `background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});` : ''}">${!item.profilePic ? item.initials : ''}</div>
                         <div class="chat-info">
                             <div class="chat-name">${item.name} ${item.online ? '<span style="color:var(--online)">●</span>' : '<span style="color:var(--offline)">●</span>'}</div>
-                            <div class="chat-preview">${item.lastMsg ? item.lastMsg.substring(0,30) : 'Sin mensajes'}</div>
+                            <div class="chat-preview">${item.lastMsgText ? item.lastMsgText.substring(0,30) : 'Sin mensajes'}</div>
                         </div>
                         ${item.hasUnread ? '<span class="nav-badge" style="position:relative;top:auto;right:auto;display:inline-flex;">!</span>' : ''}
                     </div>
                 `).join('') : '<div class="empty-state" style="padding:2rem;text-align:center;color:var(--text-secondary);">No tienes conversaciones activas</div>';
                 container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
-                // Limpiar notificaciones al abrir la lista
                 unreadChats.clear();
                 updateUnreadBadge();
             } catch (e) {
@@ -1292,50 +1271,44 @@
             try {
                 const s = await get(ref(db, 'users/'+uid));
                 return s.exists() ? s.val() : null;
-            } catch (e) {
-                return null;
-            }
+            } catch (e) { return null; }
         }
 
-        // ---------- NOTIFICACIONES DE CHAT EN TIEMPO REAL ----------
+        // ========== NOTIFICACIONES DE CHAT ==========
         function setupChatNotifications() {
             if (chatListenersActive || !currentUser) return;
             chatListenersActive = true;
-            const chatsRef = ref(db, 'chats');
-            onValue(chatsRef, (snap) => {
-                if (!snap.exists()) return;
-                const chats = snap.val();
-                for (const chatId in chats) {
-                    if (!chatId.includes(currentUser.uid)) continue;
-                    const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
-                    const messages = chats[chatId].messages;
-                    if (!messages) continue;
-                    const msgs = Object.values(messages).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    if (msgs.length === 0) continue;
-                    const lastMsg = msgs[0];
-                    // Si el último mensaje no es mío y el chat no está abierto actualmente
-                    if (lastMsg.sender !== currentUser.uid) {
-                        if (!(activeChatId === partnerId && document.getElementById('chatScreen').classList.contains('active'))) {
-                            // Incrementar contador de no leídos
-                            const currentCount = unreadChats.get(partnerId) || 0;
-                            unreadChats.set(partnerId, currentCount + 1);
-                            // Mostrar toast solo si no está ya visible la conversación
-                            getUserProfile(partnerId).then(profile => {
-                                const senderName = profile?.name || 'Alguien';
-                                showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
-                            });
-                            updateUnreadBadge();
+            onValue(ref(db, 'chats'), (snap) => {
+                try {
+                    if (!snap.exists()) return;
+                    const chats = snap.val();
+                    for (const chatId in chats) {
+                        if (!chatId.includes(currentUser.uid)) continue;
+                        const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
+                        const messages = chats[chatId].messages;
+                        if (!messages) continue;
+                        const msgs = Object.values(messages).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+                        if (msgs.length === 0) continue;
+                        const lastMsg = msgs[0];
+                        if (lastMsg.sender !== currentUser.uid) {
+                            if (!(activeChatId === partnerId && document.getElementById('chatScreen').classList.contains('active'))) {
+                                const currentCount = unreadChats.get(partnerId) || 0;
+                                unreadChats.set(partnerId, currentCount + 1);
+                                getUserProfile(partnerId).then(profile => {
+                                    const senderName = profile?.name || 'Alguien';
+                                    showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
+                                    });
+                                updateUnreadBadge();
+                            }
                         }
                     }
-                }
+                } catch (e) {}
             });
         }
 
         function updateUnreadBadge() {
             let total = 0;
-            for (const count of unreadChats.values()) {
-                total += count;
-            }
+            for (const count of unreadChats.values()) total += count;
             if (total > 0) {
                 unreadBadge.textContent = total > 99 ? '99+' : total;
                 unreadBadge.style.display = 'flex';
@@ -1344,13 +1317,12 @@
             }
         }
 
-        // ---------- PANTALLA AJUSTES ----------
+        // ========== AJUSTES ==========
         function updateSettingsUI() {
             if (!userProfile) return;
             document.getElementById('premiumStatusBadge').textContent = userProfile.premium ? '✅ Premium' : '🔓 Gratuito';
             document.getElementById('settingsGenderFilter').value = filterGender;
         }
-
         document.getElementById('settingsGenderFilter').addEventListener('change', (e) => {
             filterGender = e.target.value;
             document.querySelectorAll('#filtersContainer .filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
@@ -1359,23 +1331,20 @@
             loadNearbyUsers();
             showToast('Filtro aplicado');
         });
-
         document.getElementById('becomePremiumBtn').addEventListener('click', async () => {
             if (!userProfile) return;
-            await update(ref(db, 'users/' + currentUser.uid), { premium: true });
-            userProfile.premium = true;
-            limitWarning.style.display = 'none';
-            updateSettingsUI();
-            showToast('¡Ahora eres Premium!');
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { premium: true });
+                userProfile.premium = true;
+                limitWarning.style.display = 'none';
+                updateSettingsUI();
+                showToast('¡Ahora eres Premium!');
+            } catch (e) {}
         });
-
-        document.getElementById('settingsLogoutBtn').addEventListener('click', () => {
-            signOut(auth);
-        });
-
+        document.getElementById('settingsLogoutBtn').addEventListener('click', () => signOut(auth));
         document.querySelector('.back-from-settings-btn').addEventListener('click', () => showScreen('mainScreen'));
 
-        // ---------- NAVEGACIÓN INFERIOR ----------
+        // ========== NAVEGACIÓN INFERIOR ==========
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1388,7 +1357,7 @@
             });
         });
 
-        / ---------- UTILIDADES ----------
+        // ========== UTILIDADES ==========
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
