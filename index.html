@@ -253,6 +253,7 @@
             justify-content: center;
             padding: 0 4px;
         }
+
         /* ---------- FILTROS ---------- */
         .filters {
             display: flex;
@@ -359,7 +360,6 @@
         /* ---------- MAPA ---------- */
         #mapContainer { flex: 1; width: 100%; position: relative; }
         #map { width: 100%; height: 100%; z-index: 1; }
-
         /* ---------- MODAL ---------- */
         .modal {
             position: fixed;
@@ -543,6 +543,7 @@
     </style>
 </head>
 <body>
+
     <!-- LOGIN -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
@@ -649,7 +650,6 @@
             <p id="profileEditError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
         </div>
     </div>
-
     <!-- CHAT LIST -->
     <div id="chatListScreen" class="screen">
         <div class="header">
@@ -701,13 +701,17 @@
 
     <!-- TOAST -->
     <div id="toast" class="toast" style="display:none;"></div>
+
     <!-- ================== SCRIPTS ================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-        // Configuración OBLIGATORIA – NO MODIFICAR
+        // ⏱️ Tiempo exacto en que se abrió la app (para ignorar mensajes viejos)
+        const appStartTime = Date.now();
+
+        // ⚙️ Configuración OBLIGATORIA
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -722,7 +726,6 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // ========== VARIABLES GLOBALES ==========
         let currentUser = null;
         let userProfile = null;
         let nearbyUsers = [];
@@ -737,15 +740,13 @@
         let unreadChats = new Map();
         let globalChatsListener = null;
 
-        // ========== FUNCIONES AUXILIARES PARA EL DOM ==========
         function $(id) { return document.getElementById(id); }
         function safeAddEventListener(id, event, handler) {
             const el = $(id);
             if (el) el.addEventListener(event, handler);
-            else console.warn(`Elemento #${id} no encontrado para añadir evento`);
+            else console.warn(`Elemento #${id} no encontrado`);
         }
 
-        // ========== REFERENCIAS DOM PRINCIPALES ==========
         const loginScreen = $('loginScreen');
         const setupScreen = $('setupScreen');
         const mainScreen = $('mainScreen');
@@ -969,6 +970,7 @@
             }
             return '📍 ' + km.toFixed(1) + ' km';
         }
+
         // ========== VISTAS DINÁMICAS ==========
         function renderDynamicView() {
             const container = $('dynamicContainer');
@@ -1039,7 +1041,6 @@
             if (btn) btn.textContent = currentView === 'grid' ? '🗺️' : '🔲';
             renderDynamicView();
         });
-
         // ========== FILTROS ==========
         safeAddEventListener('filtersContainer', 'click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
@@ -1208,6 +1209,7 @@
             if (nameEl) nameEl.textContent = partner.name || 'Chat';
             showScreen('chatScreen');
             listenToMessages(uid);
+            // 🧹 Limpiar badge de este chat
             if (unreadChats.has(uid)) {
                 unreadChats.delete(uid);
                 updateUnreadBadge();
@@ -1232,7 +1234,6 @@
                     });
                     container.scrollTop = container.scrollHeight;
                 } else {
-                    // Sin mensajes: mostrar pantalla limpia con invitación
                     container.innerHTML = `
                         <div style="padding:3rem 1rem; text-align:center;">
                             <div style="font-size:3rem;">💬</div>
@@ -1242,6 +1243,7 @@
                 }
             });
         }
+
         async function sendMessage() {
             const text = $('messageInput')?.value.trim();
             if (!text || !activeChatPartnerUid) return;
@@ -1264,7 +1266,6 @@
             if (e.key === 'Enter') sendMessage();
         });
 
-        // Botones de navegación en chat
         safeAddEventListener('chatListBtn', 'click', () => {
             showScreen('chatListScreen');
             loadChatList();
@@ -1331,6 +1332,7 @@
                 container.querySelectorAll('.chat-item').forEach(el => {
                     el.addEventListener('click', () => openChat(el.dataset.uid));
                 });
+                // ❗ Ya no limpiamos todo el Map aquí; solo mostramos los badges existentes
             } catch (error) {
                 console.error('Error al cargar chats:', error);
                 container.innerHTML = `
@@ -1355,8 +1357,7 @@
                 return s.exists() ? s.val() : null;
             } catch (e) { return null; }
         }
-
-        // ========== NOTIFICACIONES DE CHAT EN TIEMPO REAL ==========
+        / ========== NOTIFICACIONES DE CHAT EN TIEMPO REAL (CORREGIDAS) ==========
         function setupChatNotifications() {
             if (globalChatsListener) globalChatsListener();
             globalChatsListener = onValue(ref(db, 'chats'), (snapshot) => {
@@ -1366,13 +1367,18 @@
                     const participants = chatId.split('_');
                     if (!participants.includes(currentUser.uid)) continue;
                     const partnerId = participants.find(id => id !== currentUser.uid);
-                    // Si la conversación está abierta actualmente, no notificar
+
+                    // 🚫 Si el chat con esa persona está abierto, no se notifica
                     if (activeChatPartnerUid === partnerId && chatScreen && chatScreen.classList.contains('active')) continue;
 
                     const messagesObj = chats[chatId].messages || {};
                     const msgs = Object.values(messagesObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                     if (msgs.length === 0) continue;
                     const lastMsg = msgs[0];
+
+                    // ⏱️ Ignorar mensajes viejos (anteriores al momento en que se abrió la app)
+                    if (lastMsg.timestamp && lastMsg.timestamp <= appStartTime) continue;
+
                     if (lastMsg.sender !== currentUser.uid) {
                         const currentCount = unreadChats.get(partnerId) || 0;
                         unreadChats.set(partnerId, currentCount + 1);
