@@ -737,7 +737,7 @@
         let filterGender = 'all';
         let filterModoExpress = false;
         // Notificaciones de chat
-        let unreadChats = new Set();
+        let unreadChats = new Map(); // Map<partnerId, { count, name }>
         let chatListenersActive = false;
         // DOM
         const loginScreen = document.getElementById('loginScreen');
@@ -908,23 +908,20 @@
                 const myInterestedIn = userProfile.interestedIn;
                 users = users.filter(u => {
                     const otherGender = u.gender;
-                    const otherInterestedIn = u.interestedIn || 'all'; // por defecto 'all' si no tiene
+                    const otherInterestedIn = u.interestedIn || 'all';
                     const iLikeThem = (myInterestedIn === 'all' || myInterestedIn === otherGender);
                     const theyLikeMe = (otherInterestedIn === 'all' || otherInterestedIn === myGender);
                     return iLikeThem && theyLikeMe;
                 });
 
-                // Filtro por chip de género
                 if (filterGender !== 'all') {
                     users = users.filter(u => u.gender === filterGender);
                 }
 
-                // Filtro Diversión Rápida
                 if (filterModoExpress) {
                     users = users.filter(u => u.modoExpress === true);
                 }
 
-                // Ordenar por distancia (más cercanos primero)
                 users.sort((a, b) => {
                     if (a.distance === null && b.distance === null) return 0;
                     if (a.distance === null) return 1;
@@ -956,8 +953,7 @@
             } else {
                 return '📍 ' + km.toFixed(1) + ' km';
             }
-        }
-
+            }
         // ---------- VISTAS DINÁMICAS ----------
         function renderDynamicView() {
             const container = document.getElementById('dynamicContainer');
@@ -1051,6 +1047,7 @@
             }
             loadNearbyUsers();
         });
+
         // ---------- PERFIL MODAL ----------
         async function openProfile(uid) {
             if (!userProfile.premium) {
@@ -1188,11 +1185,11 @@
         // ---------- CHAT ----------
         function openChat(uid) {
             activeChatId = uid;
-            const partner = nearbyUsers.find(u => u.uid === uid) || {};
+            const partner = nearbyUsers.find(u => u.uid === uid) || userProfile;
             document.getElementById('chatPartnerName').textContent = partner.name || 'Chat';
             showScreen('chatScreen');
             loadMessages();
-            // Marcar este chat como leído
+            // Marcar como leído
             if (unreadChats.has(uid)) {
                 unreadChats.delete(uid);
                 updateUnreadBadge();
@@ -1228,16 +1225,15 @@
                 sender: currentUser.uid, text, timestamp: serverTimestamp()
             });
             document.getElementById('messageInput').value = '';
-        }
-
+                }
         document.getElementById('chatListBtn').addEventListener('click', () => { showScreen('chatListScreen'); loadChatList(); });
         document.querySelector('.back-from-chatlist-btn').addEventListener('click', () => showScreen('mainScreen'));
         document.querySelector('.back-from-chat-btn').addEventListener('click', () => { activeChatId = null; showScreen('chatListScreen'); loadChatList(); });
         async function loadChatList() {
             const container = document.getElementById('chatListContainer');
-            container.innerHTML = '<div style="padding:1rem;text-align:center;">Cargando...</div>';
+            container.innerHTML = '<div style="padding:1rem;text-align:center;">Cargando conversaciones...</div>';
             const snap = await get(ref(db, 'chats'));
-            if (!snap.exists()) { container.innerHTML = '<div class="empty-state">No tienes chats</div>'; return; }
+            if (!snap.exists()) { container.innerHTML = '<div class="empty-state">No tienes conversaciones aún</div>'; return; }
             const chats = snap.val();
             const items = [];
             for (const chatId in chats) {
@@ -1256,6 +1252,12 @@
                     colors: getAvatarColors(profile?.name || '?')
                 });
             }
+            // Ordenar por el timestamp del último mensaje (más reciente primero)
+            items.sort((a, b) => {
+                const aTime = a.lastMsg ? a.lastMsg.timestamp : 0;
+                const bTime = b.lastMsg ? b.lastMsg.timestamp : 0;
+                return bTime - aTime;
+            });
             container.innerHTML = items.length ? items.map(item => `
                 <div class="chat-item" data-uid="${item.partnerId}">
                     <div class="chat-avatar" style="background-image:url(${item.profilePic}); ${!item.profilePic ? `background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});` : ''}">${!item.profilePic ? item.initials : ''}</div>
@@ -1264,15 +1266,15 @@
                         <div class="chat-preview">${item.lastMsg.substring(0,30)}</div>
                     </div>
                 </div>
-            `).join('') : '<div class="empty-state">No tienes chats</div>';
+            `).join('') : '<div class="empty-state">No tienes conversaciones aún</div>';
             container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
-            // Al abrir lista, limpiar notificaciones
+            // Limpiar notificaciones al abrir la lista
             unreadChats.clear();
             updateUnreadBadge();
         }
         async function getUserProfile(uid) { const s = await get(ref(db, 'users/'+uid)); return s.exists() ? s.val() : null; }
 
-        // ---------- NOTIFICACIONES DE CHAT ----------
+        // ---------- NOTIFICACIONES DE CHAT EN TIEMPO REAL ----------
         function setupChatNotifications() {
             if (chatListenersActive || !currentUser) return;
             chatListenersActive = true;
@@ -1283,32 +1285,46 @@
                 for (const chatId in chats) {
                     if (!chatId.includes(currentUser.uid)) continue;
                     const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
-                    // Si el chat está actualmente abierto, no contar como no leído
-                    if (activeChatId === partnerId && document.getElementById('chatScreen').classList.contains('active')) {
-                        continue;
-                    }
                     const messages = chats[chatId].messages;
                     if (!messages) continue;
                     const msgs = Object.values(messages).sort((a,b) => b.timestamp - a.timestamp);
-                    if (msgs.length > 0 && msgs[0].sender !== currentUser.uid) {
-                        if (!unreadChats.has(partnerId)) {
-                            unreadChats.add(partnerId);
+                    if (msgs.length === 0) continue;
+                    const lastMsg = msgs[0];
+                    // Si el último mensaje no es mío y el chat no está abierto actualmente
+                    if (lastMsg.sender !== currentUser.uid) {
+                        if (!(activeChatId === partnerId && document.getElementById('chatScreen').classList.contains('active'))) {
+                            if (!unreadChats.has(partnerId)) {
+                                // Obtener nombre del remitente para el toast
+                                getUserProfile(partnerId).then(profile => {
+                                    const senderName = profile?.name || 'Alguien';
+                                    showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
+                                });
+                                unreadChats.set(partnerId, { count: 1, name: '' });
+                            } else {
+                                const entry = unreadChats.get(partnerId);
+                                entry.count += 1;
+                                unreadChats.set(partnerId, entry);
+                            }
+                            updateUnreadBadge();
                         }
                     }
                 }
-                updateUnreadBadge();
             });
         }
 
         function updateUnreadBadge() {
-            const count = unreadChats.size;
-            if (count > 0) {
-                unreadBadge.textContent = count;
+            let total = 0;
+            for (const entry of unreadChats.values()) {
+                total += entry.count;
+            }
+            if (total > 0) {
+                unreadBadge.textContent = total > 99 ? '99+' : total;
                 unreadBadge.style.display = 'flex';
             } else {
                 unreadBadge.style.display = 'none';
             }
         }
+
         // ---------- PANTALLA AJUSTES ----------
         function updateSettingsUI() {
             if (!userProfile) return;
