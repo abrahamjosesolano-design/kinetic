@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -253,8 +252,7 @@
             justify-content: center;
             padding: 0 4px;
         }
-
-        /* ---------- FILTROS ---------- */
+         /* ---------- FILTROS ---------- */
         .filters {
             display: flex;
             gap: 0.5rem;
@@ -611,7 +609,6 @@
             Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
         </div>
     </div>
-
     <!-- MI PERFIL -->
     <div id="myProfileScreen" class="screen">
         <div class="header">
@@ -652,6 +649,7 @@
             <p id="profileEditError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
         </div>
     </div>
+
     <!-- CHAT LIST -->
     <div id="chatListScreen" class="screen">
         <div class="header">
@@ -703,8 +701,7 @@
 
     <!-- TOAST -->
     <div id="toast" class="toast" style="display:none;"></div>
-
-    <!-- ================== SCRIPT ================== -->
+    <!-- ================== SCRIPT COMPLETO (PARTE 2) ================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -732,14 +729,13 @@
         let currentView = 'grid';
         let map = null;
         let mapMarkers = [];
-        let activeChatId = null;
-        let activeChatPartnerUid = null;   // UID del usuario con quien se chatea
-        let chatListUnsubscribe = null;    // Para liberar listener de la bandeja
+        let activeChatPartnerUid = null;      // UID del usuario con quien se chatea
+        let chatMessagesUnsubscribe = null;   // Para liberar listener del chat activo
         const dailyLimit = 10;
         let filterGender = 'all';
         let filterModoExpress = false;
-        let unreadChats = new Map();        // partnerUid -> cantidad de mensajes sin leer
-        let globalChatsListener = null;    // listener de notificaciones
+        let unreadChats = new Map();          // partnerUid -> número de mensajes sin leer
+        let globalChatsListener = null;       // Listener de notificaciones generales
 
         // ========== REFERENCIAS DOM ==========
         const loginScreen = document.getElementById('loginScreen');
@@ -809,9 +805,8 @@
                 currentUser = null; userProfile = null; nearbyUsers = [];
                 showScreen('loginScreen');
                 if (map) { map.remove(); map = null; }
-                // Limpiar listeners de chat
                 if (globalChatsListener) globalChatsListener();
-                if (chatListUnsubscribe) chatListUnsubscribe();
+                if (chatMessagesUnsubscribe) chatMessagesUnsubscribe();
             }
         });
 
@@ -834,11 +829,15 @@
             if (!name || !age || age < 18) return err.textContent = 'Nombre y edad (mín 18) requeridos.';
             if (!bio) return err.textContent = 'Escribe una biografía.';
 
+            // Forzar obtención de ubicación
             let lat = null, lng = null;
             try {
                 const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 }));
-                lat = pos.coords.latitude; lng = pos.coords.longitude;
-            } catch (e) { console.warn('Sin ubicación en setup'); }
+                lat = pos.coords.latitude;
+                lng = pos.coords.longitude;
+            } catch (e) {
+                console.warn('Sin ubicación en setup, se guardará sin coordenadas.');
+            }
 
             const data = {
                 email: currentUser.email, name, age, gender, interestedIn, bio,
@@ -865,7 +864,7 @@
 
         function initApp() {
             showScreen('mainScreen');
-            getUserLocation();
+            getUserLocation();        // Forzar ubicación nuevamente al iniciar
             checkPremiumStatus();
             loadNearbyUsers();
             updateSettingsUI();
@@ -876,15 +875,17 @@
             if (!navigator.geolocation) return showToast('Geolocalización no soportada');
             navigator.geolocation.getCurrentPosition(
                 async (pos) => {
-                    const { latitude: lat, longitude: lng } = pos.coords;
-                    try { await update(ref(db, 'users/' + currentUser.uid), { lat, lng }); } catch(e) {}
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    try {
+                        await update(ref(db, 'users/' + currentUser.uid), { lat, lng, online: true });
+                    } catch(e) {}
                     loadNearbyUsers();
                 },
                 () => showToast('Activa la ubicación para ver personas cerca'),
                 { enableHighAccuracy: true }
             );
         }
-
         // ========== RADAR ==========
         async function loadNearbyUsers() {
             if (!currentUser || !userProfile) return;
@@ -1038,6 +1039,7 @@
             }
             loadNearbyUsers();
         });
+
         // ========== PERFIL MODAL ==========
         async function openProfile(uid) {
             if (!userProfile.premium) {
@@ -1171,41 +1173,30 @@
                 loadNearbyUsers();
             } catch (e) { showToast('Error al actualizar'); }
         });
-
-        // ====================== CHAT – ESTILO TELEGRAM ======================
-        /**
-         * Genera un ID de chat único usando ambos UIDs ordenados alfabéticamente
-         */
+        / ====================== CHAT – ESTILO TELEGRAM ======================
         function getChatId(uid1, uid2) {
             return [uid1, uid2].sort().join('_');
         }
 
-        /**
-         * Abre la conversación con otro usuario.
-         * @param {string} uid - UID del otro participante
-         */
         function openChat(uid) {
             activeChatPartnerUid = uid;
             const partner = nearbyUsers.find(u => u.uid === uid) || {};
             document.getElementById('chatPartnerName').textContent = partner.name || 'Chat';
             showScreen('chatScreen');
             listenToMessages(uid);
-            // Marcar este chat como leído
+            // Marcar como leído
             if (unreadChats.has(uid)) {
                 unreadChats.delete(uid);
                 updateUnreadBadge();
             }
         }
 
-        /**
-         * Escucha los mensajes de la conversación activa.
-         */
         function listenToMessages(partnerUid) {
+            // Limpiar listener previo
+            if (chatMessagesUnsubscribe) chatMessagesUnsubscribe();
             const chatId = getChatId(currentUser.uid, partnerUid);
             const messagesRef = ref(db, 'chats/' + chatId + '/messages');
-            // Nos aseguramos de eliminar el listener anterior para la misma conversación
-            if (chatListUnsubscribe) chatListUnsubscribe();
-            chatListUnsubscribe = onValue(messagesRef, (snapshot) => {
+            chatMessagesUnsubscribe = onValue(messagesRef, (snapshot) => {
                 const container = document.getElementById('chatMessages');
                 if (!container) return;
                 container.innerHTML = '';
@@ -1219,14 +1210,17 @@
                     });
                     container.scrollTop = container.scrollHeight;
                 } else {
-                    container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:2rem;">Envía el primer mensaje ⚡</p>';
+                    // Sin mensajes: mostrar pantalla limpia con invitación
+                    container.innerHTML = `
+                        <div style="padding:3rem 1rem; text-align:center;">
+                            <div style="font-size:3rem;">💬</div>
+                            <h3 style="margin:1rem 0 0.5rem;">¡Inicia la conversación!</h3>
+                            <p style="color:var(--text-secondary);">Envía el primer mensaje ⚡</p>
+                        </div>`;
                 }
             });
         }
 
-        /**
-         * Envía un mensaje en la conversación activa.
-         */
         async function sendMessage() {
             const text = document.getElementById('messageInput').value.trim();
             if (!text || !activeChatPartnerUid) return;
@@ -1248,7 +1242,7 @@
             if (e.key === 'Enter') sendMessage();
         });
 
-        // Botones para volver de las pantallas de chat
+        // Botones de navegación en chat
         document.getElementById('chatListBtn').addEventListener('click', () => {
             showScreen('chatListScreen');
             loadChatList();
@@ -1256,41 +1250,36 @@
         document.querySelector('.back-from-chatlist-btn').addEventListener('click', () => showScreen('mainScreen'));
         document.querySelector('.back-from-chat-btn').addEventListener('click', () => {
             activeChatPartnerUid = null;
-            if (chatListUnsubscribe) { chatListUnsubscribe(); chatListUnsubscribe = null; }
+            if (chatMessagesUnsubscribe) { chatMessagesUnsubscribe(); chatMessagesUnsubscribe = null; }
             showScreen('chatListScreen');
             loadChatList();
         });
 
-        /**
-         * Carga la bandeja de entrada de chats activos.
-         */
+        // ====================== BANDEJA DE ENTRADA ======================
         async function loadChatList() {
             const container = document.getElementById('chatListContainer');
             container.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-secondary);">Buscando conversaciones...</p>';
             try {
                 const snap = await get(ref(db, 'chats'));
                 if (!snap.exists()) {
-                    container.innerHTML = `
-                        <div style="padding:3rem 1rem; text-align:center;">
-                            <div style="font-size:3rem;">💬</div>
-                            <h3 style="margin:1rem 0 0.5rem;">No tienes conversaciones</h3>
-                            <p style="color:var(--text-secondary);">Ve al radar y rompe el hielo ⚡</p>
-                        </div>`;
+                    container.innerHTML = emptyChatListHTML();
                     return;
                 }
                 const allChats = snap.val();
                 const chatItems = [];
+                // Recorrer todos los chats
                 for (const chatId in allChats) {
                     const participants = chatId.split('_');
                     if (!participants.includes(currentUser.uid)) continue;
                     const partnerId = participants.find(id => id !== currentUser.uid);
-                    const msgs = allChats[chatId].messages ? Object.values(allChats[chatId].messages) : [];
-                    msgs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    const messagesObj = allChats[chatId].messages || {};
+                    const msgs = Object.values(messagesObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                     const lastMsg = msgs.length > 0 ? msgs[0] : null;
+                    // Obtener perfil del otro usuario
                     const profile = await getUserProfile(partnerId);
                     chatItems.push({
                         partnerId,
-                        name: profile?.name || 'Usuario',
+                        name: profile?.name || 'Usuario desconocido',
                         lastMsgText: lastMsg ? lastMsg.text : '',
                         lastMsgTimestamp: lastMsg ? lastMsg.timestamp : 0,
                         online: profile?.online || false,
@@ -1300,16 +1289,12 @@
                         unreadCount: unreadChats.get(partnerId) || 0
                     });
                 }
-                chatItems.sort((a, b) => b.lastMsgTimestamp - a.lastMsgTimestamp);
                 if (chatItems.length === 0) {
-                    container.innerHTML = `
-                        <div style="padding:3rem 1rem; text-align:center;">
-                            <div style="font-size:3rem;">💬</div>
-                            <h3 style="margin:1rem 0 0.5rem;">No tienes conversaciones</h3>
-                            <p style="color:var(--text-secondary);">Ve al radar y rompe el hielo ⚡</p>
-                        </div>`;
+                    container.innerHTML = emptyChatListHTML();
                     return;
                 }
+                // Ordenar por último mensaje (más reciente primero)
+                chatItems.sort((a, b) => b.lastMsgTimestamp - a.lastMsgTimestamp);
                 container.innerHTML = chatItems.map(item => `
                     <div class="chat-item" data-uid="${item.partnerId}">
                         <div class="chat-avatar" style="background-image:url(${item.profilePic}); ${!item.profilePic ? `background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});` : ''}">${!item.profilePic ? item.initials : ''}</div>
@@ -1335,6 +1320,15 @@
             }
         }
 
+        function emptyChatListHTML() {
+            return `
+                <div style="padding:3rem 1rem; text-align:center;">
+                    <div style="font-size:3rem;">💬</div>
+                    <h3 style="margin:1rem 0 0.5rem;">Aún no tienes chats activos</h3>
+                    <p style="color:var(--text-secondary);">Ve al radar y rompe el hielo ⚡</p>
+                </div>`;
+        }
+
         async function getUserProfile(uid) {
             try {
                 const s = await get(ref(db, 'users/' + uid));
@@ -1344,7 +1338,7 @@
 
         // ========== NOTIFICACIONES DE CHAT EN TIEMPO REAL ==========
         function setupChatNotifications() {
-            if (globalChatsListener) globalChatsListener(); // Limpiar listener anterior
+            if (globalChatsListener) globalChatsListener(); // Limpiar anterior
             globalChatsListener = onValue(ref(db, 'chats'), (snapshot) => {
                 if (!snapshot.exists() || !currentUser) return;
                 const chats = snapshot.val();
@@ -1355,20 +1349,17 @@
                     // Si la conversación está abierta actualmente, no notificar
                     if (activeChatPartnerUid === partnerId && chatScreen.classList.contains('active')) continue;
 
-                    const msgs = chats[chatId].messages ? Object.values(chats[chatId].messages) : [];
+                    const messagesObj = chats[chatId].messages || {};
+                    const msgs = Object.values(messagesObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                     if (msgs.length === 0) continue;
-                    msgs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                     const lastMsg = msgs[0];
                     if (lastMsg.sender !== currentUser.uid) {
                         const currentCount = unreadChats.get(partnerId) || 0;
                         unreadChats.set(partnerId, currentCount + 1);
-                        // Mostrar toast solo si la pantalla de chat no está activa
-                        if (!(activeChatPartnerUid === partnerId && chatScreen.classList.contains('active'))) {
-                            getUserProfile(partnerId).then(profile => {
-                                const senderName = profile?.name || 'Alguien';
-                                showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
-                            });
-                        }
+                        getUserProfile(partnerId).then(profile => {
+                            const senderName = profile?.name || 'Alguien';
+                            showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
+                        });
                         updateUnreadBadge();
                     }
                 }
@@ -1412,8 +1403,7 @@
         });
         document.getElementById('settingsLogoutBtn').addEventListener('click', () => signOut(auth));
         document.querySelector('.back-from-settings-btn').addEventListener('click', () => showScreen('mainScreen'));
-
-        // ========== NAVEGACIÓN INFERIOR ==========
+        / ========== NAVEGACIÓN INFERIOR ==========
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
