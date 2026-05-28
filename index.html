@@ -17,6 +17,7 @@
             --text: #FFFFFF;
             --text-secondary: #B8B8D4;
             --online: #2ECC71;
+            --offline: #555555;
             --streak: #FF9F1C;
             --shadow: 0 4px 20px rgba(123, 44, 191, 0.3);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -192,6 +193,21 @@
             cursor: pointer;
             transition: background 0.3s, transform 0.2s;
             backdrop-filter: blur(5px);
+            position: relative;
+        }
+        .icon-btn .badge {
+            position: absolute;
+            top: -2px; right: -2px;
+            background: var(--red);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 6px rgba(0,0,0,0.5);
         }
         .icon-btn:active { background: rgba(123, 44, 191, 0.6); transform: scale(0.92); }
 
@@ -219,9 +235,24 @@
             color: var(--text-secondary);
             cursor: pointer;
             transition: color 0.2s, transform 0.2s;
+            position: relative;
         }
         .nav-item.active { color: var(--red-light); transform: translateY(-2px); }
         .nav-icon { font-size: 1.4rem; }
+        .nav-badge {
+            position: absolute;
+            top: -4px; right: 10px;
+            background: var(--red);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            min-width: 16px; height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
 
         /* ---------- FILTROS ---------- */
         .filters {
@@ -262,6 +293,7 @@
             flex: 1;
             overflow-y: auto;
             align-content: start;
+            justify-items: center;
         }
         .profile-card {
             background: var(--card-bg);
@@ -273,6 +305,8 @@
             animation: fadeInUp 0.4s ease forwards;
             opacity: 0;
             transition: transform 0.2s, box-shadow 0.2s;
+            max-width: 150px;
+            width: 100%;
         }
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(15px); }
@@ -295,25 +329,31 @@
         .online-indicator {
             position: absolute;
             top: 8px; right: 8px;
-            width: 12px; height: 12px;
-            background: var(--online);
+            width: 10px; height: 10px;
             border-radius: 50%;
             border: 2px solid var(--card-bg);
-            box-shadow: 0 0 10px rgba(46,204,113,0.6);
+        }
+        .online-indicator.online {
+            background: var(--online);
+            box-shadow: 0 0 8px rgba(46,204,113,0.6);
+        }
+        .online-indicator.offline {
+            background: var(--offline);
+            box-shadow: none;
         }
         .profile-info {
-            padding: 0.5rem;
+            padding: 0.4rem;
             text-align: center;
         }
         .profile-name {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .profile-distance {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
         }
 
@@ -431,15 +471,55 @@
             color: white;
             box-shadow: 0 4px 15px rgba(123,44,191,0.5);
         }
-
-        /* ---------- AJUSTES ---------- */
-        .settings-container {
-            padding: 1.5rem;
+        .toggle-container {
             display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 14px;
+            margin: 0.5rem 0;
         }
-        /* ---------- CHAT ---------- */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--offline);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--purple);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+         /* ---------- CHAT ---------- */
         .chat-list { flex: 1; overflow-y: auto; padding: 0.5rem 0.8rem; }
         .chat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; border-radius: 14px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.2s; }
         .chat-item:active { background: rgba(123,44,191,0.2); }
@@ -463,7 +543,6 @@
     </style>
 </head>
 <body>
-
     <!-- ==================== PANTALLAS ==================== -->
     <!-- LOGIN -->
     <div id="loginScreen" class="screen active">
@@ -517,18 +596,20 @@
             <span class="filter-chip active" data-gender="all">🌐 Todos</span>
             <span class="filter-chip" data-gender="female">👩 Mujeres</span>
             <span class="filter-chip" data-gender="male">👨 Hombres</span>
+            <span class="filter-chip" data-filter="modoExpress">⚡ Diversión Rápida</span>
         </div>
         <div id="dynamicContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
         <div class="bottom-nav">
             <div class="nav-item active" data-screen="mainScreen"><span class="nav-icon">📡</span><span>Radar</span></div>
             <div class="nav-item" data-screen="myProfileScreen"><span class="nav-icon">👤</span><span>Perfil</span></div>
-            <div class="nav-item" data-screen="chatListScreen"><span class="nav-icon">💬</span><span>Chats</span></div>
+            <div class="nav-item" data-screen="chatListScreen" id="navChats"><span class="nav-icon">💬</span><span>Chats</span><span class="nav-badge" id="unreadBadge" style="display:none;">0</span></div>
             <div class="nav-item" data-screen="settingsScreen"><span class="nav-icon">⚙️</span><span>Ajustes</span></div>
         </div>
         <div id="limitWarning" style="display:none; background:var(--purple-dark); padding:0.5rem; text-align:center; font-size:0.8rem;">
             Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
         </div>
     </div>
+
     <!-- MI PERFIL -->
     <div id="myProfileScreen" class="screen">
         <div class="header">
@@ -554,6 +635,13 @@
             </div>
             <label>Biografía</label>
             <div class="input-group"><textarea id="editBio" rows="3"></textarea></div>
+            <div class="toggle-container">
+                <span>⚡ Modo Diversión Rápida</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="editModoExpress">
+                    <span class="slider"></span>
+                </label>
+            </div>
             <label>Álbum (hasta 3 URLs)</label>
             <div class="input-group"><input type="url" id="editAlbum1" placeholder="Foto 1 (opcional)"></div>
             <div class="input-group"><input type="url" id="editAlbum2" placeholder="Foto 2 (opcional)"></div>
@@ -619,9 +707,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-        // Configuración exacta con databaseURL obligatorio (barra final incluida)
+        // Configuración obligatoria con databaseURL explícita
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -646,6 +734,10 @@
         let activeChatId = null;
         const dailyLimit = 10;
         let filterGender = 'all';
+        let filterModoExpress = false;
+        // Notificaciones de chat
+        let unreadChats = new Set();
+        let chatListenersActive = false;
 
         // DOM
         const loginScreen = document.getElementById('loginScreen');
@@ -659,6 +751,7 @@
         const chatScreen = document.getElementById('chatScreen');
         const toast = document.getElementById('toast');
         const limitWarning = document.getElementById('limitWarning');
+        const unreadBadge = document.getElementById('unreadBadge');
 
         // ---------- AUTENTICACIÓN ----------
         document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -680,8 +773,7 @@
             document.getElementById('authError').textContent = msg;
             setTimeout(() => document.getElementById('authError').textContent = '', 4000);
         }
-
-        // ---------- ESTADO DE AUTENTICACIÓN ----------
+         // ---------- ESTADO DE AUTENTICACIÓN ----------
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -693,7 +785,9 @@
                         showScreen('setupScreen');
                         prefillSetupForm();
                     } else {
-                        await update(ref(db, 'users/' + user.uid), { online: true });
+                        const userRef = ref(db, 'users/' + user.uid);
+                        await update(userRef, { online: true });
+                        onDisconnect(userRef).update({ online: false });
                         initApp();
                     }
                 } else {
@@ -701,6 +795,9 @@
                     showScreen('setupScreen');
                 }
             } else {
+                if (currentUser) {
+                    await update(ref(db, 'users/' + currentUser.uid), { online: false });
+                }
                 currentUser = null; userProfile = null; nearbyUsers = [];
                 showScreen('loginScreen');
                 if (map) map.remove(); map = null;
@@ -737,11 +834,15 @@
                 profilePic: userProfile?.profilePic || '',
                 album: userProfile?.album || [],
                 premium: userProfile?.premium || false,
+                modoExpress: userProfile?.modoExpress || false,
                 dailyViews: 0, lastResetDate: getTodayString(),
                 lat, lng, online: true
             };
             await set(ref(db, 'users/' + currentUser.uid), data);
             userProfile = { uid: currentUser.uid, ...data };
+            const userRef = ref(db, 'users/' + currentUser.uid);
+            await update(userRef, { online: true });
+            onDisconnect(userRef).update({ online: false });
             showScreen('mainScreen');
             initApp();
         });
@@ -752,6 +853,7 @@
             checkPremiumStatus();
             loadNearbyUsers();
             updateSettingsUI();
+            setupChatNotifications();
         }
 
         function getUserLocation() {
@@ -766,15 +868,14 @@
                 { enableHighAccuracy: true }
             );
         }
-// ---------- FUNCIÓN loadNearbyUsers (sin alert, con console.log) ----------
+
+        // ---------- FUNCIÓN loadNearbyUsers (visibilidad mutua corregida) ----------
         async function loadNearbyUsers() {
             if (!currentUser || !userProfile) {
                 console.warn('⛔ No hay currentUser o userProfile');
                 return;
             }
             console.log('📡 Iniciando carga de usuarios...');
-            console.log('🔍 currentUser.uid:', currentUser.uid);
-            console.log('🔍 userProfile:', JSON.stringify(userProfile, null, 2));
 
             try {
                 const snap = await get(ref(db, 'users'));
@@ -786,59 +887,44 @@
                 }
 
                 const all = snap.val();
-                const totalEnDB = Object.keys(all).length;
-                console.log(`📊 Usuarios totales en BD: ${totalEnDB}`);
-                console.log('📋 Datos crudos de /users:', all);
-
                 const me = currentUser.uid;
                 const myLat = userProfile.lat;
                 const myLng = userProfile.lng;
                 console.log('📍 Mi ubicación:', { myLat, myLng });
 
                 let users = Object.entries(all)
-                    .filter(([uid, p]) => {
-                        const isMe = uid === me;
-                        if (isMe) console.log(`🚫 Descartado (soy yo): ${uid}`);
-                        return !isMe;
-                    })
+                    .filter(([uid]) => uid !== me)
                     .map(([uid, p]) => {
                         let distance = null;
                         if (myLat != null && myLng != null && p.lat != null && p.lng != null) {
-                            try {
-                                distance = calcDistance(myLat, myLng, p.lat, p.lng);
-                                console.log(`📏 Distancia a ${p.name || uid}: ${distance.toFixed(2)} km`);
-                            } catch (e) {
-                                console.error('🧨 Error calculando distancia:', e);
-                            }
-                        } else {
-                            console.log(`🌍 Sin coordenadas para ${p.name || uid} (o para mí)`);
+                            distance = calcDistance(myLat, myLng, p.lat, p.lng);
                         }
                         return { uid, ...p, distance };
                     });
 
-                console.log('👥 Usuarios antes de filtrar por interestedIn:', users.length);
-
-                const interestedIn = userProfile.interestedIn;
-                console.log('🎯 Mi interestedIn:', interestedIn);
+                // Filtro por interestedIn recíproco:
+                // Yo debo estar interesado en el género del otro, y el otro debe estar interesado en mi género.
+                const myGender = userProfile.gender;
+                const myInterestedIn = userProfile.interestedIn;
                 users = users.filter(u => {
-                    const match = (interestedIn === 'female' && u.gender === 'female') ||
-                                  (interestedIn === 'male' && u.gender === 'male') ||
-                                  (interestedIn === 'all');
-                    if (!match) console.log(`❌ Descartado por interestedIn: ${u.name || u.uid} (gender: ${u.gender})`);
-                    return match;
+                    const otherGender = u.gender;
+                    const otherInterestedIn = u.interestedIn || 'all'; // por defecto 'all' si no tiene
+                    const iLikeThem = (myInterestedIn === 'all' || myInterestedIn === otherGender);
+                    const theyLikeMe = (otherInterestedIn === 'all' || otherInterestedIn === myGender);
+                    return iLikeThem && theyLikeMe;
                 });
 
-                console.log('👥 Usuarios tras interestedIn:', users.length);
+                // Filtro por chip de género
+                if (filterGender !== 'all') {
+                    users = users.filter(u => u.gender === filterGender);
+                }
 
-                console.log('🎚️ filterGender (chip seleccionado):', filterGender);
-                users = users.filter(u => {
-                    const match = (filterGender === 'all' || u.gender === filterGender);
-                    if (!match) console.log(`❌ Descartado por filterGender: ${u.name || u.uid} (gender: ${u.gender})`);
-                    return match;
-                });
+                // Filtro Diversión Rápida
+                if (filterModoExpress) {
+                    users = users.filter(u => u.modoExpress === true);
+                }
 
-                console.log('👥 Usuarios tras filterGender:', users.length);
-
+                // Ordenar por distancia (más cercanos primero)
                 users.sort((a, b) => {
                     if (a.distance === null && b.distance === null) return 0;
                     if (a.distance === null) return 1;
@@ -847,8 +933,7 @@
                 });
 
                 nearbyUsers = users;
-                console.log('✅ nearbyUsers final:', nearbyUsers);
-                console.log(`✅ Carga completada. Usuarios en radar: ${nearbyUsers.length}`);
+                console.log('✅ nearbyUsers final:', nearbyUsers.length);
                 renderDynamicView();
             } catch (error) {
                 console.error('💥 Error en loadNearbyUsers:', error);
@@ -860,7 +945,18 @@
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return km;
+        }
+
+        function formatDistance(km) {
+            if (km == null) return '🌍';
+            if (km < 1) {
+                const metros = Math.round(km * 1000);
+                return `📍 ${metros} metros`;
+            } else {
+                return `📍 ${km.toFixed(1)} km`;
+            }
         }
 
         // ---------- VISTAS DINÁMICAS ----------
@@ -883,14 +979,16 @@
                 const bgStyle = u.profilePic ? `background-image:url(${u.profilePic});` : '';
                 const initials = !u.profilePic ? getInitials(u.name) : '';
                 const gradient = !u.profilePic ? `background:linear-gradient(135deg, ${getAvatarColors(u.name)[0]}, ${getAvatarColors(u.name)[1]});` : '';
+                const onlineClass = u.online ? 'online' : 'offline';
+                const distText = formatDistance(u.distance);
                 return `<div class="profile-card" style="animation-delay:${i*0.04}s;" data-uid="${u.uid}">
                     <div class="profile-img" style="${bgStyle} ${gradient}">
                         ${initials}
-                        ${u.online ? '<span class="online-indicator"></span>' : ''}
+                        <span class="online-indicator ${onlineClass}"></span>
                     </div>
                     <div class="profile-info">
                         <div class="profile-name">${u.name}, ${u.age}</div>
-                        <div class="profile-distance">${u.distance ? '📍 '+u.distance.toFixed(1)+' km' : '🌍'}</div>
+                        <div class="profile-distance">${distText}</div>
                     </div>
                 </div>`;
             }).join('');
@@ -933,17 +1031,28 @@
             renderDynamicView();
         });
 
-        // ---------- FILTROS DE GÉNERO ----------
+        // ---------- FILTROS (Género + Diversión Rápida) ----------
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
             const chip = e.target;
-            if (chip.dataset.gender) filterGender = chip.dataset.gender;
-            document.querySelectorAll('#filtersContainer .filter-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
+            const gender = chip.dataset.gender;
+            const filter = chip.dataset.filter;
+
+            if (gender) {
+                document.querySelectorAll('#filtersContainer .filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                filterGender = gender;
+            } else if (filter === 'modoExpress') {
+                filterModoExpress = !filterModoExpress;
+                if (filterModoExpress) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            }
             loadNearbyUsers();
         });
-
-        // ---------- PERFIL MODAL ----------
+        / ---------- PERFIL MODAL ----------
         async function openProfile(uid) {
             if (!userProfile.premium) {
                 const can = await incrementViewCount();
@@ -960,13 +1069,13 @@
                 albumHtml = '<div class="album-title">📸 Álbum</div><div class="album-grid">' +
                     album.map(url => `<div class="album-item" style="background-image:url(${url});"></div>`).join('') +
                     '</div>';
-                                                                  }
+            }
             modalContent.innerHTML = `
                 <div class="modal-header">
                     <button class="modal-close" id="closeModalBtn">✕</button>
                     <div class="modal-avatar" style="${!user.profilePic ? `background:linear-gradient(135deg, ${c1}, ${c2});` : ''}">${mainPic}</div>
                     <h3>${user.name}, ${user.age}</h3>
-                    <p>${user.distance ? '📍 '+user.distance.toFixed(1)+' km' : '🌍'} • ${user.online ? '🟢 En línea' : '⏳ Visto'}</p>
+                    <p>${formatDistance(user.distance)} • ${user.online ? '🟢 En línea' : '⚫ Desconectado'}</p>
                 </div>
                 <div class="modal-body">
                     <p class="bio">${user.bio || 'Sin descripción'}</p>
@@ -1025,6 +1134,7 @@
             document.getElementById('editInterested').value = userProfile.interestedIn || 'female';
             document.getElementById('editBio').value = userProfile.bio || '';
             document.getElementById('editProfilePic').value = userProfile.profilePic || '';
+            document.getElementById('editModoExpress').checked = userProfile.modoExpress || false;
             const album = userProfile.album || [];
             document.getElementById('editAlbum1').value = album[0] || '';
             document.getElementById('editAlbum2').value = album[1] || '';
@@ -1057,6 +1167,7 @@
             const interestedIn = document.getElementById('editInterested').value;
             const bio = document.getElementById('editBio').value.trim();
             const profilePic = document.getElementById('editProfilePic').value.trim();
+            const modoExpress = document.getElementById('editModoExpress').checked;
             const album = [
                 document.getElementById('editAlbum1').value.trim(),
                 document.getElementById('editAlbum2').value.trim(),
@@ -1066,7 +1177,7 @@
             if (!name || !age || age < 18) return document.getElementById('profileEditError').textContent = 'Nombre y edad válidos.';
             if (!bio) return document.getElementById('profileEditError').textContent = 'Escribe una biografía.';
 
-            const updates = { name, age, gender, interestedIn, bio, profilePic, album };
+            const updates = { name, age, gender, interestedIn, bio, profilePic, modoExpress, album };
             await update(ref(db, 'users/' + currentUser.uid), updates);
             Object.assign(userProfile, updates);
             document.getElementById('profileEditError').textContent = '';
@@ -1082,14 +1193,22 @@
             document.getElementById('chatPartnerName').textContent = partner.name || 'Chat';
             showScreen('chatScreen');
             loadMessages();
+            // Marcar este chat como leído (quitarlo de no leídos)
+            if (unreadChats.has(uid)) {
+                unreadChats.delete(uid);
+                updateUnreadBadge();
+            }
         }
         function loadMessages() {
+            if (!activeChatId) return;
             const chatId = getChatId(currentUser.uid, activeChatId);
-            onValue(ref(db, 'chats/' + chatId + '/messages'), snap => {
+            const messagesRef = ref(db, 'chats/' + chatId + '/messages');
+            onValue(messagesRef, (snap) => {
                 const container = document.getElementById('chatMessages');
                 container.innerHTML = '';
                 if (snap.exists()) {
-                    Object.values(snap.val()).sort((a,b) => a.timestamp - b.timestamp).forEach(m => {
+                    const msgs = Object.values(snap.val()).sort((a,b) => a.timestamp - b.timestamp);
+                    msgs.forEach(m => {
                         const div = document.createElement('div');
                         div.className = `message ${m.sender === currentUser.uid ? 'sent' : 'received'}`;
                         div.textContent = m.text;
@@ -1122,29 +1241,76 @@
             if (!snap.exists()) { container.innerHTML = '<div class="empty-state">No tienes chats</div>'; return; }
             const chats = snap.val();
             const items = [];
-            for (const id in chats) {
-                if (!id.includes(currentUser.uid)) continue;
-                const partnerId = id.split('_').find(p => p !== currentUser.uid);
-                const msgs = Object.values(chats[id].messages||{}).sort((a,b)=>b.timestamp-a.timestamp);
+            for (const chatId in chats) {
+                if (!chatId.includes(currentUser.uid)) continue;
+                const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
+                const msgs = chats[chatId].messages ? Object.values(chats[chatId].messages).sort((a,b) => b.timestamp - a.timestamp) : [];
+                const lastMsg = msgs.length > 0 ? msgs[0].text : '';
                 const profile = await getUserProfile(partnerId);
                 items.push({
-                    partnerId, name: profile?.name||'Usuario', lastMsg: msgs[0]?.text||'',
-                    online: profile?.online||false, profilePic: profile?.profilePic||'',
-                    initials: getInitials(profile?.name||'?'), colors: getAvatarColors(profile?.name||'?')
+                    partnerId,
+                    name: profile?.name || 'Usuario',
+                    lastMsg,
+                    online: profile?.online || false,
+                    profilePic: profile?.profilePic || '',
+                    initials: getInitials(profile?.name || '?'),
+                    colors: getAvatarColors(profile?.name || '?')
                 });
             }
             container.innerHTML = items.length ? items.map(item => `
                 <div class="chat-item" data-uid="${item.partnerId}">
                     <div class="chat-avatar" style="background-image:url(${item.profilePic}); ${!item.profilePic ? `background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});` : ''}">${!item.profilePic ? item.initials : ''}</div>
                     <div class="chat-info">
-                        <div class="chat-name">${item.name} ${item.online?'●':''}</div>
+                        <div class="chat-name">${item.name} ${item.online ? '<span style="color:var(--online)">●</span>' : '<span style="color:var(--offline)">●</span>'}</div>
                         <div class="chat-preview">${item.lastMsg.substring(0,30)}</div>
                     </div>
                 </div>
             `).join('') : '<div class="empty-state">No tienes chats</div>';
             container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
+            // Al abrir lista, limpiar notificaciones
+            unreadChats.clear();
+            updateUnreadBadge();
         }
         async function getUserProfile(uid) { const s = await get(ref(db, 'users/'+uid)); return s.exists() ? s.val() : null; }
+
+        // ---------- NOTIFICACIONES DE CHAT ----------
+        function setupChatNotifications() {
+            if (chatListenersActive || !currentUser) return;
+            chatListenersActive = true;
+            const chatsRef = ref(db, 'chats');
+            onValue(chatsRef, (snap) => {
+                if (!snap.exists()) return;
+                const chats = snap.val();
+                for (const chatId in chats) {
+                    if (!chatId.includes(currentUser.uid)) continue;
+                    const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
+                    // Si el chat está actualmente abierto, no contar como no leído
+                    if (activeChatId === partnerId && document.getElementById('chatScreen').classList.contains('active')) {
+                        continue;
+                    }
+                    // Si hay mensajes, el último mensaje es de otro usuario, y no está ya en unreadChats
+                    const messages = chats[chatId].messages;
+                    if (!messages) continue;
+                    const msgs = Object.values(messages).sort((a,b) => b.timestamp - a.timestamp);
+                    if (msgs.length > 0 && msgs[0].sender !== currentUser.uid) {
+                        if (!unreadChats.has(partnerId)) {
+                            unreadChats.add(partnerId);
+                        }
+                    }
+                }
+                updateUnreadBadge();
+            });
+        }
+
+        function updateUnreadBadge() {
+            const count = unreadChats.size;
+            if (count > 0) {
+                unreadBadge.textContent = count;
+                unreadBadge.style.display = 'flex';
+            } else {
+                unreadBadge.style.display = 'none';
+            }
+        }
 
         // ---------- PANTALLA AJUSTES ----------
         function updateSettingsUI() {
@@ -1155,7 +1321,7 @@
 
         document.getElementById('settingsGenderFilter').addEventListener('change', (e) => {
             filterGender = e.target.value;
-            document.querySelectorAll('#filtersContainer .filter-chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#filtersContainer .filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
             const activeChip = document.querySelector(`#filtersContainer .filter-chip[data-gender="${filterGender}"]`);
             if (activeChip) activeChip.classList.add('active');
             loadNearbyUsers();
