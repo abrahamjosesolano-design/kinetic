@@ -624,15 +624,14 @@
 
         // Configuración exacta con databaseURL obligatorio
         const firebaseConfig = {
-            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-            authDomain: "kinetic-app-67ae5.firebaseapp.com",
-            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com",
-            projectId: "kinetic-app-67ae5",
-            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-            messagingSenderId: "825570718975",
-            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-        };
-
+  apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+  authDomain: "kinetic-app-67ae5.firebaseapp.com",
+  databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+  projectId: "kinetic-app-67ae5",
+  storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+  messagingSenderId: "825570718975",
+  appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+};
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
