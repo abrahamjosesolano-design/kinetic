@@ -315,7 +315,7 @@
         .profile-card:active { transform: scale(0.95); box-shadow: 0 0 15px var(--purple); }
         .profile-img {
             width: 100%;
-            aspect-ratio: 1/1;
+            aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -431,7 +431,7 @@
             margin-bottom: 1rem;
         }
         .album-item {
-            aspect-ratio: 1/1;
+            aspect-ratio: 1 / 1;
             border-radius: 12px;
             background-color: var(--purple-dark);
             background-size: cover;
@@ -451,7 +451,6 @@
             transition: background 0.3s, transform 0.2s;
         }
         .btn-message:hover { background: rgba(123,44,191,0.3); }
-
         /* ---------- MI PERFIL ---------- */
         .profile-screen-container {
             padding: 1.5rem;
@@ -519,7 +518,8 @@
         input:checked + .slider:before {
             transform: translateX(24px);
         }
-         /* ---------- CHAT ---------- */
+
+        /* ---------- CHAT ---------- */
         .chat-list { flex: 1; overflow-y: auto; padding: 0.5rem 0.8rem; }
         .chat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; border-radius: 14px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.2s; }
         .chat-item:active { background: rgba(123,44,191,0.2); }
@@ -543,6 +543,7 @@
     </style>
 </head>
 <body>
+
     <!-- ==================== PANTALLAS ==================== -->
     <!-- LOGIN -->
     <div id="loginScreen" class="screen active">
@@ -738,7 +739,6 @@
         // Notificaciones de chat
         let unreadChats = new Set();
         let chatListenersActive = false;
-
         // DOM
         const loginScreen = document.getElementById('loginScreen');
         const setupScreen = document.getElementById('setupScreen');
@@ -773,7 +773,8 @@
             document.getElementById('authError').textContent = msg;
             setTimeout(() => document.getElementById('authError').textContent = '', 4000);
         }
-         // ---------- ESTADO DE AUTENTICACIÓN ----------
+
+        // ---------- ESTADO DE AUTENTICACIÓN ----------
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -902,8 +903,7 @@
                         return { uid, ...p, distance };
                     });
 
-                // Filtro por interestedIn recíproco:
-                // Yo debo estar interesado en el género del otro, y el otro debe estar interesado en mi género.
+                // Filtro recíproco: yo veo a quien me interesa y que también esté interesado en mí
                 const myGender = userProfile.gender;
                 const myInterestedIn = userProfile.interestedIn;
                 users = users.filter(u => {
@@ -944,18 +944,17 @@
             const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-            const km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return km;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
         function formatDistance(km) {
             if (km == null) return '🌍';
             if (km < 1) {
                 const metros = Math.round(km * 1000);
-                return `📍 ${metros} metros`;
+                return '📍 ' + metros + ' metros';
             } else {
-                return `📍 ${km.toFixed(1)} km`;
+                return '📍 ' + km.toFixed(1) + ' km';
             }
         }
 
@@ -1052,7 +1051,7 @@
             }
             loadNearbyUsers();
         });
-        / ---------- PERFIL MODAL ----------
+        // ---------- PERFIL MODAL ----------
         async function openProfile(uid) {
             if (!userProfile.premium) {
                 const can = await incrementViewCount();
@@ -1193,7 +1192,7 @@
             document.getElementById('chatPartnerName').textContent = partner.name || 'Chat';
             showScreen('chatScreen');
             loadMessages();
-            // Marcar este chat como leído (quitarlo de no leídos)
+            // Marcar este chat como leído
             if (unreadChats.has(uid)) {
                 unreadChats.delete(uid);
                 updateUnreadBadge();
@@ -1288,7 +1287,6 @@
                     if (activeChatId === partnerId && document.getElementById('chatScreen').classList.contains('active')) {
                         continue;
                     }
-                    // Si hay mensajes, el último mensaje es de otro usuario, y no está ya en unreadChats
                     const messages = chats[chatId].messages;
                     if (!messages) continue;
                     const msgs = Object.values(messages).sort((a,b) => b.timestamp - a.timestamp);
@@ -1311,7 +1309,6 @@
                 unreadBadge.style.display = 'none';
             }
         }
-
         // ---------- PANTALLA AJUSTES ----------
         function updateSettingsUI() {
             if (!userProfile) return;
