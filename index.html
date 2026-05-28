@@ -320,6 +320,7 @@
         /* ---------- MAPA ---------- */
         #mapContainer { flex: 1; width: 100%; position: relative; }
         #map { width: 100%; height: 100%; z-index: 1; }
+
         /* ---------- MODAL ---------- */
         .modal {
             position: fixed;
@@ -438,7 +439,6 @@
             flex-direction: column;
             gap: 1rem;
         }
-
         /* ---------- CHAT ---------- */
         .chat-list { flex: 1; overflow-y: auto; padding: 0.5rem 0.8rem; }
         .chat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; border-radius: 14px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.2s; }
@@ -529,7 +529,6 @@
             Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
         </div>
     </div>
-
     <!-- MI PERFIL -->
     <div id="myProfileScreen" class="screen">
         <div class="header">
@@ -622,16 +621,17 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-        // Configuración exacta con databaseURL obligatorio
+        // Configuración exacta con databaseURL obligatorio (barra final incluida)
         const firebaseConfig = {
-  apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-  authDomain: "kinetic-app-67ae5.firebaseapp.com",
-  databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-  projectId: "kinetic-app-67ae5",
-  storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-  messagingSenderId: "825570718975",
-  appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-};
+            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+            authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+            projectId: "kinetic-app-67ae5",
+            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+            messagingSenderId: "825570718975",
+            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
@@ -659,6 +659,7 @@
         const chatScreen = document.getElementById('chatScreen');
         const toast = document.getElementById('toast');
         const limitWarning = document.getElementById('limitWarning');
+
         // ---------- AUTENTICACIÓN ----------
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
@@ -765,21 +766,20 @@
                 { enableHighAccuracy: true }
             );
         }
-
-        // ---------- DIAGNÓSTICO loadNearbyUsers ----------
+// ---------- FUNCIÓN loadNearbyUsers (sin alert, con console.log) ----------
         async function loadNearbyUsers() {
             if (!currentUser || !userProfile) {
-                alert('⛔ No hay currentUser o userProfile');
+                console.warn('⛔ No hay currentUser o userProfile');
                 return;
             }
-            alert('📡 Iniciando carga de usuarios...');
+            console.log('📡 Iniciando carga de usuarios...');
             console.log('🔍 currentUser.uid:', currentUser.uid);
             console.log('🔍 userProfile:', JSON.stringify(userProfile, null, 2));
 
             try {
                 const snap = await get(ref(db, 'users'));
                 if (!snap.exists()) {
-                    alert('❌ No hay datos en /users');
+                    console.log('❌ No hay datos en /users');
                     nearbyUsers = [];
                     renderDynamicView();
                     return;
@@ -787,7 +787,7 @@
 
                 const all = snap.val();
                 const totalEnDB = Object.keys(all).length;
-                alert(`📊 Usuarios totales en BD: ${totalEnDB}`);
+                console.log(`📊 Usuarios totales en BD: ${totalEnDB}`);
                 console.log('📋 Datos crudos de /users:', all);
 
                 const me = currentUser.uid;
@@ -808,8 +808,7 @@
                                 distance = calcDistance(myLat, myLng, p.lat, p.lng);
                                 console.log(`📏 Distancia a ${p.name || uid}: ${distance.toFixed(2)} km`);
                             } catch (e) {
-                                alert(`🧨 Error calculando distancia con ${p.name || uid}: ${e.message}`);
-                                console.error('Error en Haversine:', e);
+                                console.error('🧨 Error calculando distancia:', e);
                             }
                         } else {
                             console.log(`🌍 Sin coordenadas para ${p.name || uid} (o para mí)`);
@@ -818,7 +817,6 @@
                     });
 
                 console.log('👥 Usuarios antes de filtrar por interestedIn:', users.length);
-                alert(`👥 Usuarios antes de filtros: ${users.length}`);
 
                 const interestedIn = userProfile.interestedIn;
                 console.log('🎯 Mi interestedIn:', interestedIn);
@@ -826,21 +824,19 @@
                     const match = (interestedIn === 'female' && u.gender === 'female') ||
                                   (interestedIn === 'male' && u.gender === 'male') ||
                                   (interestedIn === 'all');
-                    if (!match) console.log(`❌ Descartado por interestedIn: ${u.name || u.uid} (gender: ${u.gender}, interestedIn: ${interestedIn})`);
+                    if (!match) console.log(`❌ Descartado por interestedIn: ${u.name || u.uid} (gender: ${u.gender})`);
                     return match;
                 });
 
-                alert(`👥 Después de interestedIn: ${users.length}`);
-                console.log('👥 Usuarios tras filtro interestedIn:', users.length);
+                console.log('👥 Usuarios tras interestedIn:', users.length);
 
                 console.log('🎚️ filterGender (chip seleccionado):', filterGender);
                 users = users.filter(u => {
                     const match = (filterGender === 'all' || u.gender === filterGender);
-                    if (!match) console.log(`❌ Descartado por filterGender: ${u.name || u.uid} (gender: ${u.gender}, filterGender: ${filterGender})`);
+                    if (!match) console.log(`❌ Descartado por filterGender: ${u.name || u.uid} (gender: ${u.gender})`);
                     return match;
                 });
 
-                alert(`👥 Después de filterGender: ${users.length}`);
                 console.log('👥 Usuarios tras filterGender:', users.length);
 
                 users.sort((a, b) => {
@@ -852,11 +848,10 @@
 
                 nearbyUsers = users;
                 console.log('✅ nearbyUsers final:', nearbyUsers);
-                alert(`✅ Carga completada. Usuarios en radar: ${nearbyUsers.length}`);
+                console.log(`✅ Carga completada. Usuarios en radar: ${nearbyUsers.length}`);
                 renderDynamicView();
             } catch (error) {
-                alert('💥 Error en loadNearbyUsers: ' + error.message);
-                console.error(error);
+                console.error('💥 Error en loadNearbyUsers:', error);
             }
         }
 
@@ -937,6 +932,7 @@
             document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
             renderDynamicView();
         });
+
         // ---------- FILTROS DE GÉNERO ----------
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
@@ -964,7 +960,7 @@
                 albumHtml = '<div class="album-title">📸 Álbum</div><div class="album-grid">' +
                     album.map(url => `<div class="album-item" style="background-image:url(${url});"></div>`).join('') +
                     '</div>';
-            }
+                                                                  }
             modalContent.innerHTML = `
                 <div class="modal-header">
                     <button class="modal-close" id="closeModalBtn">✕</button>
@@ -1149,6 +1145,7 @@
             container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
         }
         async function getUserProfile(uid) { const s = await get(ref(db, 'users/'+uid)); return s.exists() ? s.val() : null; }
+
         // ---------- PANTALLA AJUSTES ----------
         function updateSettingsUI() {
             if (!userProfile) return;
