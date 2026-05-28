@@ -356,6 +356,7 @@
             font-size: 0.65rem;
             color: var(--text-secondary);
         }
+
         /* ---------- MAPA ---------- */
         #mapContainer { flex: 1; width: 100%; position: relative; }
         #map { width: 100%; height: 100%; z-index: 1; }
@@ -530,8 +531,8 @@
         .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.7rem; background: var(--bg); }
         .message { max-width: 80%; padding: 0.8rem 1rem; border-radius: 20px; word-wrap: break-word; line-height: 1.4; animation: msgPop 0.3s ease; }
         @keyframes msgPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .message.received { align-self: flex-start; background: var(--card-bg); border-bottom-left-radius: 5px; }
-        .message.sent { align-self: flex-end; background: var(--purple); border-bottom-right-radius: 5px; }
+        .message.received { align-self: flex-start; background: #2c2c3e; border-bottom-left-radius: 5px; }
+        .message.sent { align-self: flex-end; background: linear-gradient(135deg, var(--purple), var(--red-light)); border-bottom-right-radius: 5px; }
         .chat-input-area { display: flex; padding: 0.7rem 0.8rem; gap: 0.5rem; background: var(--card-bg); border-top: 1px solid rgba(123,44,191,0.4); align-items: center; padding-bottom: calc(0.7rem + var(--safe-bottom)); }
         .chat-input-area input { flex: 1; padding: 0.8rem 1.2rem; border-radius: 25px; border: 1px solid var(--purple); background: var(--bg); color: white; outline: none; font-size: 0.95rem; }
         .send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--red); border: none; color: white; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; transition: background 0.2s, transform 0.2s; }
@@ -651,7 +652,6 @@
             <p id="profileEditError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
         </div>
     </div>
-
     <!-- CHAT LIST -->
     <div id="chatListScreen" class="screen">
         <div class="header">
@@ -705,13 +705,12 @@
     <div id="toast" class="toast" style="display:none;"></div>
 
     <!-- ================== SCRIPT ================== -->
-    <!-- Continuará en la segunda parte... -->
-<script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-        // Configuración OBLIGATORIA con databaseURL
+        // ⚙️ Configuración OBLIGATORIA – NO MODIFICAR
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -734,11 +733,13 @@
         let map = null;
         let mapMarkers = [];
         let activeChatId = null;
+        let activeChatPartnerUid = null;   // UID del usuario con quien se chatea
+        let chatListUnsubscribe = null;    // Para liberar listener de la bandeja
         const dailyLimit = 10;
         let filterGender = 'all';
         let filterModoExpress = false;
-        let unreadChats = new Map();
-        let chatListenersActive = false;
+        let unreadChats = new Map();        // partnerUid -> cantidad de mensajes sin leer
+        let globalChatsListener = null;    // listener de notificaciones
 
         // ========== REFERENCIAS DOM ==========
         const loginScreen = document.getElementById('loginScreen');
@@ -808,6 +809,9 @@
                 currentUser = null; userProfile = null; nearbyUsers = [];
                 showScreen('loginScreen');
                 if (map) { map.remove(); map = null; }
+                // Limpiar listeners de chat
+                if (globalChatsListener) globalChatsListener();
+                if (chatListUnsubscribe) chatListUnsubscribe();
             }
         });
 
@@ -1016,7 +1020,8 @@
             document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
             renderDynamicView();
         });
-    // ========== FILTROS ==========
+
+        // ========== FILTROS ==========
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
             const chip = e.target;
@@ -1033,7 +1038,6 @@
             }
             loadNearbyUsers();
         });
-
         // ========== PERFIL MODAL ==========
         async function openProfile(uid) {
             if (!userProfile.premium) {
@@ -1168,141 +1172,206 @@
             } catch (e) { showToast('Error al actualizar'); }
         });
 
-        // ========== CHAT ==========
+        // ====================== CHAT – ESTILO TELEGRAM ======================
+        /**
+         * Genera un ID de chat único usando ambos UIDs ordenados alfabéticamente
+         */
+        function getChatId(uid1, uid2) {
+            return [uid1, uid2].sort().join('_');
+        }
+
+        /**
+         * Abre la conversación con otro usuario.
+         * @param {string} uid - UID del otro participante
+         */
         function openChat(uid) {
-            activeChatId = uid;
-            const partner = nearbyUsers.find(u => u.uid === uid) || userProfile || {};
+            activeChatPartnerUid = uid;
+            const partner = nearbyUsers.find(u => u.uid === uid) || {};
             document.getElementById('chatPartnerName').textContent = partner.name || 'Chat';
             showScreen('chatScreen');
-            loadMessages();
+            listenToMessages(uid);
+            // Marcar este chat como leído
             if (unreadChats.has(uid)) {
                 unreadChats.delete(uid);
                 updateUnreadBadge();
             }
         }
-        function loadMessages() {
-            if (!activeChatId) return;
-            const chatId = getChatId(currentUser.uid, activeChatId);
-            onValue(ref(db, 'chats/' + chatId + '/messages'), (snap) => {
+
+        /**
+         * Escucha los mensajes de la conversación activa.
+         */
+        function listenToMessages(partnerUid) {
+            const chatId = getChatId(currentUser.uid, partnerUid);
+            const messagesRef = ref(db, 'chats/' + chatId + '/messages');
+            // Nos aseguramos de eliminar el listener anterior para la misma conversación
+            if (chatListUnsubscribe) chatListUnsubscribe();
+            chatListUnsubscribe = onValue(messagesRef, (snapshot) => {
                 const container = document.getElementById('chatMessages');
+                if (!container) return;
                 container.innerHTML = '';
-                if (snap.exists()) {
-                    const msgs = Object.values(snap.val()).sort((a,b) => a.timestamp - b.timestamp);
-                    msgs.forEach(m => {
+                if (snapshot.exists()) {
+                    const msgs = Object.values(snapshot.val()).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                    msgs.forEach(msg => {
                         const div = document.createElement('div');
-                        div.className = `message ${m.sender === currentUser.uid ? 'sent' : 'received'}`;
-                        div.textContent = m.text;
+                        div.className = `message ${msg.sender === currentUser.uid ? 'sent' : 'received'}`;
+                        div.textContent = msg.text;
                         container.appendChild(div);
                     });
                     container.scrollTop = container.scrollHeight;
+                } else {
+                    container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:2rem;">Envía el primer mensaje ⚡</p>';
                 }
             });
         }
-        function getChatId(uid1, uid2) { return uid1 < uid2 ? uid1+'_'+uid2 : uid2+'_'+uid1; }
-        document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
-        document.getElementById('messageInput').addEventListener('keypress', e => { if (e.key==='Enter') sendMessage(); });
+
+        /**
+         * Envía un mensaje en la conversación activa.
+         */
         async function sendMessage() {
             const text = document.getElementById('messageInput').value.trim();
-            if (!text || !activeChatId) return;
+            if (!text || !activeChatPartnerUid) return;
+            const chatId = getChatId(currentUser.uid, activeChatPartnerUid);
             try {
-                const chatId = getChatId(currentUser.uid, activeChatId);
                 await push(ref(db, 'chats/' + chatId + '/messages'), {
-                    sender: currentUser.uid, text, timestamp: serverTimestamp()
+                    sender: currentUser.uid,
+                    text,
+                    timestamp: serverTimestamp()
                 });
                 document.getElementById('messageInput').value = '';
-            } catch (e) {}
+            } catch (e) {
+                showToast('No se pudo enviar el mensaje');
+            }
         }
 
-        document.getElementById('chatListBtn').addEventListener('click', () => { showScreen('chatListScreen'); loadChatList(); });
-        document.querySelector('.back-from-chatlist-btn').addEventListener('click', () => showScreen('mainScreen'));
-        document.querySelector('.back-from-chat-btn').addEventListener('click', () => { activeChatId = null; showScreen('chatListScreen'); loadChatList(); });
+        document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') sendMessage();
+        });
 
+        // Botones para volver de las pantallas de chat
+        document.getElementById('chatListBtn').addEventListener('click', () => {
+            showScreen('chatListScreen');
+            loadChatList();
+        });
+        document.querySelector('.back-from-chatlist-btn').addEventListener('click', () => showScreen('mainScreen'));
+        document.querySelector('.back-from-chat-btn').addEventListener('click', () => {
+            activeChatPartnerUid = null;
+            if (chatListUnsubscribe) { chatListUnsubscribe(); chatListUnsubscribe = null; }
+            showScreen('chatListScreen');
+            loadChatList();
+        });
+
+        /**
+         * Carga la bandeja de entrada de chats activos.
+         */
         async function loadChatList() {
             const container = document.getElementById('chatListContainer');
-            container.innerHTML = '<div style="padding:1rem;text-align:center;">Cargando conversaciones...</div>';
+            container.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-secondary);">Buscando conversaciones...</p>';
             try {
                 const snap = await get(ref(db, 'chats'));
                 if (!snap.exists()) {
-                    container.innerHTML = '<div class="empty-state" style="padding:2rem;text-align:center;color:var(--text-secondary);">No tienes conversaciones activas</div>';
+                    container.innerHTML = `
+                        <div style="padding:3rem 1rem; text-align:center;">
+                            <div style="font-size:3rem;">💬</div>
+                            <h3 style="margin:1rem 0 0.5rem;">No tienes conversaciones</h3>
+                            <p style="color:var(--text-secondary);">Ve al radar y rompe el hielo ⚡</p>
+                        </div>`;
                     return;
                 }
-                const chats = snap.val();
-                const items = [];
-                for (const chatId in chats) {
-                    if (!chatId.includes(currentUser.uid)) continue;
-                    const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
-                    const messagesObj = chats[chatId].messages || {};
-                    const msgs = Object.values(messagesObj).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+                const allChats = snap.val();
+                const chatItems = [];
+                for (const chatId in allChats) {
+                    const participants = chatId.split('_');
+                    if (!participants.includes(currentUser.uid)) continue;
+                    const partnerId = participants.find(id => id !== currentUser.uid);
+                    const msgs = allChats[chatId].messages ? Object.values(allChats[chatId].messages) : [];
+                    msgs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                     const lastMsg = msgs.length > 0 ? msgs[0] : null;
                     const profile = await getUserProfile(partnerId);
-                    items.push({
+                    chatItems.push({
                         partnerId,
-                        name: profile?.name || 'Usuario desconocido',
+                        name: profile?.name || 'Usuario',
                         lastMsgText: lastMsg ? lastMsg.text : '',
                         lastMsgTimestamp: lastMsg ? lastMsg.timestamp : 0,
                         online: profile?.online || false,
                         profilePic: profile?.profilePic || '',
                         initials: getInitials(profile?.name || '?'),
                         colors: getAvatarColors(profile?.name || '?'),
-                        hasUnread: unreadChats.has(partnerId)
+                        unreadCount: unreadChats.get(partnerId) || 0
                     });
                 }
-                items.sort((a, b) => b.lastMsgTimestamp - a.lastMsgTimestamp);
-                container.innerHTML = items.length ? items.map(item => `
+                chatItems.sort((a, b) => b.lastMsgTimestamp - a.lastMsgTimestamp);
+                if (chatItems.length === 0) {
+                    container.innerHTML = `
+                        <div style="padding:3rem 1rem; text-align:center;">
+                            <div style="font-size:3rem;">💬</div>
+                            <h3 style="margin:1rem 0 0.5rem;">No tienes conversaciones</h3>
+                            <p style="color:var(--text-secondary);">Ve al radar y rompe el hielo ⚡</p>
+                        </div>`;
+                    return;
+                }
+                container.innerHTML = chatItems.map(item => `
                     <div class="chat-item" data-uid="${item.partnerId}">
                         <div class="chat-avatar" style="background-image:url(${item.profilePic}); ${!item.profilePic ? `background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});` : ''}">${!item.profilePic ? item.initials : ''}</div>
                         <div class="chat-info">
-                            <div class="chat-name">${item.name} ${item.online ? '<span style="color:var(--online)">●</span>' : '<span style="color:var(--offline)">●</span>'}</div>
-                            <div class="chat-preview">${item.lastMsgText ? item.lastMsgText.substring(0,30) : 'Sin mensajes'}</div>
+                            <div class="chat-name">
+                                ${item.name}
+                                ${item.online ? '<span style="color:var(--online);">●</span>' : '<span style="color:var(--offline);">●</span>'}
+                            </div>
+                            <div class="chat-preview">${item.lastMsgText ? item.lastMsgText.substring(0, 30) : 'Sin mensajes'}</div>
                         </div>
-                        ${item.hasUnread ? '<span class="nav-badge" style="position:relative;top:auto;right:auto;display:inline-flex;">!</span>' : ''}
+                        ${item.unreadCount > 0 ? `<span class="nav-badge" style="position:relative;top:auto;right:auto;">${item.unreadCount}</span>` : ''}
                     </div>
-                `).join('') : '<div class="empty-state" style="padding:2rem;text-align:center;color:var(--text-secondary);">No tienes conversaciones activas</div>';
-                container.querySelectorAll('.chat-item').forEach(el => el.addEventListener('click', () => openChat(el.dataset.uid)));
-                unreadChats.clear();
-                updateUnreadBadge();
-            } catch (e) {
-                console.error('Error al cargar chats:', e);
-                container.innerHTML = '<div class="empty-state" style="padding:2rem;text-align:center;color:var(--text-secondary);">Error al cargar mensajes</div>';
+                `).join('');
+                container.querySelectorAll('.chat-item').forEach(el => {
+                    el.addEventListener('click', () => openChat(el.dataset.uid));
+                });
+            } catch (error) {
+                console.error('Error al cargar chats:', error);
+                container.innerHTML = `
+                    <div style="padding:3rem 1rem; text-align:center;">
+                        <p style="color:var(--text-secondary);">Error al cargar mensajes. Intenta de nuevo.</p>
+                    </div>`;
             }
         }
 
         async function getUserProfile(uid) {
             try {
-                const s = await get(ref(db, 'users/'+uid));
+                const s = await get(ref(db, 'users/' + uid));
                 return s.exists() ? s.val() : null;
             } catch (e) { return null; }
         }
 
-        // ========== NOTIFICACIONES DE CHAT ==========
+        // ========== NOTIFICACIONES DE CHAT EN TIEMPO REAL ==========
         function setupChatNotifications() {
-            if (chatListenersActive || !currentUser) return;
-            chatListenersActive = true;
-            onValue(ref(db, 'chats'), (snap) => {
-                try {
-                    if (!snap.exists()) return;
-                    const chats = snap.val();
-                    for (const chatId in chats) {
-                        if (!chatId.includes(currentUser.uid)) continue;
-                        const partnerId = chatId.split('_').find(p => p !== currentUser.uid);
-                        const messages = chats[chatId].messages;
-                        if (!messages) continue;
-                        const msgs = Object.values(messages).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-                        if (msgs.length === 0) continue;
-                        const lastMsg = msgs[0];
-                        if (lastMsg.sender !== currentUser.uid) {
-                            if (!(activeChatId === partnerId && document.getElementById('chatScreen').classList.contains('active'))) {
-                                const currentCount = unreadChats.get(partnerId) || 0;
-                                unreadChats.set(partnerId, currentCount + 1);
-                                getUserProfile(partnerId).then(profile => {
-                                    const senderName = profile?.name || 'Alguien';
-                                    showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
-                                    });
-                                updateUnreadBadge();
-                            }
+            if (globalChatsListener) globalChatsListener(); // Limpiar listener anterior
+            globalChatsListener = onValue(ref(db, 'chats'), (snapshot) => {
+                if (!snapshot.exists() || !currentUser) return;
+                const chats = snapshot.val();
+                for (const chatId in chats) {
+                    const participants = chatId.split('_');
+                    if (!participants.includes(currentUser.uid)) continue;
+                    const partnerId = participants.find(id => id !== currentUser.uid);
+                    // Si la conversación está abierta actualmente, no notificar
+                    if (activeChatPartnerUid === partnerId && chatScreen.classList.contains('active')) continue;
+
+                    const msgs = chats[chatId].messages ? Object.values(chats[chatId].messages) : [];
+                    if (msgs.length === 0) continue;
+                    msgs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    const lastMsg = msgs[0];
+                    if (lastMsg.sender !== currentUser.uid) {
+                        const currentCount = unreadChats.get(partnerId) || 0;
+                        unreadChats.set(partnerId, currentCount + 1);
+                        // Mostrar toast solo si la pantalla de chat no está activa
+                        if (!(activeChatPartnerUid === partnerId && chatScreen.classList.contains('active'))) {
+                            getUserProfile(partnerId).then(profile => {
+                                const senderName = profile?.name || 'Alguien';
+                                showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
+                            });
                         }
+                        updateUnreadBadge();
                     }
-                } catch (e) {}
+                }
             });
         }
 
@@ -1352,8 +1421,14 @@
                 const screenId = item.dataset.screen;
                 if (screenId === 'mainScreen') showScreen('mainScreen');
                 else if (screenId === 'myProfileScreen') openMyProfile();
-                else if (screenId === 'chatListScreen') { showScreen('chatListScreen'); loadChatList(); }
-                else if (screenId === 'settingsScreen') { showScreen('settingsScreen'); updateSettingsUI(); }
+                else if (screenId === 'chatListScreen') {
+                    showScreen('chatListScreen');
+                    loadChatList();
+                }
+                else if (screenId === 'settingsScreen') {
+                    showScreen('settingsScreen');
+                    updateSettingsUI();
+                }
             });
         });
 
@@ -1376,6 +1451,5 @@
             return p[Math.abs(h) % p.length];
         }
     </script>
-</body>
+    </body>
 </html>
-```
