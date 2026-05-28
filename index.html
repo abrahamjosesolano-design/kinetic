@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -51,13 +52,497 @@
         }
         .screen.active { display: flex; }
 
-        /* ... (todos los estilos iguales a la versión anterior) ... */
-        /* Por brevedad no los copio aquí, pero son exactamente los mismos que enviaste en la última Parte 1 */
+        /* ---------- LOGIN ---------- */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 2rem;
+            background: linear-gradient(145deg, var(--purple-dark) 0%, var(--bg) 100%);
+        }
+        .logo {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, var(--red-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(123,44,191,0.6));
+        }
+        .tagline {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+        .input-group {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            border: 2px solid var(--purple);
+            background: rgba(26, 0, 51, 0.8);
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .input-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23B8B8D4' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            border-color: var(--red-light);
+            box-shadow: 0 0 18px rgba(230, 56, 59, 0.5);
+        }
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple), var(--red));
+            color: white;
+            box-shadow: 0 4px 15px rgba(229, 56, 59, 0.5);
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--purple);
+            color: var(--text);
+        }
+        .divider {
+            color: var(--text-secondary);
+            margin: 1.2rem 0;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* ---------- SETUP ---------- */
+        .setup-container {
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .setup-container h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--red-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.8rem;
+        }
+        .setup-container label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.2rem;
+            margin-top: 0.5rem;
+        }
+
+        /* ---------- HEADER ---------- */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid rgba(123, 44, 191, 0.4);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            min-height: var(--header-height);
+        }
+        .header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--red-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .icon-btn {
+            background: rgba(123, 44, 191, 0.25);
+            border: none;
+            color: var(--text);
+            font-size: 1.3rem;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            backdrop-filter: blur(5px);
+            position: relative;
+        }
+        .icon-btn .badge {
+            position: absolute;
+            top: -2px; right: -2px;
+            background: var(--red);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 6px rgba(0,0,0,0.5);
+        }
+        .icon-btn:active { background: rgba(123, 44, 191, 0.6); transform: scale(0.92); }
+
+        /* ---------- NAV INFERIOR ---------- */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--card-bg);
+            border-top: 1px solid rgba(123,44,191,0.3);
+            height: var(--nav-height);
+            padding-bottom: calc(0.5rem + var(--safe-bottom));
+            padding-top: 0.5rem;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+            position: relative;
+        }
+        .nav-item.active { color: var(--red-light); transform: translateY(-2px); }
+        .nav-icon { font-size: 1.4rem; }
+        .nav-badge {
+            position: absolute;
+            top: -4px; right: 10px;
+            background: var(--red);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            min-width: 16px; height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+        /* ---------- FILTROS ---------- */
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            background: var(--card-bg);
+            overflow-x: auto;
+            white-space: nowrap;
+            align-items: center;
+            scrollbar-width: none;
+            border-bottom: 1px solid rgba(123,44,191,0.2);
+        }
+        .filters::-webkit-scrollbar { display: none; }
+        .filter-chip {
+            background: rgba(123, 44, 191, 0.2);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            flex-shrink: 0;
+        }
+        .filter-chip.active {
+            background: var(--purple);
+            border-color: var(--red-light);
+            box-shadow: 0 0 12px rgba(230,56,59,0.5);
+            font-weight: 600;
+        }
+
+        /* ---------- GRID PERFILES ---------- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.7rem;
+            padding: 0.8rem;
+            flex: 1;
+            overflow-y: auto;
+            align-content: start;
+            justify-items: center;
+        }
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            position: relative;
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            max-width: 150px;
+            width: 100%;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .profile-card:active { transform: scale(0.95); box-shadow: 0 0 15px var(--purple); }
+        .profile-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: white;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+        .online-indicator {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--card-bg);
+        }
+        .online-indicator.online {
+            background: var(--online);
+            box-shadow: 0 0 8px rgba(46,204,113,0.6);
+        }
+        .online-indicator.offline {
+            background: var(--offline);
+            box-shadow: none;
+        }
+        .profile-info {
+            padding: 0.4rem;
+            text-align: center;
+        }
+        .profile-name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-distance {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+        }
+
+        /* ---------- MAPA ---------- */
+        #mapContainer { flex: 1; width: 100%; position: relative; }
+        #map { width: 100%; height: 100%; z-index: 1; }
+
+        /* ---------- MODAL ---------- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px var(--purple-dark);
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(60px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header {
+            padding: 1.8rem 1.5rem 1rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--purple), var(--red));
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            background: rgba(0,0,0,0.3);
+            border: none;
+            color: white;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .modal-close:hover { background: rgba(0,0,0,0.5); }
+        .modal-avatar {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            border: 3px solid rgba(255,255,255,0.4);
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .modal-body { padding: 1.5rem; text-align: center; }
+        .modal-body .bio { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; }
+        .album-title { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .album-item {
+            aspect-ratio: 1 / 1;
+            border-radius: 12px;
+            background-color: var(--purple-dark);
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.2s;
+        }
+        .album-item:active { transform: scale(1.05); }
+        .modal-actions { display: flex; gap: 1rem; padding: 0 1.5rem 1.8rem; }
+        .btn-like {
+            flex: 1; padding: 0.9rem; border: none; border-radius: 30px;
+            font-weight: 700; background: var(--red); color: white; cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-message {
+            flex: 1; padding: 0.9rem; border: 2px solid var(--purple); border-radius: 30px;
+            font-weight: 700; background: transparent; color: var(--text); cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-message:hover { background: rgba(123,44,191,0.3); }
+
+        /* ---------- MI PERFIL ---------- */
+        .profile-screen-container {
+            padding: 1.5rem;
+        }
+        .profile-pic-preview {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--red));
+            margin: 0 auto 1rem;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 15px rgba(123,44,191,0.5);
+        }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 14px;
+            margin: 0.5rem 0;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--offline);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--purple);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* ---------- CHAT ---------- */
+        .chat-list { flex: 1; overflow-y: auto; padding: 0.5rem 0.8rem; }
+        .chat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; border-radius: 14px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.2s; }
+        .chat-item:active { background: rgba(123,44,191,0.2); }
+        .chat-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3rem; color: white; flex-shrink: 0; background-size: cover; background-position: center; }
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-name { font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+        .chat-preview { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.7rem; background: var(--bg); }
+        .message { max-width: 80%; padding: 0.8rem 1rem; border-radius: 20px; word-wrap: break-word; line-height: 1.4; animation: msgPop 0.3s ease; }
+        @keyframes msgPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .message.received { align-self: flex-start; background: #2c2c3e; border-bottom-left-radius: 5px; }
+        .message.sent { align-self: flex-end; background: linear-gradient(135deg, var(--purple), var(--red-light)); border-bottom-right-radius: 5px; }
+        .chat-input-area { display: flex; padding: 0.7rem 0.8rem; gap: 0.5rem; background: var(--card-bg); border-top: 1px solid rgba(123,44,191,0.4); align-items: center; padding-bottom: calc(0.7rem + var(--safe-bottom)); }
+        .chat-input-area input { flex: 1; padding: 0.8rem 1.2rem; border-radius: 25px; border: 1px solid var(--purple); background: var(--bg); color: white; outline: none; font-size: 0.95rem; }
+        .send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--red); border: none; color: white; font-size: 1.3rem; cursor: pointer; flex-shrink: 0; transition: background 0.2s, transform 0.2s; }
+        .send-btn:active { background: var(--red-light); transform: scale(0.9); }
+
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--card-bg); color: var(--text); padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 0.9rem; z-index: 300; box-shadow: 0 5px 20px rgba(0,0,0,0.6); animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards; pointer-events: none; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(30px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
     </style>
 </head>
 <body>
-
-    <!-- ==================== PANTALLAS ==================== -->
     <!-- LOGIN -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
@@ -127,7 +612,7 @@
     <!-- MI PERFIL -->
     <div id="myProfileScreen" class="screen">
         <div class="header">
-            <button class="icon-btn back-from-profile-btn">←</button>
+            <button class="icon-btn" id="backFromProfileBtn">←</button>
             <h2>Mi Perfil</h2>
             <div></div>
         </div>
@@ -164,10 +649,11 @@
             <p id="profileEditError" style="color:var(--red-light); margin-top:0.5rem; text-align:center;"></p>
         </div>
     </div>
+
     <!-- CHAT LIST -->
     <div id="chatListScreen" class="screen">
         <div class="header">
-            <button class="icon-btn back-from-chatlist-btn">←</button>
+            <button class="icon-btn" id="backFromChatListBtn">←</button>
             <h2>Mensajes</h2><div></div>
         </div>
         <div class="chat-list" id="chatListContainer"></div>
@@ -176,7 +662,7 @@
     <!-- CHAT -->
     <div id="chatScreen" class="screen">
         <div class="header">
-            <button class="icon-btn back-from-chat-btn">←</button>
+            <button class="icon-btn" id="backFromChatBtn">←</button>
             <h2 id="chatPartnerName">Chat</h2><div></div>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
@@ -189,7 +675,7 @@
     <!-- AJUSTES -->
     <div id="settingsScreen" class="screen">
         <div class="header">
-            <button class="icon-btn back-from-settings-btn">←</button>
+            <button class="icon-btn" id="backFromSettingsBtn">←</button>
             <h2>Ajustes</h2><div></div>
         </div>
         <div class="settings-container" style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
@@ -215,776 +701,771 @@
 
     <!-- TOAST -->
     <div id="toast" class="toast" style="display:none;"></div>
-    <!-- ================== SCRIPT ================== -->
+    <!-- ================== SCRIPTS ================== -->
     <script type="module">
-        // La Parte 2 se pega justo aquí
-// ================== SCRIPT COMPLETO (PARTE 2) ==================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getDatabase, ref, set, onValue, push, serverTimestamp, get, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-// ⚙️ Configuración OBLIGATORIA – NO MODIFICAR
-const firebaseConfig = {
-    apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-    authDomain: "kinetic-app-67ae5.firebaseapp.com",
-    databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-    projectId: "kinetic-app-67ae5",
-    storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-    messagingSenderId: "825570718975",
-    appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-};
+        // Configuración OBLIGATORIA – NO MODIFICAR
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+            authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+            projectId: "kinetic-app-67ae5",
+            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+            messagingSenderId: "825570718975",
+            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+        };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-// ========== FUNCIONES SEGURAS PARA EL DOM ==========
-function $(id) { return document.getElementById(id); }
-function safeAddEventListener(id, event, handler) {
-    const el = $(id);
-    if (el) el.addEventListener(event, handler);
-}
-function safeQuerySelector(selector) {
-    const el = document.querySelector(selector);
-    return el;
-}
-function safeQuerySelectorAll(selector) {
-    return document.querySelectorAll(selector);
-}
+        // ========== VARIABLES GLOBALES ==========
+        let currentUser = null;
+        let userProfile = null;
+        let nearbyUsers = [];
+        let currentView = 'grid';
+        let map = null;
+        let mapMarkers = [];
+        let activeChatPartnerUid = null;
+        let chatMessagesUnsubscribe = null;
+        const dailyLimit = 10;
+        let filterGender = 'all';
+        let filterModoExpress = false;
+        let unreadChats = new Map();
+        let globalChatsListener = null;
 
-// ========== VARIABLES GLOBALES ==========
-let currentUser = null;
-let userProfile = null;
-let nearbyUsers = [];
-let currentView = 'grid';
-let map = null;
-let mapMarkers = [];
-let activeChatPartnerUid = null;
-let chatMessagesUnsubscribe = null;
-const dailyLimit = 10;
-let filterGender = 'all';
-let filterModoExpress = false;
-let unreadChats = new Map();
-let globalChatsListener = null;
+        // ========== FUNCIONES AUXILIARES PARA EL DOM ==========
+        function $(id) { return document.getElementById(id); }
+        function safeAddEventListener(id, event, handler) {
+            const el = $(id);
+            if (el) el.addEventListener(event, handler);
+            else console.warn(`Elemento #${id} no encontrado para añadir evento`);
+        }
 
-// ========== REFERENCIAS DOM SEGURAS ==========
-const loginScreen = $('loginScreen');
-const setupScreen = $('setupScreen');
-const mainScreen = $('mainScreen');
-const myProfileScreen = $('myProfileScreen');
-const settingsScreen = $('settingsScreen');
-const profileModal = $('profileModal');
-const modalContent = $('modalContent');
-const chatListScreen = $('chatListScreen');
-const chatScreen = $('chatScreen');
-const toast = $('toast');
-const limitWarning = $('limitWarning');
-const unreadBadge = $('unreadBadge');
+        // ========== REFERENCIAS DOM PRINCIPALES ==========
+        const loginScreen = $('loginScreen');
+        const setupScreen = $('setupScreen');
+        const mainScreen = $('mainScreen');
+        const myProfileScreen = $('myProfileScreen');
+        const settingsScreen = $('settingsScreen');
+        const profileModal = $('profileModal');
+        const modalContent = $('modalContent');
+        const chatListScreen = $('chatListScreen');
+        const chatScreen = $('chatScreen');
+        const toast = $('toast');
+        const limitWarning = $('limitWarning');
+        const unreadBadge = $('unreadBadge');
 
-// ========== AUTENTICACIÓN ==========
-safeAddEventListener('loginBtn', 'click', async () => {
-    const email = $('emailInput')?.value.trim();
-    const password = $('passwordInput')?.value.trim();
-    if (!email || !password) return showAuthError('Completa todos los campos');
-    try { await signInWithEmailAndPassword(auth, email, password); }
-    catch (e) { showAuthError('Error: ' + e.message); }
-});
-safeAddEventListener('registerBtn', 'click', async () => {
-    const email = $('emailInput')?.value.trim();
-    const password = $('passwordInput')?.value.trim();
-    if (!email || !password) return showAuthError('Completa todos los campos');
-    try { await createUserWithEmailAndPassword(auth, email, password); }
-    catch (e) { showAuthError('Error: ' + e.message); }
-});
-safeAddEventListener('logoutBtn', 'click', () => signOut(auth));
+        // ========== AUTENTICACIÓN ==========
+        safeAddEventListener('loginBtn', 'click', async () => {
+            const email = $('emailInput')?.value.trim();
+            const password = $('passwordInput')?.value.trim();
+            if (!email || !password) return showAuthError('Completa todos los campos');
+            try { await signInWithEmailAndPassword(auth, email, password); }
+            catch (e) { showAuthError('Error: ' + e.message); }
+        });
+        safeAddEventListener('registerBtn', 'click', async () => {
+            const email = $('emailInput')?.value.trim();
+            const password = $('passwordInput')?.value.trim();
+            if (!email || !password) return showAuthError('Completa todos los campos');
+            try { await createUserWithEmailAndPassword(auth, email, password); }
+            catch (e) { showAuthError('Error: ' + e.message); }
+        });
+        safeAddEventListener('logoutBtn', 'click', () => signOut(auth));
 
-function showAuthError(msg) {
-    const el = $('authError');
-    if (el) {
-        el.textContent = msg;
-        setTimeout(() => { if(el) el.textContent = ''; }, 4000);
-    }
-}
+        function showAuthError(msg) {
+            const el = $('authError');
+            if (el) {
+                el.textContent = msg;
+                setTimeout(() => { if(el) el.textContent = ''; }, 4000);
+            }
+        }
 
-// ========== ESTADO DE AUTENTICACIÓN ==========
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        currentUser = user;
-        try {
-            const snap = await get(ref(db, 'users/' + user.uid));
-            if (snap.exists()) {
-                userProfile = snap.val();
-                userProfile.uid = user.uid;
-                if (!userProfile.name || !userProfile.age || !userProfile.gender || !userProfile.interestedIn || userProfile.bio === undefined) {
-                    showScreen('setupScreen');
-                    prefillSetupForm();
-                } else {
-                    // Forzar actualización de online y ubicación al iniciar
-                    const userRef = ref(db, 'users/' + user.uid);
-                    await update(userRef, { online: true });
-                    onDisconnect(userRef).update({ online: false });
-                    initApp();
+        // ========== ESTADO DE AUTENTICACIÓN ==========
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    const snap = await get(ref(db, 'users/' + user.uid));
+                    if (snap.exists()) {
+                        userProfile = snap.val();
+                        userProfile.uid = user.uid;
+                        if (!userProfile.name || !userProfile.age || !userProfile.gender || !userProfile.interestedIn || userProfile.bio === undefined) {
+                            showScreen('setupScreen');
+                            prefillSetupForm();
+                        } else {
+                            const userRef = ref(db, 'users/' + user.uid);
+                            await update(userRef, { online: true });
+                            onDisconnect(userRef).update({ online: false });
+                            initApp();
+                        }
+                    } else {
+                        userProfile = { uid: user.uid, email: user.email };
+                        showScreen('setupScreen');
+                    }
+                } catch (error) {
+                    console.error('Error al obtener perfil:', error);
+                    showToast('Error de conexión. Recarga la página.');
                 }
             } else {
-                userProfile = { uid: user.uid, email: user.email };
-                showScreen('setupScreen');
-            }
-        } catch (error) {
-            console.error('Error al obtener perfil:', error);
-            showToast('Error de conexión. Recarga la página.');
-        }
-    } else {
-        if (currentUser) {
-            try { await update(ref(db, 'users/' + currentUser.uid), { online: false }); } catch(e) {}
-        }
-        currentUser = null; userProfile = null; nearbyUsers = [];
-        showScreen('loginScreen');
-        if (map) { map.remove(); map = null; }
-        if (globalChatsListener) globalChatsListener();
-        if (chatMessagesUnsubscribe) chatMessagesUnsubscribe();
-    }
-});
-
-function prefillSetupForm() {
-    const fields = ['setupName', 'setupAge', 'setupGender', 'setupInterested', 'setupBio'];
-    if (fields.some(id => !$(id))) return;
-    $('setupName').value = userProfile.name || '';
-    $('setupAge').value = userProfile.age || '';
-    $('setupGender').value = userProfile.gender || 'male';
-    $('setupInterested').value = userProfile.interestedIn || 'female';
-    $('setupBio').value = userProfile.bio || '';
-}
-
-// ========== GUARDAR PERFIL (SETUP) ==========
-safeAddEventListener('saveProfileBtn', 'click', async () => {
-    const name = $('setupName')?.value.trim();
-    const age = parseInt($('setupAge')?.value);
-    const gender = $('setupGender')?.value;
-    const interestedIn = $('setupInterested')?.value;
-    const bio = $('setupBio')?.value.trim();
-    const err = $('setupError');
-    if (!name || !age || age < 18) { if(err) err.textContent = 'Nombre y edad (mín 18) requeridos.'; return; }
-    if (!bio) { if(err) err.textContent = 'Escribe una biografía.'; return; }
-
-    let lat = null, lng = null;
-    try {
-        const pos = await new Promise((res, rej) => {
-            navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 });
-        });
-        lat = pos.coords.latitude;
-        lng = pos.coords.longitude;
-    } catch (e) { console.warn('Sin ubicación en setup'); }
-
-    const data = {
-        email: currentUser.email, name, age, gender, interestedIn, bio,
-        profilePic: userProfile?.profilePic || '',
-        album: userProfile?.album || [],
-        premium: userProfile?.premium || false,
-        modoExpress: userProfile?.modoExpress || false,
-        dailyViews: 0, lastResetDate: getTodayString(),
-        lat, lng, online: true
-    };
-    try {
-        await set(ref(db, 'users/' + currentUser.uid), data);
-        userProfile = { uid: currentUser.uid, ...data };
-        const userRef = ref(db, 'users/' + currentUser.uid);
-        await update(userRef, { online: true });
-        onDisconnect(userRef).update({ online: false });
-        showScreen('mainScreen');
-        initApp();
-    } catch (e) {
-        console.error(e);
-        showToast('Error al guardar perfil');
-    }
-});
-
-function initApp() {
-    showScreen('mainScreen');
-    getUserLocation();
-    checkPremiumStatus();
-    loadNearbyUsers();
-    updateSettingsUI();
-    setupChatNotifications();
-}
-
-function getUserLocation() {
-    if (!navigator.geolocation) {
-        showToast('Geolocalización no soportada');
-        return;
-    }
-    navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            try {
-                await update(ref(db, 'users/' + currentUser.uid), { lat, lng, online: true });
-            } catch(e) {}
-            loadNearbyUsers();
-        },
-        () => showToast('Activa la ubicación para ver personas cerca'),
-        { enableHighAccuracy: true }
-    );
-}
-        // ========== RADAR ==========
-async function loadNearbyUsers() {
-    if (!currentUser || !userProfile) return;
-    try {
-        const snap = await get(ref(db, 'users'));
-        if (!snap.exists()) {
-            nearbyUsers = [];
-            renderDynamicView();
-            return;
-        }
-        const all = snap.val();
-        const me = currentUser.uid;
-        const myLat = userProfile.lat;
-        const myLng = userProfile.lng;
-        let users = Object.entries(all)
-            .filter(([uid]) => uid !== me)
-            .map(([uid, p]) => {
-                let distance = null;
-                if (myLat != null && myLng != null && p.lat != null && p.lng != null) {
-                    distance = calcDistance(myLat, myLng, p.lat, p.lng);
+                if (currentUser) {
+                    try { await update(ref(db, 'users/' + currentUser.uid), { online: false }); } catch(e) {}
                 }
-                return { uid, ...p, distance };
-            });
-
-        const myGender = userProfile.gender;
-        const myInterestedIn = userProfile.interestedIn;
-        users = users.filter(u => {
-            const otherGender = u.gender;
-            const otherInterestedIn = u.interestedIn || 'all';
-            return (myInterestedIn === 'all' || myInterestedIn === otherGender) &&
-                   (otherInterestedIn === 'all' || otherInterestedIn === myGender);
+                currentUser = null; userProfile = null; nearbyUsers = [];
+                showScreen('loginScreen');
+                if (map) { map.remove(); map = null; }
+                if (globalChatsListener) globalChatsListener();
+                if (chatMessagesUnsubscribe) chatMessagesUnsubscribe();
+            }
         });
 
-        if (filterGender !== 'all') users = users.filter(u => u.gender === filterGender);
-        if (filterModoExpress) users = users.filter(u => u.modoExpress === true);
-
-        users.sort((a, b) => {
-            if (a.distance === null && b.distance === null) return 0;
-            if (a.distance === null) return 1;
-            if (b.distance === null) return -1;
-            return a.distance - b.distance;
-        });
-        nearbyUsers = users;
-        renderDynamicView();
-    } catch (e) {
-        console.error('Error en radar:', e);
-        showToast('Error al cargar el radar');
-    }
-}
-
-function calcDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function formatDistance(km) {
-    if (km == null) return '🌍';
-    if (km < 1) {
-        const metros = Math.round(km * 1000);
-        return '📍 ' + metros + ' metros';
-    }
-    return '📍 ' + km.toFixed(1) + ' km';
-}
-
-// ========== VISTAS DINÁMICAS ==========
-function renderDynamicView() {
-    const container = $('dynamicContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    if (currentView === 'grid') {
-        container.className = 'grid';
-        renderGridView(container);
-    } else {
-        container.className = '';
-        container.style.flex = '1';
-        renderMapView(container);
-    }
-    checkPremiumStatus();
-}
-
-function renderGridView(container) {
-    container.innerHTML = nearbyUsers.map((u, i) => {
-        const bgStyle = u.profilePic ? `background-image:url(${u.profilePic});` : '';
-        const initials = !u.profilePic ? getInitials(u.name) : '';
-        const gradient = !u.profilePic ? `background:linear-gradient(135deg, ${getAvatarColors(u.name)[0]}, ${getAvatarColors(u.name)[1]});` : '';
-        const onlineClass = u.online ? 'online' : 'offline';
-        const distText = formatDistance(u.distance);
-        return `<div class="profile-card" style="animation-delay:${i*0.04}s;" data-uid="${u.uid}">
-            <div class="profile-img" style="${bgStyle} ${gradient}">${initials}<span class="online-indicator ${onlineClass}"></span></div>
-            <div class="profile-info">
-                <div class="profile-name">${u.name}, ${u.age}</div>
-                <div class="profile-distance">${distText}</div>
-            </div>
-        </div>`;
-    }).join('');
-    container.querySelectorAll('.profile-card').forEach(c => c.addEventListener('click', () => openProfile(c.dataset.uid)));
-}
-
-function renderMapView(container) {
-    container.innerHTML = '<div id="map"></div>';
-    if (!map) {
-        map = L.map('map').setView([0,0], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(map);
-    } else {
-        document.getElementById('map').appendChild(map.getContainer());
-        map.invalidateSize();
-    }
-    mapMarkers.forEach(m => map.removeLayer(m));
-    mapMarkers = [];
-    if (userProfile?.lat && userProfile?.lng) {
-        map.setView([userProfile.lat, userProfile.lng], 13);
-        const myIcon = L.divIcon({html:'<div style="background:#E5383B; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>', iconSize:[20,20]});
-        mapMarkers.push(L.marker([userProfile.lat, userProfile.lng], {icon:myIcon}).addTo(map).bindPopup('Yo'));
-    }
-    nearbyUsers.forEach(u => {
-        if (u.lat && u.lng) {
-            const imgHtml = u.profilePic ? `<img src="${u.profilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : getInitials(u.name);
-            const icon = L.divIcon({
-                html: `<div style="width:30px; height:30px; border-radius:50%; overflow:hidden; border:2px solid white; background:${u.profilePic?'transparent':'#7B2CBF'}; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; color:white;">${imgHtml}</div>`,
-                iconSize:[30,30]
-            });
-            const marker = L.marker([u.lat, u.lng], {icon}).addTo(map);
-            marker.on('click', () => openProfile(u.uid));
-            mapMarkers.push(marker);
+        function prefillSetupForm() {
+            const fields = ['setupName', 'setupAge', 'setupGender', 'setupInterested', 'setupBio'];
+            if (fields.some(id => !$(id))) return;
+            $('setupName').value = userProfile.name || '';
+            $('setupAge').value = userProfile.age || '';
+            $('setupGender').value = userProfile.gender || 'male';
+            $('setupInterested').value = userProfile.interestedIn || 'female';
+            $('setupBio').value = userProfile.bio || '';
         }
-    });
-}
 
-safeAddEventListener('toggleViewBtn', 'click', () => {
-    currentView = currentView === 'grid' ? 'map' : 'grid';
-    const btn = $('toggleViewBtn');
-    if (btn) btn.textContent = currentView === 'grid' ? '🗺️' : '🔲';
-    renderDynamicView();
-});
+        // ========== GUARDAR PERFIL (SETUP) ==========
+        safeAddEventListener('saveProfileBtn', 'click', async () => {
+            const name = $('setupName')?.value.trim();
+            const age = parseInt($('setupAge')?.value);
+            const gender = $('setupGender')?.value;
+            const interestedIn = $('setupInterested')?.value;
+            const bio = $('setupBio')?.value.trim();
+            const err = $('setupError');
+            if (!name || !age || age < 18) { if(err) err.textContent = 'Nombre y edad (mín 18) requeridos.'; return; }
+            if (!bio) { if(err) err.textContent = 'Escribe una biografía.'; return; }
 
-// ========== FILTROS ==========
-safeAddEventListener('filtersContainer', 'click', (e) => {
-    if (!e.target.classList.contains('filter-chip')) return;
-    const chip = e.target;
-    const gender = chip.dataset.gender;
-    const filter = chip.dataset.filter;
-    if (gender) {
-        document.querySelectorAll('#filtersContainer .filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        filterGender = gender;
-    } else if (filter === 'modoExpress') {
-        filterModoExpress = !filterModoExpress;
-        if (filterModoExpress) chip.classList.add('active');
-        else chip.classList.remove('active');
-    }
-    loadNearbyUsers();
-});
-
-// ========== PERFIL MODAL ==========
-async function openProfile(uid) {
-    if (!userProfile.premium) {
-        const can = await incrementViewCount();
-        if (!can) { if(limitWarning) limitWarning.style.display = 'block'; return; }
-    }
-    const user = nearbyUsers.find(u => u.uid === uid);
-    if (!user || !modalContent) return;
-    const initials = getInitials(user.name);
-    const [c1, c2] = getAvatarColors(user.name);
-    const mainPic = user.profilePic ? `<img src="${user.profilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : initials;
-    const album = user.album || [];
-    let albumHtml = '';
-    if (album.length > 0) {
-        albumHtml = '<div class="album-title">📸 Álbum</div><div class="album-grid">' +
-            album.map(url => `<div class="album-item" style="background-image:url(${url});"></div>`).join('') +
-            '</div>';
-    }
-    modalContent.innerHTML = `
-        <div class="modal-header">
-            <button class="modal-close" id="closeModalBtn">✕</button>
-            <div class="modal-avatar" style="${!user.profilePic ? `background:linear-gradient(135deg, ${c1}, ${c2});` : ''}">${mainPic}</div>
-            <h3>${user.name}, ${user.age}</h3>
-            <p>${formatDistance(user.distance)} • ${user.online ? '🟢 En línea' : '⚫ Desconectado'}</p>
-        </div>
-        <div class="modal-body">
-            <p class="bio">${user.bio || 'Sin descripción'}</p>
-            ${albumHtml}
-        </div>
-        <div class="modal-actions">
-            <button class="btn-like">❤️ Me gusta</button>
-            <button class="btn-message" id="openChatBtn">💬 Mensaje</button>
-        </div>`;
-    document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
-    document.getElementById('openChatBtn')?.addEventListener('click', () => { closeModal(); openChat(uid); });
-    if(profileModal) profileModal.classList.add('active');
-}
-
-window.closeModal = () => { if(profileModal) profileModal.classList.remove('active'); };
-if(profileModal) profileModal.addEventListener('click', e => { if (e.target === profileModal) closeModal(); });
-
-// ========== LÍMITE DIARIO ==========
-function getTodayString() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-async function incrementViewCount() {
-    try {
-        const uRef = ref(db, 'users/' + currentUser.uid);
-        const snap = await get(uRef);
-        if (!snap.exists()) return false;
-        const data = snap.val();
-        const today = getTodayString();
-        let views = data.dailyViews || 0;
-        if (data.lastResetDate !== today) {
-            views = 0;
-            await update(uRef, { dailyViews: 0, lastResetDate: today });
-        }
-        if (views >= dailyLimit) return false;
-        await update(uRef, { dailyViews: views + 1 });
-        userProfile.dailyViews = views + 1;
-        return true;
-    } catch (e) { return false; }
-}
-function checkPremiumStatus() {
-    if(limitWarning) limitWarning.style.display = (userProfile && !userProfile.premium && userProfile.dailyViews >= dailyLimit) ? 'block' : 'none';
-}
-safeAddEventListener('upgradeBtn', 'click', async () => {
-    try {
-        await update(ref(db, 'users/' + currentUser.uid), { premium: true });
-        userProfile.premium = true;
-        if(limitWarning) limitWarning.style.display = 'none';
-        showToast('¡Ahora eres Premium!');
-        updateSettingsUI();
-    } catch (e) {}
-});
-
-// ========== MI PERFIL (edición) ==========
-function openMyProfile() {
-    if (!userProfile) return;
-    const fields = ['editName','editAge','editGender','editInterested','editBio','editProfilePic','editModoExpress','editAlbum1','editAlbum2','editAlbum3'];
-    if (fields.some(id => !$(id))) return;
-    $('editName').value = userProfile.name || '';
-    $('editAge').value = userProfile.age || '';
-    $('editGender').value = userProfile.gender || 'male';
-    $('editInterested').value = userProfile.interestedIn || 'female';
-    $('editBio').value = userProfile.bio || '';
-    $('editProfilePic').value = userProfile.profilePic || '';
-    $('editModoExpress').checked = userProfile.modoExpress || false;
-    const album = userProfile.album || [];
-    $('editAlbum1').value = album[0] || '';
-    $('editAlbum2').value = album[1] || '';
-    $('editAlbum3').value = album[2] || '';
-    updateProfilePicPreview();
-    showScreen('myProfileScreen');
-}
-safeAddEventListener('back-from-profile-btn', 'click', () => showScreen('mainScreen'));
-safeAddEventListener('editProfilePic', 'input', updateProfilePicPreview);
-function updateProfilePicPreview() {
-    const url = $('editProfilePic')?.value.trim();
-    const preview = $('profilePicPreview');
-    if (!preview) return;
-    if (url) {
-        preview.style.backgroundImage = `url(${url})`;
-        preview.textContent = '';
-    } else {
-        preview.style.backgroundImage = '';
-        preview.textContent = getInitials(userProfile?.name || '?');
-        const [c1, c2] = getAvatarColors(userProfile?.name || '?');
-        preview.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-    }
-}
-safeAddEventListener('saveMyProfileBtn', 'click', async () => {
-    const name = $('editName')?.value.trim();
-    const age = parseInt($('editAge')?.value);
-    const gender = $('editGender')?.value;
-    const interestedIn = $('editInterested')?.value;
-    const bio = $('editBio')?.value.trim();
-    const profilePic = $('editProfilePic')?.value.trim();
-    const modoExpress = $('editModoExpress')?.checked;
-    const album = [
-        $('editAlbum1')?.value.trim(),
-        $('editAlbum2')?.value.trim(),
-        $('editAlbum3')?.value.trim()
-    ].filter(url => url !== '');
-    const err = $('profileEditError');
-    if (!name || !age || age < 18) { if(err) err.textContent = 'Nombre y edad válidos.'; return; }
-    if (!bio) { if(err) err.textContent = 'Escribe una biografía.'; return; }
-    try {
-        await update(ref(db, 'users/' + currentUser.uid), { name, age, gender, interestedIn, bio, profilePic, modoExpress, album });
-        Object.assign(userProfile, { name, age, gender, interestedIn, bio, profilePic, modoExpress, album });
-        if(err) err.textContent = '';
-        showToast('Perfil actualizado');
-        showScreen('mainScreen');
-        loadNearbyUsers();
-    } catch (e) { showToast('Error al actualizar'); }
-});
-        // ====================== CHAT – ESTILO TELEGRAM ======================
-function getChatId(uid1, uid2) {
-    return [uid1, uid2].sort().join('_');
-}
-
-function openChat(uid) {
-    activeChatPartnerUid = uid;
-    const partner = nearbyUsers.find(u => u.uid === uid) || {};
-    const nameEl = $('chatPartnerName');
-    if (nameEl) nameEl.textContent = partner.name || 'Chat';
-    showScreen('chatScreen');
-    listenToMessages(uid);
-    if (unreadChats.has(uid)) {
-        unreadChats.delete(uid);
-        updateUnreadBadge();
-    }
-}
-
-function listenToMessages(partnerUid) {
-    if (chatMessagesUnsubscribe) chatMessagesUnsubscribe();
-    const chatId = getChatId(currentUser.uid, partnerUid);
-    const messagesRef = ref(db, 'chats/' + chatId + '/messages');
-    chatMessagesUnsubscribe = onValue(messagesRef, (snapshot) => {
-        const container = $('chatMessages');
-        if (!container) return;
-        container.innerHTML = '';
-        if (snapshot.exists()) {
-            const msgs = Object.values(snapshot.val()).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-            msgs.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = `message ${msg.sender === currentUser.uid ? 'sent' : 'received'}`;
-                div.textContent = msg.text;
-                container.appendChild(div);
-            });
-            container.scrollTop = container.scrollHeight;
-        } else {
-            container.innerHTML = `
-                <div style="padding:3rem 1rem; text-align:center;">
-                    <div style="font-size:3rem;">💬</div>
-                    <h3 style="margin:1rem 0 0.5rem;">¡Inicia la conversación!</h3>
-                    <p style="color:var(--text-secondary);">Envía el primer mensaje ⚡</p>
-                </div>`;
-        }
-    });
-}
-
-async function sendMessage() {
-    const text = $('messageInput')?.value.trim();
-    if (!text || !activeChatPartnerUid) return;
-    const chatId = getChatId(currentUser.uid, activeChatPartnerUid);
-    try {
-        await push(ref(db, 'chats/' + chatId + '/messages'), {
-            sender: currentUser.uid,
-            text,
-            timestamp: serverTimestamp()
-        });
-        const input = $('messageInput');
-        if (input) input.value = '';
-    } catch (e) {
-        showToast('No se pudo enviar el mensaje');
-    }
-}
-
-safeAddEventListener('sendMsgBtn', 'click', sendMessage);
-safeAddEventListener('messageInput', 'keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
-});
-
-safeAddEventListener('chatListBtn', 'click', () => {
-    showScreen('chatListScreen');
-    loadChatList();
-});
-safeAddEventListener('back-from-chatlist-btn', 'click', () => showScreen('mainScreen'));
-safeAddEventListener('back-from-chat-btn', 'click', () => {
-    activeChatPartnerUid = null;
-    if (chatMessagesUnsubscribe) { chatMessagesUnsubscribe(); chatMessagesUnsubscribe = null; }
-    showScreen('chatListScreen');
-    loadChatList();
-});
-
-// ====================== BANDEJA DE ENTRADA ======================
-async function loadChatList() {
-    const container = $('chatListContainer');
-    if (!container) return;
-    container.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-secondary);">Buscando conversaciones...</p>';
-    try {
-        const snap = await get(ref(db, 'chats'));
-        if (!snap.exists()) {
-            container.innerHTML = emptyChatListHTML();
-            return;
-        }
-        const allChats = snap.val();
-        const chatItems = [];
-        for (const chatId in allChats) {
-            const participants = chatId.split('_');
-            if (!participants.includes(currentUser.uid)) continue;
-            const partnerId = participants.find(id => id !== currentUser.uid);
-            const messagesObj = allChats[chatId].messages || {};
-            const msgs = Object.values(messagesObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            const lastMsg = msgs.length > 0 ? msgs[0] : null;
-            const profile = await getUserProfile(partnerId);
-            chatItems.push({
-                partnerId,
-                name: profile?.name || 'Usuario desconocido',
-                lastMsgText: lastMsg ? lastMsg.text : '',
-                lastMsgTimestamp: lastMsg ? lastMsg.timestamp : 0,
-                online: profile?.online || false,
-                profilePic: profile?.profilePic || '',
-                initials: getInitials(profile?.name || '?'),
-                colors: getAvatarColors(profile?.name || '?'),
-                unreadCount: unreadChats.get(partnerId) || 0
-            });
-        }
-        if (chatItems.length === 0) {
-            container.innerHTML = emptyChatListHTML();
-            return;
-        }
-        chatItems.sort((a, b) => b.lastMsgTimestamp - a.lastMsgTimestamp);
-        container.innerHTML = chatItems.map(item => `
-            <div class="chat-item" data-uid="${item.partnerId}">
-                <div class="chat-avatar" style="background-image:url(${item.profilePic}); ${!item.profilePic ? `background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});` : ''}">${!item.profilePic ? item.initials : ''}</div>
-                <div class="chat-info">
-                    <div class="chat-name">
-                        ${item.name}
-                        ${item.online ? '<span style="color:var(--online);">●</span>' : '<span style="color:var(--offline);">●</span>'}
-                    </div>
-                    <div class="chat-preview">${item.lastMsgText ? item.lastMsgText.substring(0, 30) : 'Sin mensajes'}</div>
-                </div>
-                ${item.unreadCount > 0 ? `<span class="nav-badge" style="position:relative;top:auto;right:auto;">${item.unreadCount}</span>` : ''}
-            </div>
-        `).join('');
-        container.querySelectorAll('.chat-item').forEach(el => {
-            el.addEventListener('click', () => openChat(el.dataset.uid));
-        });
-    } catch (error) {
-        console.error('Error al cargar chats:', error);
-        container.innerHTML = `
-            <div style="padding:3rem 1rem; text-align:center;">
-                <p style="color:var(--text-secondary);">Error al cargar mensajes. Intenta de nuevo.</p>
-            </div>`;
-    }
-}
-
-function emptyChatListHTML() {
-    return `
-        <div style="padding:3rem 1rem; text-align:center;">
-            <div style="font-size:3rem;">💬</div>
-            <h3 style="margin:1rem 0 0.5rem;">Aún no tienes chats activos</h3>
-            <p style="color:var(--text-secondary);">Ve al radar y rompe el hielo ⚡</p>
-        </div>`;
-}
-
-async function getUserProfile(uid) {
-    try {
-        const s = await get(ref(db, 'users/' + uid));
-        return s.exists() ? s.val() : null;
-    } catch (e) { return null; }
-}
-
-// ========== NOTIFICACIONES DE CHAT EN TIEMPO REAL ==========
-function setupChatNotifications() {
-    if (globalChatsListener) globalChatsListener();
-    globalChatsListener = onValue(ref(db, 'chats'), (snapshot) => {
-        if (!snapshot.exists() || !currentUser) return;
-        const chats = snapshot.val();
-        for (const chatId in chats) {
-            const participants = chatId.split('_');
-            if (!participants.includes(currentUser.uid)) continue;
-            const partnerId = participants.find(id => id !== currentUser.uid);
-            if (activeChatPartnerUid === partnerId && chatScreen && chatScreen.classList.contains('active')) continue;
-
-            const messagesObj = chats[chatId].messages || {};
-            const msgs = Object.values(messagesObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            if (msgs.length === 0) continue;
-            const lastMsg = msgs[0];
-            if (lastMsg.sender !== currentUser.uid) {
-                const currentCount = unreadChats.get(partnerId) || 0;
-                unreadChats.set(partnerId, currentCount + 1);
-                getUserProfile(partnerId).then(profile => {
-                    const senderName = profile?.name || 'Alguien';
-                    showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
+            let lat = null, lng = null;
+            try {
+                const pos = await new Promise((res, rej) => {
+                    navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 });
                 });
+                lat = pos.coords.latitude;
+                lng = pos.coords.longitude;
+            } catch (e) { console.warn('Sin ubicación en setup'); }
+
+            const data = {
+                email: currentUser.email, name, age, gender, interestedIn, bio,
+                profilePic: userProfile?.profilePic || '',
+                album: userProfile?.album || [],
+                premium: userProfile?.premium || false,
+                modoExpress: userProfile?.modoExpress || false,
+                dailyViews: 0, lastResetDate: getTodayString(),
+                lat, lng, online: true
+            };
+            try {
+                await set(ref(db, 'users/' + currentUser.uid), data);
+                userProfile = { uid: currentUser.uid, ...data };
+                const userRef = ref(db, 'users/' + currentUser.uid);
+                await update(userRef, { online: true });
+                onDisconnect(userRef).update({ online: false });
+                showScreen('mainScreen');
+                initApp();
+            } catch (e) {
+                console.error(e);
+                showToast('Error al guardar perfil');
+            }
+        });
+
+        function initApp() {
+            showScreen('mainScreen');
+            getUserLocation();
+            checkPremiumStatus();
+            loadNearbyUsers();
+            updateSettingsUI();
+            setupChatNotifications();
+        }
+
+        function getUserLocation() {
+            if (!navigator.geolocation) {
+                showToast('Geolocalización no soportada');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    try {
+                        await update(ref(db, 'users/' + currentUser.uid), { lat, lng, online: true });
+                    } catch(e) {}
+                    loadNearbyUsers();
+                },
+                () => showToast('Activa la ubicación para ver personas cerca'),
+                { enableHighAccuracy: true }
+            );
+        }
+
+        // ========== RADAR ==========
+        async function loadNearbyUsers() {
+            if (!currentUser || !userProfile) return;
+            try {
+                const snap = await get(ref(db, 'users'));
+                if (!snap.exists()) {
+                    nearbyUsers = [];
+                    renderDynamicView();
+                    return;
+                }
+                const all = snap.val();
+                const me = currentUser.uid;
+                const myLat = userProfile.lat;
+                const myLng = userProfile.lng;
+                let users = Object.entries(all)
+                    .filter(([uid]) => uid !== me)
+                    .map(([uid, p]) => {
+                        let distance = null;
+                        if (myLat != null && myLng != null && p.lat != null && p.lng != null) {
+                            distance = calcDistance(myLat, myLng, p.lat, p.lng);
+                        }
+                        return { uid, ...p, distance };
+                    });
+
+                const myGender = userProfile.gender;
+                const myInterestedIn = userProfile.interestedIn;
+                users = users.filter(u => {
+                    const otherGender = u.gender;
+                    const otherInterestedIn = u.interestedIn || 'all';
+                    return (myInterestedIn === 'all' || myInterestedIn === otherGender) &&
+                           (otherInterestedIn === 'all' || otherInterestedIn === myGender);
+                });
+
+                if (filterGender !== 'all') users = users.filter(u => u.gender === filterGender);
+                if (filterModoExpress) users = users.filter(u => u.modoExpress === true);
+
+                users.sort((a, b) => {
+                    if (a.distance === null && b.distance === null) return 0;
+                    if (a.distance === null) return 1;
+                    if (b.distance === null) return -1;
+                    return a.distance - b.distance;
+                });
+                nearbyUsers = users;
+                renderDynamicView();
+            } catch (e) {
+                console.error('Error en radar:', e);
+                showToast('Error al cargar el radar');
+            }
+        }
+
+        function calcDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function formatDistance(km) {
+            if (km == null) return '🌍';
+            if (km < 1) {
+                const metros = Math.round(km * 1000);
+                return '📍 ' + metros + ' metros';
+            }
+            return '📍 ' + km.toFixed(1) + ' km';
+        }
+        // ========== VISTAS DINÁMICAS ==========
+        function renderDynamicView() {
+            const container = $('dynamicContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (currentView === 'grid') {
+                container.className = 'grid';
+                renderGridView(container);
+            } else {
+                container.className = '';
+                container.style.flex = '1';
+                renderMapView(container);
+            }
+            checkPremiumStatus();
+        }
+
+        function renderGridView(container) {
+            container.innerHTML = nearbyUsers.map((u, i) => {
+                const bgStyle = u.profilePic ? `background-image:url(${u.profilePic});` : '';
+                const initials = !u.profilePic ? getInitials(u.name) : '';
+                const gradient = !u.profilePic ? `background:linear-gradient(135deg, ${getAvatarColors(u.name)[0]}, ${getAvatarColors(u.name)[1]});` : '';
+                const onlineClass = u.online ? 'online' : 'offline';
+                const distText = formatDistance(u.distance);
+                return `<div class="profile-card" style="animation-delay:${i*0.04}s;" data-uid="${u.uid}">
+                    <div class="profile-img" style="${bgStyle} ${gradient}">${initials}<span class="online-indicator ${onlineClass}"></span></div>
+                    <div class="profile-info">
+                        <div class="profile-name">${u.name}, ${u.age}</div>
+                        <div class="profile-distance">${distText}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            container.querySelectorAll('.profile-card').forEach(c => c.addEventListener('click', () => openProfile(c.dataset.uid)));
+        }
+
+        function renderMapView(container) {
+            container.innerHTML = '<div id="map"></div>';
+            if (!map) {
+                map = L.map('map').setView([0,0], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(map);
+            } else {
+                document.getElementById('map').appendChild(map.getContainer());
+                map.invalidateSize();
+            }
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+            if (userProfile?.lat && userProfile?.lng) {
+                map.setView([userProfile.lat, userProfile.lng], 13);
+                const myIcon = L.divIcon({html:'<div style="background:#E5383B; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>', iconSize:[20,20]});
+                mapMarkers.push(L.marker([userProfile.lat, userProfile.lng], {icon:myIcon}).addTo(map).bindPopup('Yo'));
+            }
+            nearbyUsers.forEach(u => {
+                if (u.lat && u.lng) {
+                    const imgHtml = u.profilePic ? `<img src="${u.profilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : getInitials(u.name);
+                    const icon = L.divIcon({
+                        html: `<div style="width:30px; height:30px; border-radius:50%; overflow:hidden; border:2px solid white; background:${u.profilePic?'transparent':'#7B2CBF'}; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; color:white;">${imgHtml}</div>`,
+                        iconSize:[30,30]
+                    });
+                    const marker = L.marker([u.lat, u.lng], {icon}).addTo(map);
+                    marker.on('click', () => openProfile(u.uid));
+                    mapMarkers.push(marker);
+                }
+            });
+        }
+
+        safeAddEventListener('toggleViewBtn', 'click', () => {
+            currentView = currentView === 'grid' ? 'map' : 'grid';
+            const btn = $('toggleViewBtn');
+            if (btn) btn.textContent = currentView === 'grid' ? '🗺️' : '🔲';
+            renderDynamicView();
+        });
+
+        // ========== FILTROS ==========
+        safeAddEventListener('filtersContainer', 'click', (e) => {
+            if (!e.target.classList.contains('filter-chip')) return;
+            const chip = e.target;
+            const gender = chip.dataset.gender;
+            const filter = chip.dataset.filter;
+            if (gender) {
+                document.querySelectorAll('#filtersContainer .filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                filterGender = gender;
+            } else if (filter === 'modoExpress') {
+                filterModoExpress = !filterModoExpress;
+                if (filterModoExpress) chip.classList.add('active');
+                else chip.classList.remove('active');
+            }
+            loadNearbyUsers();
+        });
+
+        // ========== PERFIL MODAL ==========
+        async function openProfile(uid) {
+            if (!userProfile.premium) {
+                const can = await incrementViewCount();
+                if (!can) { if(limitWarning) limitWarning.style.display = 'block'; return; }
+            }
+            const user = nearbyUsers.find(u => u.uid === uid);
+            if (!user || !modalContent) return;
+            const initials = getInitials(user.name);
+            const [c1, c2] = getAvatarColors(user.name);
+            const mainPic = user.profilePic ? `<img src="${user.profilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : initials;
+            const album = user.album || [];
+            let albumHtml = '';
+            if (album.length > 0) {
+                albumHtml = '<div class="album-title">📸 Álbum</div><div class="album-grid">' +
+                    album.map(url => `<div class="album-item" style="background-image:url(${url});"></div>`).join('') +
+                    '</div>';
+            }
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <button class="modal-close" id="closeModalBtn">✕</button>
+                    <div class="modal-avatar" style="${!user.profilePic ? `background:linear-gradient(135deg, ${c1}, ${c2});` : ''}">${mainPic}</div>
+                    <h3>${user.name}, ${user.age}</h3>
+                    <p>${formatDistance(user.distance)} • ${user.online ? '🟢 En línea' : '⚫ Desconectado'}</p>
+                </div>
+                <div class="modal-body">
+                    <p class="bio">${user.bio || 'Sin descripción'}</p>
+                    ${albumHtml}
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-like">❤️ Me gusta</button>
+                    <button class="btn-message" id="openChatBtn">💬 Mensaje</button>
+                </div>`;
+            document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
+            document.getElementById('openChatBtn')?.addEventListener('click', () => { closeModal(); openChat(uid); });
+            if(profileModal) profileModal.classList.add('active');
+        }
+
+        window.closeModal = () => { if(profileModal) profileModal.classList.remove('active'); };
+        if(profileModal) profileModal.addEventListener('click', e => { if (e.target === profileModal) closeModal(); });
+
+        // ========== LÍMITE DIARIO ==========
+        function getTodayString() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+        async function incrementViewCount() {
+            try {
+                const uRef = ref(db, 'users/' + currentUser.uid);
+                const snap = await get(uRef);
+                if (!snap.exists()) return false;
+                const data = snap.val();
+                const today = getTodayString();
+                let views = data.dailyViews || 0;
+                if (data.lastResetDate !== today) {
+                    views = 0;
+                    await update(uRef, { dailyViews: 0, lastResetDate: today });
+                }
+                if (views >= dailyLimit) return false;
+                await update(uRef, { dailyViews: views + 1 });
+                userProfile.dailyViews = views + 1;
+                return true;
+            } catch (e) { return false; }
+        }
+        function checkPremiumStatus() {
+            if(limitWarning) limitWarning.style.display = (userProfile && !userProfile.premium && userProfile.dailyViews >= dailyLimit) ? 'block' : 'none';
+        }
+        safeAddEventListener('upgradeBtn', 'click', async () => {
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { premium: true });
+                userProfile.premium = true;
+                if(limitWarning) limitWarning.style.display = 'none';
+                showToast('¡Ahora eres Premium!');
+                updateSettingsUI();
+            } catch (e) {}
+        });
+
+        // ========== MI PERFIL (edición) ==========
+        function openMyProfile() {
+            if (!userProfile) return;
+            const fields = ['editName','editAge','editGender','editInterested','editBio','editProfilePic','editModoExpress','editAlbum1','editAlbum2','editAlbum3'];
+            if (fields.some(id => !$(id))) return;
+            $('editName').value = userProfile.name || '';
+            $('editAge').value = userProfile.age || '';
+            $('editGender').value = userProfile.gender || 'male';
+            $('editInterested').value = userProfile.interestedIn || 'female';
+            $('editBio').value = userProfile.bio || '';
+            $('editProfilePic').value = userProfile.profilePic || '';
+            $('editModoExpress').checked = userProfile.modoExpress || false;
+            const album = userProfile.album || [];
+            $('editAlbum1').value = album[0] || '';
+            $('editAlbum2').value = album[1] || '';
+            $('editAlbum3').value = album[2] || '';
+            updateProfilePicPreview();
+            showScreen('myProfileScreen');
+        }
+        safeAddEventListener('backFromProfileBtn', 'click', () => showScreen('mainScreen'));
+        safeAddEventListener('editProfilePic', 'input', updateProfilePicPreview);
+        function updateProfilePicPreview() {
+            const url = $('editProfilePic')?.value.trim();
+            const preview = $('profilePicPreview');
+            if (!preview) return;
+            if (url) {
+                preview.style.backgroundImage = `url(${url})`;
+                preview.textContent = '';
+            } else {
+                preview.style.backgroundImage = '';
+                preview.textContent = getInitials(userProfile?.name || '?');
+                const [c1, c2] = getAvatarColors(userProfile?.name || '?');
+                preview.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+            }
+        }
+        safeAddEventListener('saveMyProfileBtn', 'click', async () => {
+            const name = $('editName')?.value.trim();
+            const age = parseInt($('editAge')?.value);
+            const gender = $('editGender')?.value;
+            const interestedIn = $('editInterested')?.value;
+            const bio = $('editBio')?.value.trim();
+            const profilePic = $('editProfilePic')?.value.trim();
+            const modoExpress = $('editModoExpress')?.checked;
+            const album = [
+                $('editAlbum1')?.value.trim(),
+                $('editAlbum2')?.value.trim(),
+                $('editAlbum3')?.value.trim()
+            ].filter(url => url !== '');
+            const err = $('profileEditError');
+            if (!name || !age || age < 18) { if(err) err.textContent = 'Nombre y edad válidos.'; return; }
+            if (!bio) { if(err) err.textContent = 'Escribe una biografía.'; return; }
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { name, age, gender, interestedIn, bio, profilePic, modoExpress, album });
+                Object.assign(userProfile, { name, age, gender, interestedIn, bio, profilePic, modoExpress, album });
+                if(err) err.textContent = '';
+                showToast('Perfil actualizado');
+                showScreen('mainScreen');
+                loadNearbyUsers();
+            } catch (e) { showToast('Error al actualizar'); }
+        });
+
+        // ====================== CHAT – ESTILO TELEGRAM ======================
+        function getChatId(uid1, uid2) {
+            return [uid1, uid2].sort().join('_');
+        }
+
+        function openChat(uid) {
+            activeChatPartnerUid = uid;
+            const partner = nearbyUsers.find(u => u.uid === uid) || {};
+            const nameEl = $('chatPartnerName');
+            if (nameEl) nameEl.textContent = partner.name || 'Chat';
+            showScreen('chatScreen');
+            listenToMessages(uid);
+            if (unreadChats.has(uid)) {
+                unreadChats.delete(uid);
                 updateUnreadBadge();
             }
         }
-    });
-}
 
-function updateUnreadBadge() {
-    if (!unreadBadge) return;
-    let total = 0;
-    for (const count of unreadChats.values()) total += count;
-    if (total > 0) {
-        unreadBadge.textContent = total > 99 ? '99+' : total;
-        unreadBadge.style.display = 'flex';
-    } else {
-        unreadBadge.style.display = 'none';
-    }
-}
+        function listenToMessages(partnerUid) {
+            if (chatMessagesUnsubscribe) chatMessagesUnsubscribe();
+            const chatId = getChatId(currentUser.uid, partnerUid);
+            const messagesRef = ref(db, 'chats/' + chatId + '/messages');
+            chatMessagesUnsubscribe = onValue(messagesRef, (snapshot) => {
+                const container = $('chatMessages');
+                if (!container) return;
+                container.innerHTML = '';
+                if (snapshot.exists()) {
+                    const msgs = Object.values(snapshot.val()).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                    msgs.forEach(msg => {
+                        const div = document.createElement('div');
+                        div.className = `message ${msg.sender === currentUser.uid ? 'sent' : 'received'}`;
+                        div.textContent = msg.text;
+                        container.appendChild(div);
+                    });
+                    container.scrollTop = container.scrollHeight;
+                } else {
+                    // Sin mensajes: mostrar pantalla limpia con invitación
+                    container.innerHTML = `
+                        <div style="padding:3rem 1rem; text-align:center;">
+                            <div style="font-size:3rem;">💬</div>
+                            <h3 style="margin:1rem 0 0.5rem;">¡Inicia la conversación!</h3>
+                            <p style="color:var(--text-secondary);">Envía el primer mensaje ⚡</p>
+                        </div>`;
+                }
+            });
+        }
+        async function sendMessage() {
+            const text = $('messageInput')?.value.trim();
+            if (!text || !activeChatPartnerUid) return;
+            const chatId = getChatId(currentUser.uid, activeChatPartnerUid);
+            try {
+                await push(ref(db, 'chats/' + chatId + '/messages'), {
+                    sender: currentUser.uid,
+                    text,
+                    timestamp: serverTimestamp()
+                });
+                const input = $('messageInput');
+                if (input) input.value = '';
+            } catch (e) {
+                showToast('No se pudo enviar el mensaje');
+            }
+        }
 
-// ========== AJUSTES ==========
-function updateSettingsUI() {
-    if (!userProfile) return;
-    const badge = $('premiumStatusBadge');
-    if (badge) badge.textContent = userProfile.premium ? '✅ Premium' : '🔓 Gratuito';
-    const filter = $('settingsGenderFilter');
-    if (filter) filter.value = filterGender;
-}
-safeAddEventListener('settingsGenderFilter', 'change', (e) => {
-    filterGender = e.target.value;
-    document.querySelectorAll('#filtersContainer .filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
-    const activeChip = document.querySelector(`#filtersContainer .filter-chip[data-gender="${filterGender}"]`);
-    if (activeChip) activeChip.classList.add('active');
-    loadNearbyUsers();
-    showToast('Filtro aplicado');
-});
-safeAddEventListener('becomePremiumBtn', 'click', async () => {
-    if (!userProfile) return;
-    try {
-        await update(ref(db, 'users/' + currentUser.uid), { premium: true });
-        userProfile.premium = true;
-        if(limitWarning) limitWarning.style.display = 'none';
-        updateSettingsUI();
-        showToast('¡Ahora eres Premium!');
-    } catch (e) {}
-});
-safeAddEventListener('settingsLogoutBtn', 'click', () => signOut(auth));
-safeAddEventListener('back-from-settings-btn', 'click', () => showScreen('mainScreen'));
+        safeAddEventListener('sendMsgBtn', 'click', sendMessage);
+        safeAddEventListener('messageInput', 'keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
 
-// ========== NAVEGACIÓN INFERIOR ==========
-safeQuerySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-        safeQuerySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        item.classList.add('active');
-        const screenId = item.dataset.screen;
-        if (screenId === 'mainScreen') showScreen('mainScreen');
-        else if (screenId === 'myProfileScreen') openMyProfile();
-        else if (screenId === 'chatListScreen') {
+        // Botones de navegación en chat
+        safeAddEventListener('chatListBtn', 'click', () => {
             showScreen('chatListScreen');
             loadChatList();
-        }
-        else if (screenId === 'settingsScreen') {
-            showScreen('settingsScreen');
-            updateSettingsUI();
-        }
-    });
-});
+        });
+        safeAddEventListener('backFromChatListBtn', 'click', () => showScreen('mainScreen'));
+        safeAddEventListener('backFromChatBtn', 'click', () => {
+            activeChatPartnerUid = null;
+            if (chatMessagesUnsubscribe) { chatMessagesUnsubscribe(); chatMessagesUnsubscribe = null; }
+            showScreen('chatListScreen');
+            loadChatList();
+        });
 
-// ========== UTILIDADES ==========
-function showScreen(id) {
-    safeQuerySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const target = $(id);
-    if (target) target.classList.add('active');
-    if (id === 'mainScreen') checkPremiumStatus();
-}
-function showToast(msg) {
-    if (!toast) return;
-    toast.textContent = msg; toast.style.display = 'block';
-    toast.style.animation = 'none'; void toast.offsetWidth;
-    toast.style.animation = 'toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards';
-    setTimeout(() => { if(toast) toast.style.display = 'none'; }, 3000);
-}
-function getInitials(name) { return name?.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || '?'; }
-function getAvatarColors(name) {
-    const p = [['#7B2CBF','#E5383B'],['#9D4EDD','#FF686B'],['#5A189A','#D00000'],['#3C096C','#FF4D6D'],['#7209B7','#F72585']];
-    let h = 0; for (let i=0; i<name.length; i++) h = name.charCodeAt(i) + ((h<<5)-h);
-    return p[Math.abs(h) % p.length];
-}
+        // ====================== BANDEJA DE ENTRADA ======================
+        async function loadChatList() {
+            const container = $('chatListContainer');
+            if (!container) return;
+            container.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-secondary);">Buscando conversaciones...</p>';
+            try {
+                const snap = await get(ref(db, 'chats'));
+                if (!snap.exists()) {
+                    container.innerHTML = emptyChatListHTML();
+                    return;
+                }
+                const allChats = snap.val();
+                const chatItems = [];
+                for (const chatId in allChats) {
+                    const participants = chatId.split('_');
+                    if (!participants.includes(currentUser.uid)) continue;
+                    const partnerId = participants.find(id => id !== currentUser.uid);
+                    const messagesObj = allChats[chatId].messages || {};
+                    const msgs = Object.values(messagesObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    const lastMsg = msgs.length > 0 ? msgs[0] : null;
+                    const profile = await getUserProfile(partnerId);
+                    chatItems.push({
+                        partnerId,
+                        name: profile?.name || 'Usuario desconocido',
+                        lastMsgText: lastMsg ? lastMsg.text : '',
+                        lastMsgTimestamp: lastMsg ? lastMsg.timestamp : 0,
+                        online: profile?.online || false,
+                        profilePic: profile?.profilePic || '',
+                        initials: getInitials(profile?.name || '?'),
+                        colors: getAvatarColors(profile?.name || '?'),
+                        unreadCount: unreadChats.get(partnerId) || 0
+                    });
+                }
+                if (chatItems.length === 0) {
+                    container.innerHTML = emptyChatListHTML();
+                    return;
+                }
+                chatItems.sort((a, b) => b.lastMsgTimestamp - a.lastMsgTimestamp);
+                container.innerHTML = chatItems.map(item => `
+                    <div class="chat-item" data-uid="${item.partnerId}">
+                        <div class="chat-avatar" style="background-image:url(${item.profilePic}); ${!item.profilePic ? `background:linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]});` : ''}">${!item.profilePic ? item.initials : ''}</div>
+                        <div class="chat-info">
+                            <div class="chat-name">
+                                ${item.name}
+                                ${item.online ? '<span style="color:var(--online);">●</span>' : '<span style="color:var(--offline);">●</span>'}
+                            </div>
+                            <div class="chat-preview">${item.lastMsgText ? item.lastMsgText.substring(0, 30) : 'Sin mensajes'}</div>
+                        </div>
+                        ${item.unreadCount > 0 ? `<span class="nav-badge" style="position:relative;top:auto;right:auto;">${item.unreadCount}</span>` : ''}
+                    </div>
+                `).join('');
+                container.querySelectorAll('.chat-item').forEach(el => {
+                    el.addEventListener('click', () => openChat(el.dataset.uid));
+                });
+            } catch (error) {
+                console.error('Error al cargar chats:', error);
+                container.innerHTML = `
+                    <div style="padding:3rem 1rem; text-align:center;">
+                        <p style="color:var(--text-secondary);">Error al cargar mensajes. Intenta de nuevo.</p>
+                    </div>`;
+            }
+        }
+
+        function emptyChatListHTML() {
+            return `
+                <div style="padding:3rem 1rem; text-align:center;">
+                    <div style="font-size:3rem;">💬</div>
+                    <h3 style="margin:1rem 0 0.5rem;">Aún no tienes chats activos</h3>
+                    <p style="color:var(--text-secondary);">Ve al radar y rompe el hielo ⚡</p>
+                </div>`;
+        }
+
+        async function getUserProfile(uid) {
+            try {
+                const s = await get(ref(db, 'users/' + uid));
+                return s.exists() ? s.val() : null;
+            } catch (e) { return null; }
+        }
+
+        // ========== NOTIFICACIONES DE CHAT EN TIEMPO REAL ==========
+        function setupChatNotifications() {
+            if (globalChatsListener) globalChatsListener();
+            globalChatsListener = onValue(ref(db, 'chats'), (snapshot) => {
+                if (!snapshot.exists() || !currentUser) return;
+                const chats = snapshot.val();
+                for (const chatId in chats) {
+                    const participants = chatId.split('_');
+                    if (!participants.includes(currentUser.uid)) continue;
+                    const partnerId = participants.find(id => id !== currentUser.uid);
+                    // Si la conversación está abierta actualmente, no notificar
+                    if (activeChatPartnerUid === partnerId && chatScreen && chatScreen.classList.contains('active')) continue;
+
+                    const messagesObj = chats[chatId].messages || {};
+                    const msgs = Object.values(messagesObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    if (msgs.length === 0) continue;
+                    const lastMsg = msgs[0];
+                    if (lastMsg.sender !== currentUser.uid) {
+                        const currentCount = unreadChats.get(partnerId) || 0;
+                        unreadChats.set(partnerId, currentCount + 1);
+                        getUserProfile(partnerId).then(profile => {
+                            const senderName = profile?.name || 'Alguien';
+                            showToast(`💬 ${senderName}: ${lastMsg.text.substring(0, 20)}`);
+                        });
+                        updateUnreadBadge();
+                    }
+                }
+            });
+        }
+
+        function updateUnreadBadge() {
+            if (!unreadBadge) return;
+            let total = 0;
+            for (const count of unreadChats.values()) total += count;
+            if (total > 0) {
+                unreadBadge.textContent = total > 99 ? '99+' : total;
+                unreadBadge.style.display = 'flex';
+            } else {
+                unreadBadge.style.display = 'none';
+            }
+        }
+
+        // ========== AJUSTES ==========
+        function updateSettingsUI() {
+            if (!userProfile) return;
+            const badge = $('premiumStatusBadge');
+            if (badge) badge.textContent = userProfile.premium ? '✅ Premium' : '🔓 Gratuito';
+            const filter = $('settingsGenderFilter');
+            if (filter) filter.value = filterGender;
+        }
+        safeAddEventListener('settingsGenderFilter', 'change', (e) => {
+            filterGender = e.target.value;
+            document.querySelectorAll('#filtersContainer .filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
+            const activeChip = document.querySelector(`#filtersContainer .filter-chip[data-gender="${filterGender}"]`);
+            if (activeChip) activeChip.classList.add('active');
+            loadNearbyUsers();
+            showToast('Filtro aplicado');
+        });
+        safeAddEventListener('becomePremiumBtn', 'click', async () => {
+            if (!userProfile) return;
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { premium: true });
+                userProfile.premium = true;
+                if(limitWarning) limitWarning.style.display = 'none';
+                updateSettingsUI();
+                showToast('¡Ahora eres Premium!');
+            } catch (e) {}
+        });
+        safeAddEventListener('settingsLogoutBtn', 'click', () => signOut(auth));
+        safeAddEventListener('backFromSettingsBtn', 'click', () => showScreen('mainScreen'));
+
+        // ========== NAVEGACIÓN INFERIOR ==========
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                const screenId = item.dataset.screen;
+                if (screenId === 'mainScreen') showScreen('mainScreen');
+                else if (screenId === 'myProfileScreen') openMyProfile();
+                else if (screenId === 'chatListScreen') {
+                    showScreen('chatListScreen');
+                    loadChatList();
+                }
+                else if (screenId === 'settingsScreen') {
+                    showScreen('settingsScreen');
+                    updateSettingsUI();
+                }
+            });
+        });
+
+        // ========== UTILIDADES ==========
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = $(id);
+            if (target) target.classList.add('active');
+            if (id === 'mainScreen') checkPremiumStatus();
+        }
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg; toast.style.display = 'block';
+            toast.style.animation = 'none'; void toast.offsetWidth;
+            toast.style.animation = 'toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards';
+            setTimeout(() => { if(toast) toast.style.display = 'none'; }, 3000);
+        }
+        function getInitials(name) { return name?.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || '?'; }
+        function getAvatarColors(name) {
+            const p = [['#7B2CBF','#E5383B'],['#9D4EDD','#FF686B'],['#5A189A','#D00000'],['#3C096C','#FF4D6D'],['#7209B7','#F72585']];
+            let h = 0; for (let i=0; i<name.length; i++) h = name.charCodeAt(i) + ((h<<5)-h);
+            return p[Math.abs(h) % p.length];
+        }
+    </script>
 </body>
 </html>
