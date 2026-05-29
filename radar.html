@@ -5,16 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kinetic – Radar</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --bg: #0d0616;
-            --card-bg: #12091f;
-            --text: #ffffff;
-            --text-secondary: #b8b8d4;
-            --neon: #ff00ff;
-            --cyan: #00ffff;
-            --online: #2ecc71;
+            --purple: #7B2CBF;
+            --purple-dark: #3C096C;
+            --red: #E5383B;
+            --red-light: #FF6B6B;
+            --bg: #10002B;
+            --card-bg: #1A0033;
+            --text: #FFFFFF;
+            --text-secondary: #B8B8D4;
+            --online: #2ECC71;
+            --offline: #555555;
+            --streak: #FF9F1C;
+            --shadow: 0 4px 20px rgba(123, 44, 191, 0.3);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --nav-height: 64px;
             --header-height: 56px;
@@ -23,42 +27,52 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
             background: var(--bg);
             color: var(--text);
             max-width: 480px;
             margin: 0 auto;
             height: 100vh;
             height: 100dvh;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
+            position: relative;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ---------- HEADER ---------- */
         .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0.8rem 1rem;
             background: var(--card-bg);
-            border-bottom: 1px solid rgba(255,0,255,0.3);
+            border-bottom: 1px solid rgba(123, 44, 191, 0.4);
             position: sticky;
             top: 0;
             z-index: 10;
-            min-height: var(--header-height);
             backdrop-filter: blur(10px);
+            min-height: var(--header-height);
         }
         .header h2 {
             font-size: 1.4rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--neon), var(--cyan));
+            background: linear-gradient(135deg, var(--red-light), var(--purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .icon-btn {
-            background: rgba(255,0,255,0.2);
+            background: rgba(123, 44, 191, 0.25);
             border: none;
             color: var(--text);
             font-size: 1.3rem;
@@ -68,10 +82,57 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: 0.3s;
+            transition: background 0.3s, transform 0.2s;
+            backdrop-filter: blur(5px);
+            position: relative;
         }
-        .icon-btn:active { background: rgba(255,0,255,0.5); }
+        .icon-btn:active { background: rgba(123, 44, 191, 0.6); transform: scale(0.92); }
 
+        /* ---------- NAV INFERIOR ---------- */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--card-bg);
+            border-top: 1px solid rgba(123,44,191,0.3);
+            height: var(--nav-height);
+            padding-bottom: calc(0.5rem + var(--safe-bottom));
+            padding-top: 0.5rem;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+            position: relative;
+        }
+        .nav-item.active { color: var(--red-light); transform: translateY(-2px); }
+        .nav-icon { font-size: 1.4rem; }
+        .nav-badge {
+            position: absolute;
+            top: -4px; right: 10px;
+            background: var(--red);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            min-width: 16px; height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* ---------- FILTROS ---------- */
         .filters {
             display: flex;
             gap: 0.5rem;
@@ -79,101 +140,106 @@
             background: var(--card-bg);
             overflow-x: auto;
             white-space: nowrap;
+            align-items: center;
             scrollbar-width: none;
-            border-bottom: 1px solid rgba(255,0,255,0.2);
+            border-bottom: 1px solid rgba(123,44,191,0.2);
         }
         .filters::-webkit-scrollbar { display: none; }
         .filter-chip {
-            background: rgba(255,0,255,0.15);
+            background: rgba(123, 44, 191, 0.2);
             padding: 0.4rem 1rem;
             border-radius: 20px;
             font-size: 0.8rem;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s;
             border: 1px solid transparent;
+            flex-shrink: 0;
         }
         .filter-chip.active {
-            background: var(--neon);
-            color: white;
-            box-shadow: 0 0 12px var(--neon);
+            background: var(--purple);
+            border-color: var(--red-light);
+            box-shadow: 0 0 12px rgba(230,56,59,0.5);
             font-weight: 600;
         }
 
-        .dynamic-container {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Grid */
+        /* ---------- GRID PERFILES ---------- */
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 0.7rem;
             padding: 0.8rem;
+            flex: 1;
             overflow-y: auto;
+            align-content: start;
+            justify-items: center;
         }
         .profile-card {
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
             position: relative;
-            aspect-ratio: 1 / 1.2;
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
             transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid rgba(255,0,255,0.2);
+            max-width: 150px;
+            width: 100%;
         }
-        .profile-card:active {
-            transform: scale(0.95);
-            box-shadow: 0 0 15px var(--neon);
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        .profile-card:active { transform: scale(0.95); box-shadow: 0 0 15px var(--purple); }
         .profile-img {
             width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-        .profile-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            padding: 0.5rem;
-            color: white;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-        .online-dot {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            background: var(--online);
-            box-shadow: 0 0 8px var(--online);
-            border: 2px solid var(--card-bg);
-        }
-        .svg-avatar {
-            width: 100%;
-            height: 100%;
+            aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #12091f;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: white;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+        .online-indicator {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--card-bg);
+        }
+        .online-indicator.online {
+            background: var(--online);
+            box-shadow: 0 0 8px rgba(46,204,113,0.6);
+        }
+        .online-indicator.offline {
+            background: var(--offline);
+            box-shadow: none;
+        }
+        .profile-info {
+            padding: 0.4rem;
+            text-align: center;
+        }
+        .profile-name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-distance {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
         }
 
-        /* Map */
-        #map {
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+        /* ---------- MAPA ---------- */
+        #mapContainer { flex: 1; width: 100%; position: relative; }
+        #map { width: 100%; height: 100%; z-index: 1; }
 
-        /* Modal */
+        /* ---------- MODAL ---------- */
         .modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -191,14 +257,19 @@
             max-width: 400px;
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 0 30px var(--neon);
+            box-shadow: 0 12px 40px var(--purple-dark);
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             max-height: 90vh;
             overflow-y: auto;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(60px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         .modal-header {
             padding: 1.8rem 1.5rem 1rem;
             text-align: center;
-            background: linear-gradient(135deg, var(--neon), #7B2CBF);
+            background: linear-gradient(135deg, var(--purple), var(--red));
             position: relative;
         }
         .modal-close {
@@ -211,131 +282,96 @@
             border-radius: 50%;
             font-size: 1.2rem;
             cursor: pointer;
+            transition: background 0.2s;
         }
+        .modal-close:hover { background: rgba(0,0,0,0.5); }
         .modal-avatar {
             width: 100px; height: 100px;
             border-radius: 50%;
             margin: 0 auto 0.5rem;
-            background-size: cover;
-            background-position: center;
-            border: 3px solid white;
-            box-shadow: 0 0 20px var(--neon);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.5rem;
             font-weight: bold;
-            color: white;
+            border: 3px solid rgba(255,255,255,0.4);
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .modal-body { padding: 1.5rem; text-align: center; }
+        .modal-body .bio { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; }
+        .album-title { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .album-item {
+            aspect-ratio: 1 / 1;
+            border-radius: 12px;
+            background-color: var(--purple-dark);
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.2s;
+        }
+        .album-item:active { transform: scale(1.05); }
         .modal-actions { display: flex; gap: 1rem; padding: 0 1.5rem 1.8rem; }
         .btn-like {
             flex: 1; padding: 0.9rem; border: none; border-radius: 30px;
-            font-weight: 700; background: var(--neon); color: white; cursor: pointer;
+            font-weight: 700; background: var(--red); color: white; cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
         }
         .btn-message {
-            flex: 1; padding: 0.9rem; border: 2px solid var(--neon); border-radius: 30px;
-            font-weight: 700; background: transparent; color: var(--neon); cursor: pointer;
+            flex: 1; padding: 0.9rem; border: 2px solid var(--purple); border-radius: 30px;
+            font-weight: 700; background: transparent; color: var(--text); cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
         }
+        .btn-message:hover { background: rgba(123,44,191,0.3); }
 
-        /* Bottom Nav */
-        .bottom-nav {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: rgba(13,6,22,0.9);
-            border-top: 1px solid rgba(255,0,255,0.3);
-            height: var(--nav-height);
-            padding-bottom: calc(0.5rem + var(--safe-bottom));
-            flex-shrink: 0;
-            backdrop-filter: blur(10px);
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            z-index: 100;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.2rem;
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            position: relative;
-            transition: 0.2s;
-        }
-        .nav-item.active {
-            color: var(--neon);
-            text-shadow: 0 0 6px var(--neon);
-        }
-        .nav-item i { font-size: 1.4rem; }
-        .badge-counter {
-            position: absolute;
-            top: -6px;
-            right: 8px;
-            background: var(--neon);
-            color: white;
-            font-size: 0.6rem;
-            font-weight: 700;
-            min-width: 18px;
-            height: 18px;
-            border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 8px var(--neon);
-        }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--card-bg); color: var(--text); padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 0.9rem; z-index: 300; box-shadow: 0 5px 20px rgba(0,0,0,0.6); animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards; pointer-events: none; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(30px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
     </style>
 </head>
 <body>
 
-    <!-- HEADER -->
-    <div class="header">
-        <h2>⚡ Kinetic</h2>
-        <div style="display:flex; gap:0.5rem;">
-            <button class="icon-btn" id="toggleViewBtn"><i class="fas fa-map-marked-alt"></i></button>
-            <button class="icon-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+    <!-- MAIN SCREEN -->
+    <div id="mainScreen" class="screen">
+        <div class="header">
+            <h2>⚡ Kinetic</h2>
+            <div style="display:flex; gap:0.5rem;">
+                <button class="icon-btn" id="toggleViewBtn" title="Vista mapa/grid">🗺️</button>
+                <button class="icon-btn" id="chatListBtn" title="Mensajes">💬</button>
+                <button class="icon-btn" id="logoutBtn" title="Salir">🚪</button>
+            </div>
+        </div>
+        <div class="filters" id="filtersContainer">
+            <span class="filter-chip active" data-gender="all">🌐 Todos</span>
+            <span class="filter-chip" data-gender="female">👩 Mujeres</span>
+            <span class="filter-chip" data-gender="male">👨 Hombres</span>
+            <span class="filter-chip" data-filter="modoExpress">⚡ Diversión Rápida</span>
+        </div>
+        <div id="dynamicContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
+        <div class="bottom-nav">
+            <div class="nav-item active" data-screen="mainScreen"><span class="nav-icon">📡</span><span>Radar</span></div>
+            <div class="nav-item" data-screen="myProfile"><span class="nav-icon">👤</span><span>Perfil</span></div>
+            <div class="nav-item" data-screen="chats" id="navChats"><span class="nav-icon">💬</span><span>Chats</span><span class="nav-badge" id="unreadBadge" style="display:none;">0</span></div>
+            <div class="nav-item" data-screen="settings"><span class="nav-icon">⚙️</span><span>Ajustes</span></div>
+        </div>
+        <div id="limitWarning" style="display:none; background:var(--purple-dark); padding:0.5rem; text-align:center; font-size:0.8rem;">
+            Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
         </div>
     </div>
-
-    <!-- FILTROS -->
-    <div class="filters" id="filtersContainer">
-        <span class="filter-chip active" data-gender="all">🌐 Todos</span>
-        <span class="filter-chip" data-gender="female">👩 Mujeres</span>
-        <span class="filter-chip" data-gender="male">👨 Hombres</span>
-        <span class="filter-chip" data-filter="modoExpress">⚡ Express</span>
-    </div>
-
-    <!-- CONTENEDOR DINÁMICO (GRID / MAPA) -->
-    <div class="dynamic-container" id="dynamicContainer" style="padding-bottom: var(--nav-height);"></div>
 
     <!-- MODAL PERFIL -->
-    <div class="modal" id="profileModal"><div class="modal-content" id="modalContent"></div></div>
+    <div id="profileModal" class="modal"><div class="modal-content" id="modalContent"></div></div>
 
     <!-- TOAST -->
-    <div id="toast" style="position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--neon); color:white; padding:0.8rem 1.5rem; border-radius:30px; font-size:0.9rem; z-index:300; display:none; box-shadow:0 0 15px var(--neon);"></div>
+    <div id="toast" class="toast" style="display:none;"></div>
 
-    <!-- BARRA DE NAVEGACIÓN INFERIOR UNIFICADA -->
-    <div class="bottom-nav">
-        <div class="nav-item active" data-screen="main">
-            <i class="fas fa-satellite"></i><span>Radar</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='myProfile.html'">
-            <i class="fas fa-user"></i><span>Perfil</span>
-        </div>
-        <div class="nav-item" id="navChats" onclick="window.location.href='chats.html'">
-            <i class="fas fa-comment"></i><span>Chats</span>
-            <span class="badge-counter" id="unreadBadge" style="display:none;">0</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='settings.html'">
-            <i class="fas fa-cog"></i><span>Ajustes</span>
-        </div>
-    </div>
-
+    <!-- Firebase y Leaflet -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -362,25 +398,29 @@
         let map = null;
         let mapMarkers = [];
         let unreadCounts = new Map();
+        let filterGender = 'all';
+        let filterModoExpress = false;
+        const dailyLimit = 10;
 
-        // DOM
-        const dynamicContainer = document.getElementById('dynamicContainer');
         const toast = document.getElementById('toast');
-        const unreadBadge = document.getElementById('unreadBadge');
+        const limitWarning = document.getElementById('limitWarning');
         const profileModal = document.getElementById('profileModal');
         const modalContent = document.getElementById('modalContent');
+        const unreadBadge = document.getElementById('unreadBadge');
 
+        // SVG de respaldo para avatares
         const defaultAvatarSVG = `<svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;background:#12091f;border-radius:50%;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>`;
 
         function showToast(msg) {
-            toast.textContent = msg;
-            toast.style.display = 'block';
+            toast.textContent = msg; toast.style.display = 'block';
+            toast.style.animation = 'none'; void toast.offsetWidth;
+            toast.style.animation = 'toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards';
             setTimeout(() => toast.style.display = 'none', 3000);
         }
 
         function getInitials(name) { return name?.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || '?'; }
         function getAvatarColors(name) {
-            const p = [['#ff00ff','#7B2CBF'],['#00ffff','#0080ff'],['#ff00ff','#ff0080']];
+            const p = [['#7B2CBF','#E5383B'],['#9D4EDD','#FF686B'],['#5A189A','#D00000'],['#3C096C','#FF4D6D'],['#7209B7','#F72585']];
             let h = 0; for (let i=0; i<name.length; i++) h = name.charCodeAt(i) + ((h<<5)-h);
             return p[Math.abs(h) % p.length];
         }
@@ -388,7 +428,7 @@
         // Autenticación
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.href = 'index.html'; // login
+                window.location.href = 'index.html'; // Redirigir al login
                 return;
             }
             currentUser = user;
@@ -396,7 +436,7 @@
             if (snap.exists()) {
                 userProfile = snap.val();
                 userProfile.uid = user.uid;
-                update(ref(db, 'users/' + user.uid), { online: true });
+                await update(ref(db, 'users/' + user.uid), { online: true });
                 onDisconnect(ref(db, 'users/' + user.uid)).update({ online: false });
                 loadNearbyUsers();
                 setupChatNotifications();
@@ -410,13 +450,11 @@
         // Toggle vista
         document.getElementById('toggleViewBtn').addEventListener('click', () => {
             currentView = currentView === 'grid' ? 'map' : 'grid';
-            document.getElementById('toggleViewBtn').innerHTML = currentView === 'grid' ? '<i class="fas fa-map-marked-alt"></i>' : '<i class="fas fa-th"></i>';
+            document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
             loadNearbyUsers();
         });
 
         // Filtros
-        let filterGender = 'all';
-        let filterModoExpress = false;
         document.getElementById('filtersContainer').addEventListener('click', (e) => {
             if (!e.target.classList.contains('filter-chip')) return;
             const chip = e.target;
@@ -431,11 +469,14 @@
             loadNearbyUsers();
         });
 
-        // ====== RADAR ======
+        // Radar
         async function loadNearbyUsers() {
             if (!currentUser || !userProfile) return;
             const snap = await get(ref(db, 'users'));
-            if (!snap.exists()) { dynamicContainer.innerHTML = ''; return; }
+            if (!snap.exists()) {
+                document.getElementById('dynamicContainer').innerHTML = '';
+                return;
+            }
             const all = snap.val();
             const me = currentUser.uid;
             const myLat = userProfile.lat;
@@ -461,37 +502,44 @@
             users.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
             nearbyUsers = users;
 
-            dynamicContainer.innerHTML = '';
+            const container = document.getElementById('dynamicContainer');
+            container.innerHTML = '';
             if (currentView === 'grid') {
-                dynamicContainer.className = 'grid';
-                renderGrid();
+                container.className = 'grid';
+                renderGrid(container);
             } else {
-                dynamicContainer.className = '';
-                dynamicContainer.innerHTML = '<div id="map" style="flex:1;"></div>';
+                container.className = '';
+                container.innerHTML = '<div id="map" style="flex:1;"></div>';
                 setTimeout(initMap, 200);
             }
         }
 
-        function renderGrid() {
-            dynamicContainer.innerHTML = nearbyUsers.map(u => {
-                const hasPhoto = u.profilePic?.startsWith('http') || (u.album?.length > 0 && u.album[0].startsWith('http'));
+        function renderGrid(container) {
+            container.innerHTML = nearbyUsers.map(u => {
+                const hasPhoto = u.profilePic?.startsWith('http') || (u.album?.length > 0 && u.album[0]?.startsWith('http'));
                 const photoUrl = hasPhoto ? (u.profilePic?.startsWith('http') ? u.profilePic : u.album[0]) : null;
-                let imgHtml = '';
+                const onlineClass = u.online ? 'online' : 'offline';
+                const distText = u.distance ? (u.distance < 1 ? '📍 ' + Math.round(u.distance*1000) + ' metros' : '📍 ' + u.distance.toFixed(1) + ' km') : '🌍';
+                let imgContent = '';
                 if (photoUrl) {
-                    imgHtml = `<div class="profile-img" style="background-image:url(${photoUrl})">
-                        ${u.online ? '<span class="online-dot"></span>' : ''}
-                        <div class="profile-overlay">${u.name}, ${u.age || '?'}</div>
+                    imgContent = `<div class="profile-img" style="background-image:url(${photoUrl})">
+                        <span class="online-indicator ${onlineClass}"></span>
                     </div>`;
                 } else {
-                    imgHtml = `<div class="svg-avatar" style="position:relative;">
-                        ${defaultAvatarSVG}
-                        ${u.online ? '<span class="online-dot"></span>' : ''}
-                        <div class="profile-overlay">${u.name}, ${u.age || '?'}</div>
+                    imgContent = `<div class="profile-img" style="background:linear-gradient(135deg, ${getAvatarColors(u.name)[0]}, ${getAvatarColors(u.name)[1]});">
+                        ${getInitials(u.name)}
+                        <span class="online-indicator ${onlineClass}"></span>
                     </div>`;
                 }
-                return `<div class="profile-card" data-uid="${u.uid}">${imgHtml}</div>`;
+                return `<div class="profile-card" style="animation-delay:${i*0.04}s;" data-uid="${u.uid}">
+                    ${imgContent}
+                    <div class="profile-info">
+                        <div class="profile-name">${u.name}, ${u.age || '?'}</div>
+                        <div class="profile-distance">${distText}</div>
+                    </div>
+                </div>`;
             }).join('');
-            document.querySelectorAll('.profile-card').forEach(card => {
+            container.querySelectorAll('.profile-card').forEach(card => {
                 card.addEventListener('click', () => openProfile(card.dataset.uid));
             });
         }
@@ -505,15 +553,15 @@
             mapMarkers = [];
             if (userProfile?.lat && userProfile?.lng) {
                 map.setView([userProfile.lat, userProfile.lng], 13);
-                const myIcon = L.divIcon({html:'<div style="background:#ff00ff; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>'});
-                mapMarkers.push(L.marker([userProfile.lat, userProfile.lng], {icon: myIcon}).addTo(map).bindPopup('Yo'));
+                const myIcon = L.divIcon({html:'<div style="background:#E5383B; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>'});
+                mapMarkers.push(L.marker([userProfile.lat, userProfile.lng], {icon:myIcon}).addTo(map).bindPopup('Yo'));
             }
             nearbyUsers.forEach(u => {
                 if (u.lat && u.lng) {
                     const iconHtml = u.profilePic?.startsWith('http') ? `<img src="${u.profilePic}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : getInitials(u.name);
                     const icon = L.divIcon({
-                        html: `<div style="background:#12091f; border:2px solid #ff00ff; border-radius:50%; width:30px;height:30px; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:12px;">${iconHtml}</div>`,
-                        iconSize: [34,34]
+                        html: `<div style="background:#7B2CBF; width:30px;height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:12px;">${iconHtml}</div>`,
+                        iconSize:[34,34]
                     });
                     const marker = L.marker([u.lat, u.lng], {icon}).addTo(map);
                     marker.on('click', () => openProfile(u.uid));
@@ -530,23 +578,38 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // ====== PERFIL MODAL ======
+        // Modal perfil
         async function openProfile(uid) {
+            if (!userProfile.premium) {
+                const can = await incrementViewCount();
+                if (!can) { limitWarning.style.display = 'block'; return; }
+            }
             const user = nearbyUsers.find(u => u.uid === uid);
             if (!user) return;
-            const photoUrl = user.profilePic?.startsWith('http') ? user.profilePic : (user.album?.length > 0 && user.album[0].startsWith('http') ? user.album[0] : null);
-            const mainPic = photoUrl ? `<img src="${photoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : getInitials(user.name);
+            const initials = getInitials(user.name);
+            const [c1, c2] = getAvatarColors(user.name);
+            const mainPic = user.profilePic ? `<img src="${user.profilePic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerHTML='${defaultAvatarSVG.replace(/'/g, "\\'")}';">` : initials;
+            const album = user.album || [];
+            let albumHtml = '';
+            if (album.length > 0 && album.some(url => url?.startsWith('http'))) {
+                albumHtml = '<div class="album-title">📸 Álbum</div><div class="album-grid">' +
+                    album.filter(url => url?.startsWith('http')).map(url => `<div class="album-item" style="background-image:url(${url});"></div>`).join('') +
+                    '</div>';
+            }
             modalContent.innerHTML = `
                 <div class="modal-header">
-                    <button class="modal-close" id="closeModalBtn">&times;</button>
-                    <div class="modal-avatar" style="background:${!photoUrl ? 'linear-gradient(135deg, #ff00ff, #7B2CBF)' : ''}">${mainPic}</div>
+                    <button class="modal-close" id="closeModalBtn">✕</button>
+                    <div class="modal-avatar" style="${!user.profilePic ? `background:linear-gradient(135deg, ${c1}, ${c2});` : ''}">${mainPic}</div>
                     <h3>${user.name}, ${user.age || '?'}</h3>
-                    <p>${user.distance ? '📍 '+user.distance.toFixed(1)+' km' : '🌍'} • ${user.online ? '🟢 En línea' : '⚫ Offline'}</p>
+                    <p>${user.distance ? (user.distance < 1 ? '📍 ' + Math.round(user.distance*1000) + ' metros' : '📍 ' + user.distance.toFixed(1) + ' km') : '🌍'} • ${user.online ? '🟢 En línea' : '⚫ Desconectado'}</p>
                 </div>
-                <div class="modal-body"><p>${user.bio || 'Sin descripción'}</p></div>
+                <div class="modal-body">
+                    <p class="bio">${user.bio || 'Sin descripción'}</p>
+                    ${albumHtml}
+                </div>
                 <div class="modal-actions">
                     <button class="btn-like">❤️ Me gusta</button>
-                    <button class="btn-message" id="openChatBtn">💬 Chatear</button>
+                    <button class="btn-message" id="openChatBtn">💬 Mensaje</button>
                 </div>`;
             document.getElementById('closeModalBtn').addEventListener('click', () => profileModal.classList.remove('active'));
             document.getElementById('openChatBtn').addEventListener('click', () => {
@@ -556,9 +619,37 @@
             profileModal.classList.add('active');
         }
         window.closeModal = () => profileModal.classList.remove('active');
-        profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.remove('active'); });
+        profileModal.addEventListener('click', e => { if (e.target === profileModal) profileModal.classList.remove('active'); });
 
-        // ====== NOTIFICACIONES DE CHATS ======
+        // Límite diario
+        function getTodayString() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+        async function incrementViewCount() {
+            const uRef = ref(db, 'users/' + currentUser.uid);
+            const snap = await get(uRef);
+            if (!snap.exists()) return false;
+            const data = snap.val();
+            const today = getTodayString();
+            let views = data.dailyViews || 0;
+            if (data.lastResetDate !== today) {
+                views = 0;
+                await update(uRef, { dailyViews: 0, lastResetDate: today });
+            }
+            if (views >= dailyLimit) return false;
+            await update(uRef, { dailyViews: views + 1 });
+            userProfile.dailyViews = views + 1;
+            return true;
+        }
+        document.getElementById('upgradeBtn')?.addEventListener('click', async () => {
+            await update(ref(db, 'users/' + currentUser.uid), { premium: true });
+            userProfile.premium = true;
+            limitWarning.style.display = 'none';
+            showToast('¡Ahora eres Premium!');
+        });
+
+        // Notificaciones de chats
         function setupChatNotifications() {
             onValue(ref(db, 'chats'), (snap) => {
                 if (!snap.exists() || !currentUser) return;
@@ -582,6 +673,16 @@
                 }
             });
         }
+
+        // Navegación inferior
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const screen = item.dataset.screen;
+                if (screen === 'myProfile') window.location.href = 'myProfile.html';
+                else if (screen === 'chats') window.location.href = 'chats.html';
+                else if (screen === 'settings') window.location.href = 'settings.html';
+            });
+        });
     </script>
 </body>
 </html>
