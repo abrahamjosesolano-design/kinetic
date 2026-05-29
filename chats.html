@@ -10,157 +10,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Urbanist', sans-serif;
-        }
-
-        body {
-            background-color: #0d0616;
-            color: #ffffff;
-            min-height: 100vh;
-            padding-top: 70px;
-            padding-bottom: 80px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .chats-wrapper {
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background-color: #12091f;
-            border-bottom: 1px solid #25123e;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 100;
-        }
-
-        .bar-title {
-            font-size: 22px;
-            font-weight: 800;
-            background: linear-gradient(90deg, #00f2ff, #ff00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .chats-list {
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        /* FILAS DE CONVERSACIÓN */
-        .chat-row {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: #12091f;
-            border: 1px solid rgba(61, 28, 99, 0.2);
-            border-radius: 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .chat-row:hover {
-            background-color: #1a0b2e;
-        }
-
-        .chat-avatar {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 15px;
-            border: 2px solid #3d1c63;
-        }
-
-        .chat-body {
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        .chat-name-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .chat-name {
-            font-size: 16px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .chat-last-msg {
-            font-size: 14px;
-            color: #a094b8;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* ICONO DE NOTIFICACIÓN NEÓN */
-        .badge-new-msg {
-            width: 12px;
-            height: 12px;
-            background-color: #ff00ff;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #ff00ff;
-            margin-left: 10px;
-            flex-shrink: 0;
-        }
-
-        .empty-msg {
-            text-align: center;
-            padding: 60px 20px;
-            color: #796699;
-            font-size: 16px;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
+        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; padding-top: 70px; padding-bottom: 80px; display: flex; justify-content: center; }
+        .chats-wrapper { width: 100%; max-width: 600px; }
+        .top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background-color: #12091f; border-bottom: 1px solid #25123e; display: flex; align-items: center; padding: 0 20px; z-index: 100; }
+        .bar-title { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #00f2ff, #ff00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .chats-list { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .chat-row { display: flex; align-items: center; padding: 15px; background-color: #12091f; border: 1px solid rgba(61, 28, 99, 0.2); border-radius: 16px; cursor: pointer; transition: background 0.2s; }
+        .chat-row:hover { background-color: #1a0b2e; }
+        .chat-avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid #3d1c63; }
+        .chat-body { flex-grow: 1; overflow: hidden; }
+        .chat-name-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .chat-name { font-size: 16px; font-weight: 700; color: #fff; }
+        .chat-last-msg { font-size: 14px; color: #a094b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .badge-new-msg { width: 12px; height: 12px; background-color: #ff00ff; border-radius: 50%; box-shadow: 0 0 10px #ff00ff; margin-left: 10px; flex-shrink: 0; }
+        .empty-msg { text-align: center; padding: 60px 20px; color: #796699; font-size: 16px; }
+        
         /* NAV BAR */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 65px;
-            background-color: #12091f;
-            border-top: 1px solid #25123e;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #796699;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 600;
-            gap: 4px;
-            cursor: pointer;
-            flex: 1;
-            padding: 10px 0;
-        }
-
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #12091f; border-top: 1px solid #25123e; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #796699; text-decoration: none; font-size: 11px; font-weight: 600; gap: 4px; cursor: pointer; flex: 1; padding: 10px 0; }
         .nav-item.active { color: #00f2ff; }
-        .nav-item i { font-size: 20px; }
+        .nav-item i { font-size: 20px; transition: all 0.3s ease; }
     </style>
 </head>
 <body>
@@ -222,6 +92,7 @@
             } else {
                 currentUid = user.uid;
                 escucharSalasChat();
+                activarNotificacionesGlobales(user.uid);
             }
         });
 
@@ -229,7 +100,7 @@
             onValue(ref(db, 'chats'), (snapshot) => {
                 const chats = snapshot.val();
                 if (!chats) {
-                    container.innerHTML = `<div class="empty-msg">No tienes chats activos aún. ¡Inicia uno desde el Radar!</div>`;
+                    container.innerHTML = `<div class="empty-msg">No tienes chats activos aún.</div>`;
                     return;
                 }
 
@@ -241,30 +112,22 @@
                         const partes = chatId.split('_');
                         const targetId = partes[0] === currentUid ? partes[1] : partes[0];
                         const lastInfo = chats[chatId].lastInfo || {};
-
-                        // Guardar datos temporalmente para no perder orden
                         promesasCarga.push({ targetId, lastInfo });
                     }
                 }
 
                 if(promesasCarga.length === 0){
-                    container.innerHTML = `<div class="empty-msg">No tienes chats activos aún.</div>`;
+                    container.innerHTML = `<div class="empty-msg">No tienes chats activos.</div>`;
                     return;
                 }
 
-                // Dibujar cada fila consultando el nombre real en vivo
                 promesasCarga.forEach(item => {
                     onValue(ref(db, `users/${item.targetId}`), (uSnap) => {
                         const uData = uSnap.val() || {};
-                        
-                        // Quitar el bug de los "Anónimos" en la lista de chats
-                        const nombreChat = uData.nombre ? uData.nombre : "Usuario de Kinetic";
+                        const nombreChat = uData.nombre || "Usuario de Kinetic";
                         const fotoChat = (uData.album && uData.album.length > 0) ? uData.album[0] : 'https://via.placeholder.com/150';
-
-                        // Verificar si hay una notificación pendiente para mí
                         const tieneNotificacion = item.lastInfo.unreadTarget === currentUid;
 
-                        // Crear elemento visual
                         const row = document.createElement('div');
                         row.className = 'chat-row';
                         row.innerHTML = `
@@ -273,7 +136,7 @@
                                 <div class="chat-name-row">
                                     <span class="chat-name">${nombreChat}</span>
                                 </div>
-                                <div class="chat-last-msg">${item.lastInfo.text || 'Mensaje multimedia...'}</div>
+                                <div class="chat-last-msg">${item.lastInfo.text || 'Mensaje enviado...'}</div>
                             </div>
                             ${tieneNotificacion ? '<div class="badge-new-msg"></div>' : ''}
                         `;
@@ -286,6 +149,31 @@
                         container.appendChild(row);
                     }, { onlyOnce: true });
                 });
+            });
+        }
+
+        function activarNotificacionesGlobales(miUid) {
+            onValue(ref(db, 'chats'), (snapshot) => {
+                const listaChats = snapshot.val();
+                let alertarMensajeNuevo = false;
+
+                for (let idChat in listaChats) {
+                    if (idChat.includes(miUid) && listaChats[idChat].lastInfo?.unreadTarget === miUid) {
+                        alertarMensajeNuevo = true;
+                        break;
+                    }
+                }
+
+                const iconoMensajeria = document.querySelector('.nav-item i.fa-comment');
+                if (iconoMensajeria) {
+                    if (alertarMensajeNuevo) {
+                        iconoMensajeria.style.color = '#ff00ff';
+                        iconoMensajeria.style.filter = 'drop-shadow(0 0 8px #ff00ff)';
+                    } else {
+                        iconoMensajeria.style.color = '';
+                        iconoMensajeria.style.filter = '';
+                    }
+                }
             });
         }
     </script>
