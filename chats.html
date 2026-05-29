@@ -2,28 +2,25 @@
 <html lang="es">
 <head>
   <!-- ═══════════════════════════════════════════════════════════════
-       KINETIC — chat.html  (sala de chat individual)
-       Versión unificada y reforzada
+       KINETIC — chats.html  (lista de conversaciones)
+       Versión blindada — sin datos nulos, sin avatares rotos,
+       sin redirecciones inválidas.
        ─────────────────────────────────────────────────────────────
-       ESTRUCTURA GENERAL
-       ┌─ HEADER fijo  (avatar + nombre + estado + botón volver) ─┐
-       │  MESSAGES WRAP  (scroll interno, flex column)             │
-       └─ INPUT BAR fija (textarea + botón enviar)               ─┘
-
-       FLUJO FIREBASE
-       1. onAuthStateChanged → obtiene miUid
-       2. Lee ?chatId y ?targetId de la URL
-          · chatId  : leído o generado canónicamente (uid_menor_uid_mayor)
-          · targetId: uid del receptor
-       3. get(users/${targetId}) → pinta header, valida avatar
-       4. onValue(chats/${chatId}/messages) → renderMessages()
-          · cada render marca mis mensajes como leídos (markAsRead)
-          · scroll automático al fondo
-       5. sendMessage() → push mensaje + update lastInfo
+       CORRECCIONES APLICADAS
+       ✅ Redirección: window.location.href = 'chat.html?id=' + targetUid
+          + data-id en cada tarjeta como fuente de verdad del UID
+       ✅ Avatar: triple fallback album[0] → foto → SVG inline
+          + onerror que reemplaza el nodo completo con el SVG
+       ✅ Nombre: "Usuario de Kinetic" si está vacío o indefinido
+       ✅ Último mensaje: "Mensaje multimedia o vacío..." como fallback
+       ✅ chatId split robusto: soporta UIDs con y sin guiones bajos
+       ✅ Badge absoluto — nunca desplaza el texto
+       ✅ Skeletons durante la carga inicial
+       ✅ Badge global en barra de navegación
   ═══════════════════════════════════════════════════════════════ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Kinetic — Chat</title>
+  <title>Kinetic — Mensajes</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
@@ -31,32 +28,21 @@
        1. TOKENS DE DISEÑO
     ══════════════════════════════════════════════════════════ */
     :root {
-      /* Paleta cyberpunk oscura */
-      --bg-deep     : #0d0616;
-      --bg-card     : #12091f;
-      --bg-card2    : #1a0f2e;
-      --accent      : #ff00ff;   /* fucsia neón  */
-      --accent2     : #00eeff;   /* cyan neón    */
-      --accent-glow : rgba(255, 0, 255, 0.35);
-
-      /* Burbujas */
-      --bubble-me-a : #7b00ff;
-      --bubble-me-b : #ff00cc;
-      --bubble-them : #1e1133;
-
-      /* Texto */
-      --text-hi   : #f0e6ff;
-      --text-mid  : #9b84b8;
-      --text-lo   : #5c4a7a;
-
-      /* Bordes */
+      --bg-deep    : #0d0616;
+      --bg-card    : #12091f;
+      --bg-card2   : #1a0f2e;
+      --accent     : #ff00ff;
+      --accent2    : #00eeff;
+      --accent-glow: rgba(255, 0, 255, 0.35);
+      --text-hi    : #f0e6ff;
+      --text-mid   : #9b84b8;
+      --text-lo    : #5c4a7a;
       --border     : rgba(255, 0, 255, 0.12);
-      --border-hi  : rgba(255, 0, 255, 0.35);
-
-      /* Layout */
-      --header-h   : 64px;
-      --input-h    : 68px;
-      --safe-b     : env(safe-area-inset-bottom, 0px);  /* notch soporte */
+      --border-hi  : rgba(255, 0, 255, 0.3);
+      --header-h   : 60px;
+      --nav-h      : 64px;
+      --avatar-sz  : 55px;
+      --safe-b     : env(safe-area-inset-bottom, 0px);
     }
 
     /* ══════════════════════════════════════════════════════════
@@ -64,16 +50,16 @@
     ══════════════════════════════════════════════════════════ */
     *, *::before, *::after {
       box-sizing: border-box;
-      margin: 0;
+      margin : 0;
       padding: 0;
     }
 
     html, body {
-      height: 100%;
-      background : var(--bg-deep);
-      color      : var(--text-hi);
+      height    : 100%;
+      background: var(--bg-deep);
+      color     : var(--text-hi);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size  : 16px;
+      font-size : 16px;
       overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
     }
@@ -81,331 +67,293 @@
     /* ══════════════════════════════════════════════════════════
        3. HEADER FIJO
     ══════════════════════════════════════════════════════════ */
-    .chat-header {
+    .top-bar {
       position       : fixed;
       top: 0; left: 0; right: 0;
       height         : var(--header-h);
       z-index        : 200;
       display        : flex;
       align-items    : center;
-      gap            : 12px;
-      padding        : 0 16px;
+      padding        : 0 20px;
       background     : rgba(13, 6, 22, 0.97);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom  : 1px solid var(--border);
     }
 
-    /* Botón volver */
-    .btn-back {
-      flex-shrink: 0;
-      display    : flex;
-      align-items: center;
-      justify-content: center;
-      width      : 36px;
-      height     : 36px;
-      background : none;
-      border     : none;
-      border-radius: 50%;
-      color      : var(--accent2);
-      font-size  : 1.1rem;
-      cursor     : pointer;
-      transition : color 0.2s, background 0.2s;
-    }
-    .btn-back:hover  { color: var(--accent); background: rgba(255,0,255,0.08); }
-    .btn-back:active { background: rgba(255,0,255,0.16); }
-
-    /* Avatar en header */
-    .header-avatar {
-      flex-shrink  : 0;
-      width        : 42px;
-      height       : 42px;
-      border-radius: 50%;
-      object-fit   : cover;
-      border       : 2px solid var(--accent);
-      box-shadow   : 0 0 10px var(--accent-glow);
-      background   : var(--bg-card2);
-      display      : block;
-    }
-
-    /* Bloque nombre + estado */
-    .header-info {
-      flex    : 1 1 0;
-      min-width: 0;
-    }
-    .header-name {
-      font-size  : 0.95rem;
-      font-weight: 700;
-      color      : var(--text-hi);
-      white-space: nowrap;
-      overflow   : hidden;
-      text-overflow: ellipsis;
-      line-height: 1.3;
-    }
-    .header-status {
-      font-size    : 0.68rem;
-      color        : var(--accent2);
-      letter-spacing: 0.07em;
+    .top-bar h1 {
+      font-size     : 1.1rem;
+      font-weight   : 800;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
+      background    : linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       4. ÁREA PRINCIPAL DE SCROLL
+    ══════════════════════════════════════════════════════════ */
+    .content {
+      padding-top   : calc(var(--header-h) + 8px);
+      padding-bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
+      min-height    : 100vh;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       5. FILAS DE CHAT
+       Reglas clave para alineación perfecta:
+       · position: relative  → ancla del badge absoluto
+       · align-items: center → centrado vertical garantizado
+       · .chat-body min-width:0 → ellipsis funciona en flex
+       · padding-right en .chat-body → espacio reservado badge
+    ══════════════════════════════════════════════════════════ */
+    .chat-row {
+      position      : relative;          /* ancla del badge .badge-new-msg */
+      display       : flex;
+      align-items   : center;            /* centrado vertical perfecto       */
+      gap           : 14px;
+      padding       : 12px 20px;
+      min-height    : 76px;              /* alto consistente entre filas     */
+      background    : var(--bg-card);
+      border-bottom : 1px solid var(--border);
+      cursor        : pointer;
+      text-decoration: none;
+      color         : inherit;
+      transition    : background 0.18s ease;
+      /* sin overflow:hidden — el badge sale hacia afuera */
+    }
+    .chat-row:hover,
+    .chat-row:focus-visible {
+      background: var(--bg-card2);
+      outline   : none;
+    }
+    .chat-row:active { background: #221040; }
+
+    /* ── Avatar circular ──────────────────────────────────── */
+    .chat-avatar-wrap {
+      flex-shrink  : 0;
+      width        : var(--avatar-sz);
+      height       : var(--avatar-sz);
+      border-radius: 50%;
+      overflow     : hidden;
+      border       : 2px solid var(--border-hi);
+      background   : var(--bg-card2);
+      display      : flex;
+      align-items  : center;
+      justify-content: center;
+    }
+
+    /* La <img> cuando existe */
+    .chat-avatar-wrap img {
+      width     : 100%;
+      height    : 100%;
+      object-fit: cover;
+      display   : block;
+    }
+
+    /* El SVG fallback directo (cuando no hay foto) */
+    .chat-avatar-wrap svg {
+      width : 70%;
+      height: 70%;
+    }
+
+    /* ── Bloque de texto ─────────────────────────────────── */
+    .chat-body {
+      flex       : 1 1 0;
+      min-width  : 0;           /* crítico — activa el ellipsis en hijos flex */
+      padding-right: 40px;      /* espacio reservado para el badge absoluto   */
+    }
+
+    .chat-name {
+      font-size    : 0.92rem;
+      font-weight  : 600;
+      color        : var(--text-hi);
+      white-space  : nowrap;
+      overflow     : hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
       line-height  : 1.2;
     }
 
-    /* ══════════════════════════════════════════════════════════
-       4. ÁREA DE MENSAJES (scroll interno)
-    ══════════════════════════════════════════════════════════ */
-    .messages-wrap {
-      /* Ocupa el espacio entre header e input bar */
-      position  : fixed;
-      top       : var(--header-h);
-      bottom    : calc(var(--input-h) + var(--safe-b));
-      left      : 0;
-      right     : 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-
-      /* Burbujas apiladas verticalmente */
-      display        : flex;
-      flex-direction : column;
-      gap            : 6px;
-      padding        : 18px 14px 12px;
-
-      scroll-behavior: smooth;
+    .chat-preview {
+      font-size    : 0.78rem;
+      color        : var(--text-mid);
+      white-space  : nowrap;
+      overflow     : hidden;
+      text-overflow: ellipsis;
+      line-height  : 1.3;
+    }
+    /* Preview con mensaje sin leer → más brillante */
+    .chat-row.unread .chat-preview {
+      color      : var(--text-hi);
+      font-weight: 500;
     }
 
-    /* Scrollbar delgado cyberpunk */
-    .messages-wrap::-webkit-scrollbar        { width: 3px; }
-    .messages-wrap::-webkit-scrollbar-track  { background: transparent; }
-    .messages-wrap::-webkit-scrollbar-thumb  {
-      background   : rgba(255, 0, 255, 0.3);
-      border-radius: 2px;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       5. SEPARADOR DE FECHA
-    ══════════════════════════════════════════════════════════ */
-    .date-sep {
-      align-self   : center;
-      font-size    : 0.68rem;
-      color        : var(--text-lo);
-      background   : var(--bg-card);
-      border       : 1px solid var(--border);
-      border-radius: 99px;
-      padding      : 3px 14px;
-      margin       : 8px 0 4px;
-      user-select  : none;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       6. BURBUJAS DE MENSAJE
-    ══════════════════════════════════════════════════════════ */
-    .bubble-wrap {
-      display    : flex;
-      align-items: flex-end;
-      gap        : 8px;
-      max-width  : 80%;
-      /* animación de entrada */
-      animation  : bubbleIn 0.18s ease-out both;
-    }
-
-    /* Mis mensajes → derecha */
-    .bubble-wrap.me {
-      align-self    : flex-end;
-      flex-direction: row-reverse;
-    }
-
-    /* Mensajes del receptor → izquierda */
-    .bubble-wrap.them {
-      align-self: flex-start;
-    }
-
-    /* Mini-avatar junto a la burbuja del receptor */
-    .bubble-avatar {
-      flex-shrink  : 0;
-      width        : 28px;
-      height       : 28px;
-      border-radius: 50%;
-      object-fit   : cover;
-      border       : 1px solid var(--border);
-      background   : var(--bg-card2);
-      display      : block;
-    }
-    /* Ocultar avatar en mis burbujas */
-    .bubble-wrap.me .bubble-avatar { display: none; }
-
-    /* Contenedor interno: burbuja + pie */
-    .bubble-inner {
-      display       : flex;
-      flex-direction: column;
-      gap           : 3px;
-      max-width     : 100%;
-    }
-
-    /* La burbuja en sí */
-    .bubble {
-      padding      : 10px 14px;
-      border-radius: 18px;
-      font-size    : 0.875rem;
-      line-height  : 1.55;
-      word-break   : break-word;
-      white-space  : pre-wrap;       /* respeta saltos de línea del usuario */
-    }
-
-    /* Mis mensajes — degradado fucsia → violeta */
-    .bubble-wrap.me .bubble {
-      background          : linear-gradient(135deg, var(--bubble-me-a), var(--bubble-me-b));
-      border-bottom-right-radius: 4px;
-      color               : #fff;
-      box-shadow          : 0 3px 14px rgba(123, 0, 255, 0.4);
-    }
-
-    /* Mensajes del receptor — oscuro con borde sutil */
-    .bubble-wrap.them .bubble {
-      background          : var(--bubble-them);
-      border-bottom-left-radius: 4px;
-      color               : var(--text-hi);
-      border              : 1px solid var(--border);
-    }
-
-    /* Pie de burbuja: hora + estado */
-    .bubble-foot {
-      display    : flex;
-      align-items: center;
-      gap        : 4px;
-      font-size  : 0.62rem;
-      color      : rgba(255, 255, 255, 0.4);
-      white-space: nowrap;
-    }
-    .bubble-wrap.me   .bubble-foot { justify-content: flex-end; }
-    .bubble-wrap.them .bubble-foot {
-      justify-content: flex-start;
-      color: var(--text-lo);
-    }
-
-    /* Ticks de estado (✓ enviado / ✓✓ leído) */
-    .tick        { font-size: 0.7rem; }
-    .tick.read   { color: var(--accent2); }
-    .tick.sent   { color: rgba(255,255,255,0.4); }
-
-    /* ══════════════════════════════════════════════════════════
-       7. ESTADOS VACÍO / CARGA / ERROR
-    ══════════════════════════════════════════════════════════ */
-    .state-box {
-      align-self : center;
-      text-align : center;
-      color      : var(--text-lo);
-      font-size  : 0.85rem;
-      padding    : 40px 24px 0;
-      line-height: 1.6;
-    }
-    .state-box i {
-      display    : block;
-      font-size  : 2.2rem;
-      margin-bottom: 12px;
-    }
-    .state-box.error { color: #ff4466; }
-
-    /* Spinner de carga */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner {
-      align-self   : center;
-      width        : 34px;
-      height       : 34px;
-      border       : 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation    : spin 0.75s linear infinite;
-      margin-top   : 40px;
-      flex-shrink  : 0;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       8. BARRA DE INPUT FIJA
-    ══════════════════════════════════════════════════════════ */
-    .input-bar {
-      position       : fixed;
-      bottom         : 0;
-      left           : 0;
-      right          : 0;
-      /* Respeta notch en iOS */
-      padding-bottom : var(--safe-b);
-      min-height     : var(--input-h);
-      z-index        : 200;
+    /* ── Badge de mensaje nuevo ──────────────────────────── */
+    /*
+       position: absolute + right/top + transform
+       → NUNCA modifica el flujo del documento
+       → NUNCA desplaza el texto del mensaje
+    */
+    .badge-new-msg {
+      position       : absolute;
+      right          : 18px;
+      top            : 50%;
+      transform      : translateY(-50%);
+      width          : 22px;
+      height         : 22px;
+      border-radius  : 50%;
+      background     : var(--accent);
+      box-shadow     : 0 0 8px var(--accent), 0 0 20px rgba(255,0,255,0.5);
       display        : flex;
       align-items    : center;
-      gap            : 10px;
-      padding-left   : 14px;
-      padding-right  : 14px;
-      padding-top    : 12px;
+      justify-content: center;
+      font-size      : 0.6rem;
+      font-weight    : 700;
+      color          : #fff;
+      pointer-events : none;
+      user-select    : none;
+      /* animación de pulso */
+      animation      : badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { box-shadow: 0 0 8px var(--accent), 0 0 18px rgba(255,0,255,0.45); }
+      50%      { box-shadow: 0 0 14px var(--accent), 0 0 30px rgba(255,0,255,0.7); }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       6. ESTADO VACÍO
+    ══════════════════════════════════════════════════════════ */
+    .empty-state {
+      display       : flex;
+      flex-direction: column;
+      align-items   : center;
+      justify-content: center;
+      gap           : 16px;
+      padding       : 80px 32px 40px;
+      color         : var(--text-lo);
+      text-align    : center;
+    }
+    .empty-state i   { font-size: 3.2rem; }
+    .empty-state h3  { font-size: 1rem; font-weight: 600; color: var(--text-mid); }
+    .empty-state p   { font-size: 0.82rem; line-height: 1.6; }
+
+    /* ══════════════════════════════════════════════════════════
+       7. SKELETONS DE CARGA
+    ══════════════════════════════════════════════════════════ */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+    .skeleton {
+      background     : linear-gradient(
+        90deg,
+        var(--bg-card)  25%,
+        var(--bg-card2) 50%,
+        var(--bg-card)  75%
+      );
+      background-size: 1200px 100%;
+      animation      : shimmer 1.5s infinite linear;
+      border-radius  : 6px;
+    }
+    .skel-row {
+      display      : flex;
+      align-items  : center;
+      gap          : 14px;
+      padding      : 12px 20px;
+      min-height   : 76px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skel-circle {
+      flex-shrink  : 0;
+      width        : var(--avatar-sz);
+      height       : var(--avatar-sz);
+      border-radius: 50%;
+    }
+    .skel-lines { flex: 1; display: flex; flex-direction: column; gap: 9px; }
+    .skel-line  { height: 11px; }
+
+    /* ══════════════════════════════════════════════════════════
+       8. BARRA DE NAVEGACIÓN INFERIOR
+    ══════════════════════════════════════════════════════════ */
+    .bottom-nav {
+      position       : fixed;
+      bottom         : 0; left: 0; right: 0;
+      height         : calc(var(--nav-h) + var(--safe-b));
+      padding-bottom : var(--safe-b);
+      z-index        : 200;
+      display        : flex;
+      justify-content: space-around;
+      align-items    : center;
       background     : rgba(13, 6, 22, 0.97);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-top     : 1px solid var(--border);
     }
 
-    /* Textarea auto-expandible */
-    .msg-input {
-      flex         : 1 1 0;
-      min-width    : 0;
-      background   : var(--bg-card2);
-      border       : 1px solid var(--border);
-      border-radius: 24px;
-      color        : var(--text-hi);
-      font-family  : inherit;
-      font-size    : 0.9rem;
-      line-height  : 1.45;
-      padding      : 10px 16px;
-      outline      : none;
-      resize       : none;
-      overflow-y   : auto;
-      max-height   : 120px;
-      transition   : border-color 0.2s, box-shadow 0.2s;
+    .nav-item {
+      position       : relative;
+      display        : flex;
+      flex-direction : column;
+      align-items    : center;
+      gap            : 3px;
+      padding        : 6px 18px;
+      color          : var(--text-lo);
+      font-size      : 1.25rem;
+      text-decoration: none;
+      cursor         : pointer;
+      transition     : color 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .msg-input::placeholder { color: var(--text-lo); }
-    .msg-input:focus {
-      border-color: var(--border-hi);
-      box-shadow  : 0 0 0 2px rgba(255, 0, 255, 0.1);
+    .nav-item span {
+      font-size     : 0.58rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight   : 600;
     }
+    .nav-item.active {
+      color      : var(--accent);
+      text-shadow: 0 0 12px var(--accent);
+    }
+    .nav-item:not(.active):hover { color: var(--text-mid); }
 
-    /* Botón enviar */
-    .btn-send {
-      flex-shrink  : 0;
-      width        : 44px;
-      height       : 44px;
-      border-radius: 50%;
-      background   : linear-gradient(135deg, var(--bubble-me-a), var(--bubble-me-b));
-      border       : none;
-      cursor       : pointer;
-      color        : #fff;
-      font-size    : 1rem;
-      display      : flex;
-      align-items  : center;
+    /* Badge contador global sobre el ícono de chats */
+    .badge-counter {
+      position       : absolute;
+      top            : 2px;
+      right          : 8px;
+      min-width      : 18px;
+      height         : 18px;
+      border-radius  : 9px;
+      background     : var(--accent);
+      box-shadow     : 0 0 8px var(--accent);
+      color          : #fff;
+      font-size      : 0.58rem;
+      font-weight    : 700;
+      display        : flex;
+      align-items    : center;
       justify-content: center;
-      box-shadow   : 0 0 12px var(--accent-glow);
-      transition   : transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      padding        : 0 5px;
+      pointer-events : none;
+      transition     : transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
     }
-    .btn-send:not(:disabled):hover {
-      transform : scale(1.1);
-      box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
-    }
-    .btn-send:not(:disabled):active { transform: scale(0.92); }
-    .btn-send:disabled {
-      opacity   : 0.38;
-      cursor    : not-allowed;
-      transform : none;
-      box-shadow: none;
+    .badge-counter.hidden {
+      transform     : scale(0);
+      opacity       : 0;
+      pointer-events: none;
     }
 
     /* ══════════════════════════════════════════════════════════
-       9. ANIMACIONES
+       9. ANIMACIÓN DE ENTRADA DE FILAS
     ══════════════════════════════════════════════════════════ */
-    @keyframes bubbleIn {
-      from { opacity: 0; transform: scale(0.86) translateY(8px); }
-      to   { opacity: 1; transform: scale(1)    translateY(0);   }
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to   { opacity: 1; transform: translateX(0);     }
     }
-
-    /* Solo anima la última burbuja (evita re-animar todo en cada render) */
-    .bubble-wrap:not(.no-anim) { animation: bubbleIn 0.18s ease-out both; }
-    .bubble-wrap.no-anim       { animation: none; }
+    .chat-row { animation: rowIn 0.22s ease-out both; }
   </style>
 </head>
 <body>
@@ -413,84 +361,108 @@
   <!-- ═══════════════════════════════════════════════════
        HEADER
   ═══════════════════════════════════════════════════ -->
-  <header class="chat-header" id="chatHeader">
-
-    <button class="btn-back" id="btnBack" aria-label="Volver a mensajes">
-      <i class="fa-solid fa-arrow-left"></i>
-    </button>
-
-    <!-- Avatar — src se inyecta por JS; onerror como red de seguridad -->
-    <img
-      class="header-avatar"
-      id="headerAvatar"
-      src=""
-      alt="Avatar"
-      aria-hidden="true"
-    />
-
-    <div class="header-info">
-      <div class="header-name"   id="headerName">Cargando…</div>
-      <div class="header-status" id="headerStatus">Kinetic</div>
-    </div>
-
+  <header class="top-bar" aria-label="Cabecera de mensajes">
+    <h1>Mensajes</h1>
   </header>
 
 
   <!-- ═══════════════════════════════════════════════════
-       ÁREA DE MENSAJES
+       LISTA DE CHATS
   ═══════════════════════════════════════════════════ -->
-  <main class="messages-wrap" id="messagesWrap" aria-live="polite" aria-label="Mensajes">
-    <div class="spinner" id="loadingSpinner" aria-label="Cargando mensajes"></div>
+  <main class="content" aria-label="Lista de conversaciones">
+
+    <!-- Skeletons visibles durante la carga inicial -->
+    <div id="skeletons" aria-hidden="true">
+      <div class="skel-row">
+        <div class="skel-circle skeleton"></div>
+        <div class="skel-lines">
+          <div class="skel-line skeleton" style="width:48%"></div>
+          <div class="skel-line skeleton" style="width:72%"></div>
+        </div>
+      </div>
+      <div class="skel-row">
+        <div class="skel-circle skeleton"></div>
+        <div class="skel-lines">
+          <div class="skel-line skeleton" style="width:60%"></div>
+          <div class="skel-line skeleton" style="width:55%"></div>
+        </div>
+      </div>
+      <div class="skel-row">
+        <div class="skel-circle skeleton"></div>
+        <div class="skel-lines">
+          <div class="skel-line skeleton" style="width:38%"></div>
+          <div class="skel-line skeleton" style="width:80%"></div>
+        </div>
+      </div>
+      <div class="skel-row">
+        <div class="skel-circle skeleton"></div>
+        <div class="skel-lines">
+          <div class="skel-line skeleton" style="width:55%"></div>
+          <div class="skel-line skeleton" style="width:65%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filas reales inyectadas por JS -->
+    <div id="rows" role="list"></div>
+
   </main>
 
 
   <!-- ═══════════════════════════════════════════════════
-       BARRA DE INPUT
+       BARRA DE NAVEGACIÓN INFERIOR
   ═══════════════════════════════════════════════════ -->
-  <div class="input-bar" role="form" aria-label="Escribir mensaje">
+  <nav class="bottom-nav" aria-label="Navegación principal">
 
-    <textarea
-      class  ="msg-input"
-      id     ="msgInput"
-      rows   ="1"
-      maxlength="1000"
-      placeholder="Escribe un mensaje…"
-      aria-label ="Mensaje"
-      disabled
-    ></textarea>
+    <a href="index.html" class="nav-item" aria-label="Inicio">
+      <i class="fa-solid fa-house"></i>
+      <span>Inicio</span>
+    </a>
 
-    <button
-      class  ="btn-send"
-      id     ="btnSend"
-      aria-label="Enviar"
-      disabled
-    >
-      <i class="fa-solid fa-paper-plane"></i>
-    </button>
+    <a href="radar.html" class="nav-item" aria-label="Radar">
+      <i class="fa-solid fa-location-crosshairs"></i>
+      <span>Radar</span>
+    </a>
 
-  </div>
+    <a href="likes.html" class="nav-item" aria-label="Likes">
+      <i class="fa-solid fa-heart"></i>
+      <span>Likes</span>
+    </a>
+
+    <!-- Chats — activo + badge global de mensajes sin leer -->
+    <a href="chats.html" class="nav-item active" id="navChats" aria-label="Mensajes">
+      <i class="fa-solid fa-comment"></i>
+      <div class="badge-counter hidden" id="globalBadge" aria-live="polite"></div>
+      <span>Chats</span>
+    </a>
+
+    <a href="perfil.html" class="nav-item" aria-label="Perfil">
+      <i class="fa-solid fa-user"></i>
+      <span>Perfil</span>
+    </a>
+
+  </nav>
 
 
   <!-- ═══════════════════════════════════════════════════
        FIREBASE + LÓGICA PRINCIPAL
   ═══════════════════════════════════════════════════ -->
   <script type="module">
-    /* ──────────────────────────────────────────────────────────
-       IMPORTACIONES FIREBASE (módulo ES)
-    ────────────────────────────────────────────────────────── */
+
+    /* ──────────────────────────────────────────────────────
+       IMPORTACIONES FIREBASE
+    ────────────────────────────────────────────────────── */
     import { initializeApp }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import {
-      getDatabase, ref,
-      get, push, update, onValue
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, onValue, get }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 
-    /* ──────────────────────────────────────────────────────────
+    /* ──────────────────────────────────────────────────────
        CONFIGURACIÓN FIREBASE
-    ────────────────────────────────────────────────────────── */
+    ────────────────────────────────────────────────────── */
     const firebaseConfig = {
       apiKey           : "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
       authDomain       : "kinetic-app-67ae5.firebaseapp.com",
@@ -506,47 +478,54 @@
     const db   = getDatabase(app);
 
 
-    /* ──────────────────────────────────────────────────────────
-       AVATAR PLACEHOLDER
-       SVG incrustado como data-URI → nunca genera petición de red,
-       nunca lanza 404, nunca se rompe.
-    ────────────────────────────────────────────────────────── */
-    const AVATAR_SVG =
-      "data:image/svg+xml," + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-          <rect width="100" height="100" fill="#12091f"/>
-          <!-- halo exterior -->
-          <circle cx="50" cy="38" r="22" fill="none"
-                  stroke="#ff00ff" stroke-width="1" stroke-opacity="0.3"/>
-          <!-- silueta cabeza -->
-          <circle cx="50" cy="37" r="16" fill="none"
-                  stroke="#ff00ff" stroke-width="2.2"/>
-          <!-- punto interior -->
-          <circle cx="50" cy="37" r="6" fill="#ff00ff" fill-opacity="0.18"/>
-          <!-- hombros -->
-          <path d="M16 84 Q18 60 50 60 Q82 60 84 84"
-                fill="none" stroke="#00eeff" stroke-width="2.2"
-                stroke-linecap="round"/>
-          <!-- líneas decorativas -->
-          <line x1="28" y1="84" x2="20" y2="84"
-                stroke="#00eeff" stroke-width="1" stroke-opacity="0.4"/>
-          <line x1="72" y1="84" x2="80" y2="84"
-                stroke="#00eeff" stroke-width="1" stroke-opacity="0.4"/>
-        </svg>
-      `);
-
-
-    /* ──────────────────────────────────────────────────────────
-       UTILIDADES PURAS (sin efectos secundarios)
-    ────────────────────────────────────────────────────────── */
+    /* ──────────────────────────────────────────────────────
+       AVATAR SVG FALLBACK CYBERPUNK
+       Se usa de dos formas:
+         A) Como nodo SVG directo (createSvgAvatar) → sin petición de red
+         B) Serializado como string para el onerror de <img>
+    ────────────────────────────────────────────────────── */
+    const DEFAULT_SVG_STRING = `<svg viewBox="0 0 24 24" fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+    </svg>`;
 
     /**
-     * Verifica estrictamente si `val` es una URL HTTP/HTTPS usable
-     * como atributo src de <img>.
+     * Crea un elemento <div> que contiene el SVG cyberpunk.
+     * Se inserta dentro de .chat-avatar-wrap cuando no hay foto.
+     * @returns {HTMLDivElement}
+     */
+    function createSvgAvatar() {
+      const div = document.createElement('div');
+      div.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;';
+      div.innerHTML = DEFAULT_SVG_STRING;
+      return div;
+    }
+
+    /**
+     * Versión escapada para uso dentro de onerror="..."
+     * Reemplaza el nodo <img> completo con el SVG.
+     */
+    const SVG_ONERROR = DEFAULT_SVG_STRING
+      .replace(/\n\s*/g, ' ')
+      .replace(/"/g, '&quot;');
+
+    const ONERROR_HANDLER =
+      `this.onerror=null;` +
+      `this.parentElement.innerHTML='${SVG_ONERROR}';`;
+
+
+    /* ──────────────────────────────────────────────────────
+       UTILIDADES PURAS
+    ────────────────────────────────────────────────────── */
+
+    /**
+     * Valida estrictamente si `val` es una URL HTTP/HTTPS usable.
      * @param {*} val
      * @returns {boolean}
      */
-    function isValidImgUrl(val) {
+    function isValidUrl(val) {
       if (!val || typeof val !== 'string' || val.trim() === '') return false;
       try {
         const u = new URL(val.trim());
@@ -557,29 +536,64 @@
     }
 
     /**
-     * Resuelve la URL del avatar con cadena de fallbacks:
-     *   album[0]  →  foto  →  AVATAR_SVG
-     * @param {object|null} user  Objeto de datos del usuario
-     * @returns {string}  URL segura, nunca vacía
+     * Extrae la URL de foto del usuario con triple fallback:
+     *   album[0]  →  foto  →  null
+     * Retorna null si no hay ninguna URL válida.
+     * @param {object|null} user
+     * @returns {string|null}
      */
-    function resolveAvatar(user) {
-      if (!user) return AVATAR_SVG;
+    function getPhotoUrl(user) {
+      if (!user || typeof user !== 'object') return null;
 
       // 1) Primer elemento del álbum
-      const fromAlbum = Array.isArray(user.album) && user.album.length > 0
-        ? user.album[0]
-        : null;
-      if (isValidImgUrl(fromAlbum)) return fromAlbum.trim();
+      if (Array.isArray(user.album) && user.album.length > 0) {
+        const a0 = user.album[0];
+        if (isValidUrl(a0)) return a0.trim();
+      }
 
-      // 2) Campo foto
-      if (isValidImgUrl(user.foto)) return user.foto.trim();
+      // 2) Campo foto raíz
+      if (isValidUrl(user.foto)) return user.foto.trim();
 
-      // 3) Placeholder SVG neón (nunca falla)
-      return AVATAR_SVG;
+      // 3) Sin foto válida
+      return null;
     }
 
     /**
-     * Escapa caracteres especiales HTML para prevenir XSS.
+     * Resuelve el nombre del usuario con fallback garantizado.
+     * @param {object|null} user
+     * @returns {string}
+     */
+    function resolveName(user) {
+      if (!user || typeof user !== 'object') return 'Usuario de Kinetic';
+      const n = user.nombre || user.name || user.displayName || '';
+      return n.trim() !== '' ? n.trim() : 'Usuario de Kinetic';
+    }
+
+    /**
+     * Extrae el UID receptor de un chatId canónico "uid1_uid2".
+     * Robusto ante UIDs que contengan guiones u otros separadores.
+     * Usa el miUid para identificar cuál de los dos es el receptor.
+     * @param {string} chatId
+     * @param {string} miUid
+     * @returns {string|null}
+     */
+    function extractTargetUid(chatId, miUid) {
+      if (!chatId || !miUid) return null;
+
+      // Los chatIds canónicos son: menorUID_mayorUID
+      // Intentamos separar por el primer o segundo segmento
+      const idx = chatId.indexOf(miUid);
+      if (idx === -1) return null; // Esta sala no nos pertenece
+
+      // Eliminar miUid y el guion bajo separador
+      let other = chatId.replace(miUid, '');
+      // Quitar guion bajo inicial o final
+      other = other.replace(/^_|_$/g, '');
+      return other.trim() !== '' ? other.trim() : null;
+    }
+
+    /**
+     * Escapa texto para inserción segura en HTML (anti-XSS).
      * @param {*} str
      * @returns {string}
      */
@@ -592,407 +606,267 @@
         .replace(/'/g, '&#39;');
     }
 
-    /**
-     * Formatea un timestamp en HH:MM (24h, locale español).
-     * @param {number} ts
-     * @returns {string}
-     */
-    function fmtTime(ts) {
-      if (!ts) return '';
-      return new Date(ts).toLocaleTimeString('es', {
-        hour  : '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
-    }
 
-    /**
-     * Devuelve una etiqueta de fecha legible para el separador.
-     * @param {number} ts
-     * @returns {string}  "Hoy" | "Ayer" | "3 jun. 2025"
-     */
-    function fmtDateLabel(ts) {
-      if (!ts) return '';
-      const d   = new Date(ts);
-      const now = new Date();
-      const y   = new Date(now); y.setDate(now.getDate() - 1);
-
-      if (d.toDateString() === now.toDateString()) return 'Hoy';
-      if (d.toDateString() === y.toDateString())   return 'Ayer';
-      return d.toLocaleDateString('es', {
-        day: 'numeric', month: 'short', year: 'numeric'
-      });
-    }
-
-    /**
-     * Genera el chatId canónico a partir de dos UIDs.
-     * El UID lexicográficamente menor siempre va primero,
-     * garantizando el mismo ID independientemente de quién inicie.
-     * @param {string} a
-     * @param {string} b
-     * @returns {string}
-     */
-    function makeChatId(a, b) {
-      return a < b ? `${a}_${b}` : `${b}_${a}`;
-    }
+    /* ──────────────────────────────────────────────────────
+       REFERENCIAS AL DOM
+    ────────────────────────────────────────────────────── */
+    const $rows      = document.getElementById('rows');
+    const $skeletons = document.getElementById('skeletons');
+    const $badge     = document.getElementById('globalBadge');
 
 
-    /* ──────────────────────────────────────────────────────────
-       REFERENCIAS A ELEMENTOS DEL DOM
-    ────────────────────────────────────────────────────────── */
-    const $wrap       = document.getElementById('messagesWrap');
-    const $input      = document.getElementById('msgInput');
-    const $btnSend    = document.getElementById('btnSend');
-    const $headerAvt  = document.getElementById('headerAvatar');
-    const $headerName = document.getElementById('headerName');
-    const $headerSt   = document.getElementById('headerStatus');
-    const $spinner    = document.getElementById('loadingSpinner');
-
-
-    /* ──────────────────────────────────────────────────────────
-       ESTADO DE LA PANTALLA
-    ────────────────────────────────────────────────────────── */
-    let miUid        = null;  // UID del usuario autenticado
-    let targetId     = null;  // UID del receptor
-    let chatId       = null;  // ID del nodo de chat en Firebase
-    let targetAvatar = AVATAR_SVG;  // URL resuelta del avatar del receptor
-    let lastDateLbl  = null;  // Control del separador de fecha actual
-    let isSending    = false; // Bandera anti-doble-envío
-
-
-    /* ──────────────────────────────────────────────────────────
-       LECTURA DE PARÁMETROS DE URL
-       Soporta dos formas de llegar a esta pantalla:
-         A) chat.html?chatId=XXX&targetId=YYY  (desde chats.html)
-         B) chat.html?targetId=YYY             (desde radar/likes)
-    ────────────────────────────────────────────────────────── */
-    const _params      = new URLSearchParams(window.location.search);
-    const _chatIdUrl   = _params.get('chatId')   || null;
-    const _targetIdUrl = _params.get('targetId') || null;
-    targetId = _targetIdUrl;
-
-
-    /* ──────────────────────────────────────────────────────────
-       INTERACCIONES DE UI (independientes del auth)
-    ────────────────────────────────────────────────────────── */
-
-    // Botón volver
-    document.getElementById('btnBack').addEventListener('click', () => {
-      if (window.history.length > 1) window.history.back();
-      else window.location.href = 'chats.html';
-    });
-
-    // Auto-resize del textarea + activar/desactivar btn enviar
-    $input.addEventListener('input', () => {
-      $input.style.height = 'auto';
-      $input.style.height = Math.min($input.scrollHeight, 120) + 'px';
-      $btnSend.disabled   = $input.value.trim().length === 0 || isSending;
-    });
-
-    // Enter envía (Shift+Enter = nueva línea)
-    $input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        if (!$btnSend.disabled) sendMessage();
-      }
-    });
-
-    $btnSend.addEventListener('click', sendMessage);
-
-
-    /* ──────────────────────────────────────────────────────────
-       AUTENTICACIÓN → PUNTO DE ENTRADA PRINCIPAL
-    ────────────────────────────────────────────────────────── */
-    onAuthStateChanged(auth, async (user) => {
-
-      // Sin sesión → login
+    /* ──────────────────────────────────────────────────────
+       AUTENTICACIÓN → PUNTO DE ENTRADA
+    ────────────────────────────────────────────────────── */
+    onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = 'login.html';
         return;
       }
-
-      miUid = user.uid;
-
-      // Sin receptor → pantalla no puede funcionar
-      if (!targetId) {
-        showError('No se indicó el usuario destino.<br>Vuelve a la lista de mensajes.');
-        return;
-      }
-
-      // Determinar chatId: desde URL o generado canónicamente
-      chatId = _chatIdUrl || makeChatId(miUid, targetId);
-
-      // Cargar perfil del receptor (async, con manejo de error)
-      await loadTargetProfile();
-
-      // Habilitar input ahora que sabemos quiénes somos
-      $input.disabled  = false;
-      $input.focus();
-      $btnSend.disabled = true; // se habilitará cuando el usuario escriba
-
-      // Suscribir mensajes en tiempo real
-      listenMessages();
-
-      // Marcar mis mensajes sin leer como leídos
-      markAsRead();
+      initChatList(user.uid);
     });
 
 
-    /* ──────────────────────────────────────────────────────────
-       CARGAR PERFIL DEL RECEPTOR
-    ────────────────────────────────────────────────────────── */
-    async function loadTargetProfile() {
-      let userData = null;
+    /* ──────────────────────────────────────────────────────
+       INICIALIZAR LISTA DE CHATS
+       Suscripción en tiempo real al nodo `chats`.
+       Cada actualización re-evalúa todas las salas del usuario.
+    ────────────────────────────────────────────────────── */
+    function initChatList(miUid) {
+      const chatsRef = ref(db, 'chats');
 
-      try {
-        const snap = await get(ref(db, `users/${targetId}`));
-        if (snap.exists()) userData = snap.val();
-      } catch (err) {
-        // Error de red: continuamos con placeholder
-        console.warn('[Kinetic] No se pudo cargar el perfil del receptor:', err.message);
-      }
+      onValue(chatsRef, async (snapshot) => {
+        const allChats = snapshot.val();
 
-      // ── Validación antirroturas estricta ──────────────────────
-      targetAvatar = resolveAvatar(userData);
+        // Ocultar skeletons en el primer resultado
+        $skeletons.style.display = 'none';
+        $rows.innerHTML          = '';
 
-      const nombre = userData?.nombre
-                  || userData?.name
-                  || userData?.displayName
-                  || 'Usuario';
-
-      // Pintar header
-      $headerAvt.src     = targetAvatar;
-      $headerAvt.onerror = () => { $headerAvt.src = AVATAR_SVG; }; // red de seguridad
-      $headerAvt.alt     = nombre;
-
-      $headerName.textContent = nombre;
-      $headerSt.textContent   = 'Kinetic';
-      document.title          = `${nombre} — Kinetic`;
-    }
-
-
-    /* ──────────────────────────────────────────────────────────
-       MARCAR MENSAJES COMO LEÍDOS
-       Limpia unreadTarget en lastInfo si apuntaba a mí.
-    ────────────────────────────────────────────────────────── */
-    function markAsRead() {
-      if (!chatId || !miUid) return;
-
-      const lastInfoRef = ref(db, `chats/${chatId}/lastInfo`);
-
-      get(lastInfoRef).then((snap) => {
-        if (!snap.exists()) return;
-        const info = snap.val();
-        // Solo actúa si el flag apunta al usuario actual
-        if (info.unreadTarget === miUid) {
-          update(lastInfoRef, { unreadTarget: '' }).catch(() => {});
+        // Sin datos en absoluto
+        if (!allChats || typeof allChats !== 'object') {
+          renderEmpty();
+          updateBadge(0);
+          return;
         }
-      }).catch(() => {});
-    }
 
+        // Filtrar salas donde participa el usuario actual
+        // Usamos extractTargetUid para asegurarnos de que el chatId
+        // realmente contenga miUid (evita falsos positivos con includes)
+        const mySalas = Object.entries(allChats).filter(([chatId]) => {
+          return extractTargetUid(chatId, miUid) !== null;
+        });
 
-    /* ──────────────────────────────────────────────────────────
-       SUSCRIPCIÓN EN TIEMPO REAL A MENSAJES
-    ────────────────────────────────────────────────────────── */
-    function listenMessages() {
-      const msgsRef = ref(db, `chats/${chatId}/messages`);
+        if (mySalas.length === 0) {
+          renderEmpty();
+          updateBadge(0);
+          return;
+        }
 
-      onValue(msgsRef, (snapshot) => {
-        const raw  = snapshot.val() || {};
-        renderMessages(raw);
-        markAsRead(); // marcar leídos en cada actualización
+        // Cargar perfiles de todos los receptores en paralelo
+        const roomData = await Promise.all(
+          mySalas.map(([chatId, chatVal]) => fetchRoom(chatId, chatVal, miUid))
+        );
+
+        // Filtrar rooms inválidos (targetUid no resoluble)
+        const validRooms = roomData.filter(Boolean);
+
+        if (validRooms.length === 0) {
+          renderEmpty();
+          updateBadge(0);
+          return;
+        }
+
+        // Ordenar: sin-leer primero, luego por timestamp descendente
+        validRooms.sort((a, b) => {
+          if (b.unread !== a.unread) return b.unread - a.unread;
+          return (b.lastTs || 0) - (a.lastTs || 0);
+        });
+
+        // Pintar filas y contabilizar no-leídas
+        let totalUnread = 0;
+        const fragment  = document.createDocumentFragment();
+
+        validRooms.forEach((room, idx) => {
+          if (room.unread) totalUnread++;
+          fragment.appendChild(buildRow(room, idx));
+        });
+
+        $rows.appendChild(fragment);
+        updateBadge(totalUnread);
+
       }, (err) => {
-        console.error('[Kinetic] Error en listener de mensajes:', err);
-        showError('No se pudo cargar la conversación.<br>Revisa tu conexión.');
+        // Error de conexión o permisos
+        console.error('[Kinetic/chats] Error en onValue:', err);
+        $skeletons.style.display = 'none';
+        renderError();
       });
     }
 
 
-    /* ──────────────────────────────────────────────────────────
-       RENDERIZAR TODOS LOS MENSAJES
-    ────────────────────────────────────────────────────────── */
-    function renderMessages(data) {
-      // Quitar spinner de primera carga
-      $spinner?.remove();
+    /* ──────────────────────────────────────────────────────
+       FETCH DE UNA SALA + PERFIL DEL RECEPTOR
+    ────────────────────────────────────────────────────── */
+    async function fetchRoom(chatId, chatVal, miUid) {
+      // Extraer UID del receptor de forma robusta
+      const targetUid = extractTargetUid(chatId, miUid);
+      if (!targetUid) return null; // sala sin UID válido → descartar
 
-      // Guardar posición actual para detectar si estamos al fondo
-      const atBottom = $wrap.scrollHeight - $wrap.scrollTop - $wrap.clientHeight < 60;
+      // Datos de la sala
+      const lastInfo  = (chatVal && typeof chatVal.lastInfo === 'object')
+        ? chatVal.lastInfo
+        : {};
 
-      $wrap.innerHTML = '';
-      lastDateLbl     = null;
+      const unread    = lastInfo.unreadTarget === miUid;
+      const lastMsg   = (typeof lastInfo.lastMessage === 'string' && lastInfo.lastMessage.trim() !== '')
+        ? lastInfo.lastMessage.trim()
+        : 'Mensaje multimedia o vacío...';            // ← fallback obligatorio
+      const lastTs    = lastInfo.lastTs || 0;
 
-      // Convertir objeto Firebase en array ordenado por timestamp
-      const messages = Object.entries(data)
-        .map(([key, msg]) => ({ _key: key, ...msg }))
-        .sort((a, b) => (a.ts || 0) - (b.ts || 0));
-
-      if (messages.length === 0) {
-        $wrap.appendChild(createEmptyState());
-        return;
-      }
-
-      const fragment = document.createDocumentFragment();
-      const total    = messages.length;
-
-      messages.forEach((msg, idx) => {
-        const isMe    = msg.from === miUid;
-        const label   = fmtDateLabel(msg.ts);
-        const isLast  = idx === total - 1;
-
-        // ── Separador de fecha ──────────────────────────────────
-        if (label !== lastDateLbl) {
-          lastDateLbl = label;
-          const sep = document.createElement('div');
-          sep.className   = 'date-sep';
-          sep.textContent = label;
-          fragment.appendChild(sep);
-        }
-
-        // ── Contenedor de burbuja ───────────────────────────────
-        const wrap = document.createElement('div');
-        wrap.className = `bubble-wrap ${isMe ? 'me' : 'them'}${isLast ? '' : ' no-anim'}`;
-
-        // Mini-avatar del receptor (solo en burbujas "them")
-        if (!isMe) {
-          const av = document.createElement('img');
-          av.className = 'bubble-avatar';
-          av.src       = targetAvatar;
-          av.alt       = '';
-          av.onerror   = () => { av.src = AVATAR_SVG; };
-          wrap.appendChild(av);
-        }
-
-        // Bloque interior: burbuja + pie
-        const inner = document.createElement('div');
-        inner.className = 'bubble-inner';
-
-        // Burbuja de texto
-        const bub = document.createElement('div');
-        bub.className   = 'bubble';
-        bub.textContent = msg.text || '';  // textContent: XSS-safe
-
-        // Pie: hora + ticks
-        const foot = document.createElement('div');
-        foot.className  = 'bubble-foot';
-
-        const timeSpan = document.createElement('span');
-        timeSpan.textContent = fmtTime(msg.ts);
-        foot.appendChild(timeSpan);
-
-        // Ticks de estado solo en mis mensajes
-        if (isMe) {
-          const tick = document.createElement('span');
-          tick.className = `tick ${msg.read ? 'read' : 'sent'}`;
-          tick.textContent = msg.read ? '✓✓' : '✓';
-          tick.title       = msg.read ? 'Leído' : 'Enviado';
-          foot.appendChild(tick);
-        }
-
-        inner.appendChild(bub);
-        inner.appendChild(foot);
-        wrap.appendChild(inner);
-        fragment.appendChild(wrap);
-      });
-
-      $wrap.appendChild(fragment);
-
-      // Scroll automático al fondo si ya estábamos abajo (o primera carga)
-      if (atBottom || total <= 15) {
-        scrollToBottom();
-      }
-    }
-
-
-    /* ──────────────────────────────────────────────────────────
-       SCROLL AL FONDO
-    ────────────────────────────────────────────────────────── */
-    function scrollToBottom() {
-      // Usar requestAnimationFrame garantiza que el DOM ya se pintó
-      requestAnimationFrame(() => {
-        $wrap.scrollTop = $wrap.scrollHeight;
-      });
-    }
-
-
-    /* ──────────────────────────────────────────────────────────
-       ENVIAR MENSAJE
-    ────────────────────────────────────────────────────────── */
-    async function sendMessage() {
-      const text = $input.value.trim();
-      if (!text || !chatId || !miUid || isSending) return;
-
-      // Bloquear doble envío
-      isSending         = true;
-      $btnSend.disabled = true;
-      $input.value      = '';
-      $input.style.height = 'auto';
-
-      const now = Date.now();
-
-      const msgPayload = {
-        from: miUid,
-        to  : targetId,
-        text,
-        ts  : now,
-        read: false
-      };
-
-      const lastInfoPayload = {
-        lastMessage : text,
-        lastTs      : now,
-        unreadTarget: targetId    // receptor tiene mensaje sin leer
-      };
-
+      // Cargar perfil del receptor desde Firebase
+      let targetUser = null;
       try {
-        // 1) Guardar mensaje en el historial
-        await push(ref(db, `chats/${chatId}/messages`), msgPayload);
-
-        // 2) Actualizar resumen del chat (para la lista chats.html)
-        await update(ref(db, `chats/${chatId}/lastInfo`), lastInfoPayload);
-
+        const snap = await get(ref(db, `users/${targetUid}`));
+        if (snap.exists()) targetUser = snap.val();
       } catch (err) {
-        console.error('[Kinetic] Error al enviar mensaje:', err);
-        // Restaurar texto para que el usuario pueda reintentar
-        $input.value = text;
-      } finally {
-        isSending         = false;
-        $btnSend.disabled = $input.value.trim().length === 0;
+        console.warn(`[Kinetic/chats] No se pudo cargar users/${targetUid}:`, err.message);
+        // Continuamos con targetUser = null → fallbacks de nombre/avatar
       }
+
+      const nombre   = resolveName(targetUser);
+      const photoUrl = getPhotoUrl(targetUser);  // null si no hay foto válida
+
+      return { chatId, targetUid, nombre, photoUrl, lastMsg, lastTs, unread };
     }
 
 
-    /* ──────────────────────────────────────────────────────────
-       CREAR ESTADO VACÍO (sin mensajes)
-    ────────────────────────────────────────────────────────── */
-    function createEmptyState() {
-      const box = document.createElement('div');
-      box.className = 'state-box';
-      box.innerHTML = `
-        <i class="fa-regular fa-comment-dots" style="color:var(--text-lo)"></i>
-        Aún no hay mensajes.<br>¡Di hola! 👋
-      `;
-      return box;
+    /* ──────────────────────────────────────────────────────
+       CONSTRUIR UNA FILA DE CHAT (DOM puro, sin innerHTML de datos)
+    ────────────────────────────────────────────────────── */
+    function buildRow(room, idx) {
+      const { chatId, targetUid, nombre, photoUrl, lastMsg, unread } = room;
+
+      /* ── Contenedor principal ─────────────────────────── */
+      const row = document.createElement('div');
+      row.className              = `chat-row${unread ? ' unread' : ''}`;
+      row.setAttribute('role',   'listitem');
+      row.setAttribute('tabindex', '0');
+      row.setAttribute('aria-label', `Chat con ${nombre}`);
+      row.dataset.id             = targetUid;  // ← fuente de verdad del UID
+      row.style.animationDelay   = `${idx * 0.04}s`;
+
+      /* ── Evento de redirección ───────────────────────────
+         ✅ CORRECCIÓN CRÍTICA:
+         window.location.href = 'chat.html?id=' + targetUid
+         El UID se lee desde data-id, nunca de una clausura que
+         pudiera haberse corrompido si el DOM se modificó.
+      ──────────────────────────────────────────────────── */
+      row.addEventListener('click', () => {
+        const uid = row.dataset.id;
+        if (!uid) {
+          console.error('[Kinetic/chats] targetUid indefinido en esta fila.');
+          return;
+        }
+        window.location.href = 'chat.html?id=' + uid;
+      });
+
+      // Soporte de teclado (Enter / Espacio)
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          row.click();
+        }
+      });
+
+      /* ── Avatar ──────────────────────────────────────── */
+      const avatarWrap = document.createElement('div');
+      avatarWrap.className = 'chat-avatar-wrap';
+
+      if (photoUrl) {
+        // Hay URL válida → usar <img> con onerror que inyecta el SVG
+        const img = document.createElement('img');
+        img.src   = photoUrl;
+        img.alt   = nombre;
+        // onerror: reemplaza el <img> con el SVG cyberpunk directamente
+        img.setAttribute('onerror', ONERROR_HANDLER);
+        avatarWrap.appendChild(img);
+      } else {
+        // Sin foto → SVG directo, sin petición de red, sin riesgo de rotura
+        avatarWrap.appendChild(createSvgAvatar());
+      }
+
+      /* ── Bloque de texto ─────────────────────────────── */
+      const body = document.createElement('div');
+      body.className = 'chat-body';
+
+      const nameEl = document.createElement('div');
+      nameEl.className   = 'chat-name';
+      nameEl.textContent = nombre;     // textContent: XSS-safe
+
+      const previewEl = document.createElement('div');
+      previewEl.className   = 'chat-preview';
+      previewEl.textContent = lastMsg; // textContent: XSS-safe
+
+      body.appendChild(nameEl);
+      body.appendChild(previewEl);
+
+      /* ── Badge de no-leído ───────────────────────────── */
+      if (unread) {
+        const badge = document.createElement('div');
+        badge.className          = 'badge-new-msg';
+        badge.setAttribute('aria-label', 'Mensaje nuevo');
+        badge.setAttribute('role', 'status');
+        row.appendChild(badge);
+      }
+
+      /* ── Ensamblar ───────────────────────────────────── */
+      row.appendChild(avatarWrap);
+      row.appendChild(body);
+      // El badge ya fue appendeado antes (posición absoluta, orden no importa)
+
+      return row;
     }
 
 
-    /* ──────────────────────────────────────────────────────────
-       MOSTRAR ERROR FATAL EN EL ÁREA DE MENSAJES
-    ────────────────────────────────────────────────────────── */
-    function showError(htmlMsg) {
-      $spinner?.remove();
-      $wrap.innerHTML = '';
-
-      const box = document.createElement('div');
-      box.className = 'state-box error';
-      box.innerHTML = `
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        ${htmlMsg}
+    /* ──────────────────────────────────────────────────────
+       RENDERIZAR ESTADO VACÍO
+    ────────────────────────────────────────────────────── */
+    function renderEmpty() {
+      $rows.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-regular fa-comment-dots" style="color:var(--text-lo)"></i>
+          <h3>Sin conversaciones aún</h3>
+          <p>Conéctate con alguien en el Radar<br>para empezar a chatear.</p>
+        </div>
       `;
-      $wrap.appendChild(box);
+    }
 
-      // Deshabilitar input
-      $input.disabled   = true;
-      $btnSend.disabled = true;
+
+    /* ──────────────────────────────────────────────────────
+       RENDERIZAR ERROR DE CONEXIÓN
+    ────────────────────────────────────────────────────── */
+    function renderError() {
+      $rows.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-triangle-exclamation" style="color:#ff4466"></i>
+          <h3 style="color:#ff4466">Error de conexión</h3>
+          <p>No se pudieron cargar los mensajes.<br>Verifica tu conexión e intenta de nuevo.</p>
+        </div>
+      `;
+    }
+
+
+    /* ──────────────────────────────────────────────────────
+       ACTUALIZAR BADGE GLOBAL EN BARRA INFERIOR
+    ────────────────────────────────────────────────────── */
+    function updateBadge(count) {
+      if (count > 0) {
+        $badge.textContent = count > 99 ? '99+' : String(count);
+        $badge.classList.remove('hidden');
+        $badge.setAttribute('aria-label', `${count} mensajes sin leer`);
+      } else {
+        $badge.classList.add('hidden');
+        $badge.removeAttribute('aria-label');
+      }
     }
 
   </script>
