@@ -98,7 +98,6 @@
             height: 100px;
         }
 
-        /* ÁLBUM MULTIMEDIA EDITABLE */
         .editable-album {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -144,7 +143,7 @@
             box-shadow: 0 4px 15px rgba(0, 242, 255, 0.2);
         }
 
-        /* BARRA INFERIOR */
+        /* BARRA DE NAVEGACIÓN UNIFICADA */
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -240,6 +239,10 @@
             <i class="fa-solid fa-border-all"></i>
             <span>Mosaico</span>
         </div>
+        <div class="nav-item" onclick="window.location.href='likes.html'">
+            <i class="fa-solid fa-heart"></i>
+            <span>Likes</span>
+        </div>
         <div class="nav-item" onclick="window.location.href='chats.html'">
             <i class="fa-solid fa-comment"></i>
             <span>Chats</span>
@@ -321,7 +324,6 @@
             const busca = document.getElementById('pBusca').value;
             const bio = document.getElementById('pBio').value.trim();
 
-            // Filtrar slots de fotos vacíos
             const albumFinal = listaFotosLocales.filter(url => url !== "");
 
             update(ref(db, `users/${currentUid}`), {
@@ -332,7 +334,7 @@
                 bio: bio,
                 album: albumFinal
             }).then(() => {
-                alert("¡Perfil guardado con éxito! Ahora aparecerás correctamente en el Radar.");
+                alert("¡Perfil guardado con éxito!");
                 window.location.href = "radar.html";
             });
         });
