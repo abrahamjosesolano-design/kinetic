@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kinetic – Registro</title>
+    <style>
+        :root {
+            --bg: #0d0616;
+            --card-bg: #12091f;
+            --text: #ffffff;
+            --text-secondary: #b8b8d4;
+            --neon: #ff00ff;
+            --error: #ff3366;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+            background: radial-gradient(circle at top, #1a0033 0%, var(--bg) 80%);
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, var(--neon), #7B2CBF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px var(--neon));
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-size: 1.8rem;
+        }
+
+        .tagline {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+            border: 2px solid var(--neon);
+            background: rgba(255, 0, 255, 0.05);
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            font-family: inherit;
+            box-shadow: 0 0 8px rgba(255, 0, 255, 0.2);
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            border-color: var(--neon);
+            box-shadow: 0 0 18px var(--neon);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon), #7B2CBF);
+            color: white;
+            box-shadow: 0 0 15px var(--neon);
+        }
+
+        .btn-primary:active { transform: scale(0.97); }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--neon);
+            color: var(--neon);
+            margin-top: 0.8rem;
+        }
+
+        .error-message {
+            background: rgba(255, 51, 102, 0.15);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 0.8rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show { display: block; }
+
+        .back-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .back-link a {
+            color: var(--neon);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">K</div>
+        <h1>Crear Cuenta</h1>
+        <p class="tagline">Únete a Kinetic y conecta con el mundo</p>
+
+        <div class="input-group">
+            <label>Nombre</label>
+            <input type="text" id="nombre" placeholder="Tu nombre">
+        </div>
+        <div class="input-group">
+            <label>Correo electrónico</label>
+            <input type="email" id="email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="input-group">
+            <label>Contraseña</label>
+            <input type="password" id="password" placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="input-group">
+            <label>Edad</label>
+            <input type="number" id="edad" placeholder="18" min="18" max="99">
+        </div>
+        <div class="input-group">
+            <label>Biografía</label>
+            <textarea id="bio" rows="2" placeholder="Cuéntanos algo sobre ti..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" id="registerBtn">Crear Cuenta</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">Volver al inicio de sesión</button>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="back-link">
+            ¿Ya tienes cuenta? <a href="index.html">Inicia sesión</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+            authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+            projectId: "kinetic-app-67ae5",
+            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+            messagingSenderId: "825570718975",
+            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const errorEl = document.getElementById('errorMessage');
+
+        function showError(msg) {
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+            setTimeout(() => errorEl.classList.remove('show'), 5000);
+        }
+
+        // Desactivamos la redirección automática de onAuthStateChanged durante el registro
+        let registering = false;
+        onAuthStateChanged(auth, (user) => {
+            if (!registering && user) {
+                // Si ya hay sesión activa, redirigimos a index.html
+                window.location.href = 'index.html';
+            }
+        });
+
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const edad = document.getElementById('edad').value.trim();
+            const bio = document.getElementById('bio').value.trim();
+
+            if (!nombre || !email || !password) {
+                showError('Completa todos los campos obligatorios.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('La contraseña debe tener al menos 6 caracteres.');
+                return;
+            }
+
+            registering = true;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Crear nodo del usuario en Realtime Database
+                const userData = {
+                    name: nombre,
+                    email: email,
+                    age: edad || "No definida",
+                    bio: bio || "¡Hola! Estoy usando Kinetic.",
+                    album: [""],
+                    profilePic: "",
+                    online: false,
+                    premium: false,
+                    modoExpress: false,
+                    lat: null,
+                    lng: null,
+                    interestedIn: "all",
+                    gender: "non-binary",
+                    dailyViews: 0,
+                    lastResetDate: new Date().toISOString().split('T')[0]
+                };
+
+                await set(ref(db, 'users/' + user.uid), userData);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error en registro:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    showError('Este correo ya está registrado.');
+                } else if (error.code === 'auth/weak-password') {
+                    showError('La contraseña es demasiado débil.');
+                } else {
+                    showError('Error al crear la cuenta: ' + error.message);
+                }
+                registering = false;
+            }
+        });
+    </script>
+</body>
+</html>
