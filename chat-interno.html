@@ -23,6 +23,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            height: -webkit-fill-available; 
             overflow: hidden;
         }
 
@@ -34,7 +35,7 @@
             display: flex;
             align-items: center;
             padding: 0 15px;
-            position: relative;
+            flex-shrink: 0;
             z-index: 10;
         }
 
@@ -164,14 +165,16 @@
             text-overflow: ellipsis;
         }
 
-        /* BARRA INFERIOR DE ENTRADA */
+        /* BARRA INFERIOR DE ENTRADA CORREGIDA */
         .chat-input-area {
             background-color: #12091f;
             border-top: 1px solid #25123e;
-            padding: 10px 15px;
+            padding: 12px 15px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            flex-shrink: 0;
+            margin-bottom: env(safe-area-inset-bottom);
         }
 
         /* INDICADOR DE MENSAJE QUE ESTÁS RESPONDIENDO */
@@ -249,7 +252,7 @@
             box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
         }
 
-        /* MENÚ CONTEXTUAL DE MENSAJE (BORRAR/RESPONDER) */
+        /* MENÚ CONTEXTUAL DE MENSAJE */
         .msg-menu {
             position: fixed;
             background-color: #1a0b2e;
@@ -283,7 +286,7 @@
 <body>
 
     <div class="chat-header">
-        <button class="btn-back" onclick="window.location.href='radar.html'">
+        <button class="btn-back" onclick="window.location.href='chats.html'">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
         <img id="headerAvatar" class="header-avatar" src="https://via.placeholder.com/150" alt="">
@@ -306,7 +309,7 @@
                 <i class="fa-solid fa-paperclip"></i>
             </button>
             <div class="input-wrapper">
-                <input type="text" id="inputMsg" class="chat-input" placeholder="Escribe un mensaje o pega URL de foto/video..." autocomplete="off">
+                <input type="text" id="inputMsg" class="chat-input" placeholder="Escribe un mensaje..." autocomplete="off">
             </div>
             <button class="btn-send" id="btnSend">
                 <i class="fa-solid fa-paper-plane"></i>
@@ -322,7 +325,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
@@ -346,7 +349,6 @@
         let selectedMsgText = "";
         let activeReplyId = null;
 
-        // Efectos de sonido nativos (URLs estables CDN de sonidos limpios)
         const soundSend = new Audio("https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav");
         const soundRec = new Audio("https://assets.mixkit.co/active_storage/sfx/866/866-84.wav");
         soundSend.volume = 0.4;
@@ -356,22 +358,22 @@
         const inputMsg = document.getElementById('inputMsg');
         const btnSend = document.getElementById('btnSend');
         const btnMedia = document.getElementById('btnMedia');
-        
         const replyBar = document.getElementById('replyBar');
         const replyText = document.getElementById('replyText');
         const btnCancelReply = document.getElementById('btnCancelReply');
         const msgMenu = document.getElementById('msgMenu');
 
-        // Candado
         onAuthStateChanged(auth, (user) => {
             if (!user || !targetUserId) {
                 window.location.href = "index.html";
             } else {
                 currentUid = user.uid;
-                // Generar ID único combinado alfabéticamente (id1_id2) para evitar duplicación de salas
                 chatId = currentUid < targetUserId ? `${currentUid}_${targetUserId}` : `${targetUserId}_${currentUid}`;
                 cargarDatosCabecera();
                 escucharMensajes();
+                
+                // Limpiar marcador de no leído al entrar a la sala
+                update(ref(db, `chats/${chatId}/lastInfo`), { unreadTarget: "" });
             }
         });
 
@@ -392,7 +394,6 @@
             });
         }
 
-        // Detectar si una cadena de texto es una URL de imagen o video
         function checkEsMedia(url) {
             if (typeof url !== 'string') return null;
             const limpia = url.split('?')[0].toLowerCase();
@@ -408,7 +409,7 @@
                 const mData = snap.val();
 
                 if (!mData) {
-                    msgContainer.innerHTML = `<div style="text-align:center; color:#796699; margin-top:20px; font-size:14px;">Dí hola... sin timidez 💬</div>`;
+                    msgContainer.innerHTML = `<div style="text-align:center; color:#796699; margin-top:20px;">Dí hola... sin timidez 💬</div>`;
                     primerCarga = false;
                     return;
                 }
@@ -421,18 +422,16 @@
                     const bubble = document.createElement('div');
                     bubble.className = 'msg-bubble';
                     
-                    // Lógica si es una respuesta fijada
                     let replyHTML = "";
                     if (m.replyToText) {
                         replyHTML = `<div class="reply-box-in-bubble"><i class="fa-solid fa-reply"></i> ${m.replyToText}</div>`;
                     }
 
-                    // Evaluar si el texto es un enlace multimedia
                     const tipoMedia = checkEsMedia(m.text);
                     let cuerpoMensaje = `<span class="text-content">${m.text}</span>`;
                     
                     if (tipoMedia === 'img') {
-                        cuerpoMensaje = `<img class="msg-media" src="${m.text}" alt="Imagen enviada">`;
+                        cuerpoMensaje = `<img class="msg-media" src="${m.text}" alt="Imagen">`;
                     } else if (tipoMedia === 'video') {
                         cuerpoMensaje = `<video class="msg-media" src="${m.text}" controls></video>`;
                     }
@@ -440,7 +439,6 @@
                     const hora = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     bubble.innerHTML = `${replyHTML}${cuerpoMensaje}<span class="msg-time">${hora}</span>`;
 
-                    // Guardar ID en el elemento para interactuar con el menú de opciones al hacer clic
                     bubble.addEventListener('click', (e) => {
                         e.stopPropagation();
                         abrirMenuMensaje(e, mId, m.text, m.sender);
@@ -452,20 +450,17 @@
 
                 msgContainer.scrollTop = msgContainer.scrollHeight;
 
-                // Solo suena el audio de recepción si NO es la carga inicial de mensajes viejos
                 if (!primerCarga) {
-                    // Obtener el último mensaje enviado para verificar el sender
                     const keys = Object.keys(mData);
                     const ultimoMsg = mData[keys[keys.length - 1]];
                     if (ultimoMsg.sender !== currentUid) {
-                        soundRec.play().catch(e => console.log("Permiso audio requerido"));
+                        soundRec.play().catch(e => console.log(e));
                     }
                 }
                 primerCarga = false;
             });
         }
 
-        // Función para enviar mensaje
         function enviarMensaje() {
             const texto = inputMsg.value.trim();
             if (!texto) return;
@@ -479,25 +474,27 @@
                 timestamp: Date.now()
             };
 
-            // Si hay una respuesta activa, añadirla al paquete del mensaje
             if (activeReplyId) {
                 paqueteMsg.replyToId = activeReplyId;
                 paqueteMsg.replyToText = selectedMsgText;
             }
 
             set(nuevoMsgRef, paqueteMsg).then(() => {
+                set(ref(db, `chats/${chatId}/lastInfo`), {
+                    text: texto,
+                    timestamp: Date.now(),
+                    unreadTarget: targetUserId
+                });
+
                 inputMsg.value = '';
-                soundSend.play().catch(e => console.log("Permiso audio requerido"));
+                soundSend.play().catch(e => console.log(e));
                 cancelarRespuesta();
             });
         }
 
         btnSend.addEventListener('click', enviarMensaje);
-        inputMsg.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') enviarMensaje();
-        });
+        inputMsg.addEventListener('keypress', (e) => { if (e.key === 'Enter') enviarMensaje(); });
 
-        // Botón clip multimedia flotante (Agrega un prompt sencillo para facilitar el envío de URLs)
         btnMedia.addEventListener('click', () => {
             const url = prompt("Pega el enlace directo (.jpg, .png, .mp4) de tu foto o video:");
             if (url && url.trim()) {
@@ -506,30 +503,19 @@
             }
         });
 
-        /* --- SISTEMA DE MENÚ CONTEXTUAL (BORRAR Y RESPONDER) --- */
         function abrirMenuMensaje(e, mId, texto, sender) {
             selectedMsgId = mId;
             selectedMsgText = texto;
-
-            // Mostrar u ocultar la opción de eliminar (Grindr/Telegram te permite borrar los tuyos)
             const optDelete = document.getElementById('optDelete');
-            if (sender === currentUid) {
-                optDelete.style.display = 'flex';
-            } else {
-                optDelete.style.display = 'none'; // No puedes borrar mensajes de otros
-            }
+            optDelete.style.display = (sender === currentUid) ? 'flex' : 'none';
 
             msgMenu.style.top = `${e.clientY}px`;
             msgMenu.style.left = `${Math.min(e.clientX, window.innerWidth - 160)}px`;
             msgMenu.style.display = 'block';
         }
 
-        // Cerrar menú al hacer clic fuera
-        document.addEventListener('click', () => {
-            msgMenu.style.display = 'none';
-        });
+        document.addEventListener('click', () => { msgMenu.style.display = 'none'; });
 
-        // Acción: Configurar Respuesta (Fijar arriba de la barra de texto)
         document.getElementById('optReply').addEventListener('click', () => {
             activeReplyId = selectedMsgId;
             replyText.innerText = `Respondiendo a: "${selectedMsgText}"`;
@@ -537,14 +523,9 @@
             inputMsg.focus();
         });
 
-        function cancelarRespuesta() {
-            activeReplyId = null;
-            replyBar.style.display = 'none';
-        }
-
+        function cancelarRespuesta() { activeReplyId = null; replyBar.style.display = 'none'; }
         btnCancelReply.addEventListener('click', cancelarRespuesta);
 
-        // Acción: Eliminar mensaje para ambos en tiempo real
         document.getElementById('optDelete').addEventListener('click', () => {
             if (confirm("¿Quieres eliminar este mensaje para todos?")) {
                 remove(ref(db, `chats/${chatId}/messages/${selectedMsgId}`));
