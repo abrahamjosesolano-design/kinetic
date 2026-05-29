@@ -10,228 +10,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Urbanist', sans-serif;
-        }
-
-        body {
-            background-color: #0d0616;
-            color: #ffffff;
-            min-height: 100vh;
-            padding-top: 70px;
-            padding-bottom: 90px;
-        }
-
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background-color: #12091f;
-            border-bottom: 1px solid #25123e;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 100;
-        }
-
-        .bar-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: #fff;
-        }
-
-        .btn-logout {
-            background: transparent;
-            border: none;
-            color: #ff0055;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .profile-container {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        label {
-            font-size: 14px;
-            color: #ff00ff;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 14px;
-            background-color: #12091f;
-            border: 1px solid #25123e;
-            border-radius: 12px;
-            color: white;
-            font-size: 15px;
-            outline: none;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: #00f2ff;
-        }
-
-        textarea {
-            resize: none;
-            height: 100px;
-        }
-
-        .editable-album {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        .album-slot {
-            aspect-ratio: 1 / 1;
-            background-color: #12091f;
-            border: 1px dashed #3d1c63;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .album-slot img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .album-slot i {
-            font-size: 20px;
-            color: #796699;
-        }
-
-        .btn-save {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(90deg, #00f2ff, #8a2be2);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 15px;
-            box-shadow: 0 4px 15px rgba(0, 242, 255, 0.2);
-        }
-
-        /* BARRA DE NAVEGACIÓN UNIFICADA */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 65px;
-            background-color: #12091f;
-            border-top: 1px solid #25123e;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #796699;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 600;
-            gap: 4px;
-            cursor: pointer;
-            flex: 1;
-            padding: 10px 0;
-        }
-
-        .nav-item.active {
-            color: #ff00ff;
-        }
-
-        .nav-item i {
-            font-size: 20px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
+        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; padding-top: 30px; padding-bottom: 80px; display: flex; justify-content: center; }
+        .my-profile-container { width: 100%; max-width: 500px; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .avatar-frame { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #00f2ff; object-fit: cover; margin-bottom: 15px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); }
+        .my-title { font-size: 22px; font-weight: 800; margin-bottom: 25px; color: #fff; }
+        .form-box { width: 100%; background: #12091f; border: 1px solid #25123e; padding: 20px; border-radius: 16px; display: flex; flex-direction: column; gap: 15px; }
+        .info-label { font-size: 13px; color: #ff00ff; font-weight: 700; text-transform: uppercase; }
+        .info-value { font-size: 16px; color: #e2daf0; background-color: #0d0616; padding: 12px; border-radius: 10px; border: 1px solid rgba(61, 28, 99, 0.5); }
+        .btn-logout { margin-top: 25px; width: 100%; padding: 14px; background: linear-gradient(135deg, #3d1c63, #12091f); border: 1px solid #ff0055; border-radius: 12px; color: #ff0055; font-weight: 700; cursor: pointer; text-align: center; }
+        
+        /* NAV BAR */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #12091f; border-top: 1px solid #25123e; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #796699; text-decoration: none; font-size: 11px; font-weight: 600; gap: 4px; cursor: pointer; flex: 1; padding: 10px 0; }
+        .nav-item.active { color: #00f2ff; }
+        .nav-item i { font-size: 20px; transition: all 0.3s ease; }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="bar-title">Mi Perfil</div>
-        <button class="btn-logout" id="btnLogout"><i class="fa-solid fa-power-off"></i> Salir</button>
-    </div>
+    <div class="my-profile-container">
+        <img id="myAvatar" class="avatar-frame" src="https://via.placeholder.com/150">
+        <h2 id="myProfileName" class="my-title">Cargando perfil...</h2>
 
-    <div class="profile-container">
-        <div class="form-group">
-            <label>Nombre en la app</label>
-            <input type="text" id="pNombre" placeholder="Ej. Juan">
+        <div class="form-box">
+            <span class="info-label">Mi Bio</span>
+            <div id="myProfileBio" class="info-value">...</div>
+
+            <span class="info-label">Mi Edad</span>
+            <div id="myProfileAge" class="info-value">...</div>
         </div>
 
-        <div class="form-group">
-            <label>Edad</label>
-            <input type="number" id="pEdad" placeholder="Ej. 22">
-        </div>
-
-        <div class="form-group">
-            <label>Mi Género</label>
-            <select id="pGenero">
-                <option value="Hombre">Hombre</option>
-                <option value="Mujer">Mujer</option>
-                <option value="Todos">No binario / Otro</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Busco conocer</label>
-            <select id="pBusca">
-                <option value="Todos">A Todos</option>
-                <option value="Hombre">Hombres</option>
-                <option value="Mujer">Mujeres</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Descripción (Bio)</label>
-            <textarea id="pBio" placeholder="Cuéntale al mundo qué buscas..."></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Álbum de Fotos (Pega URLs de imágenes)</label>
-            <div class="editable-album">
-                <div class="album-slot" onclick="cambiarFotoUrl(0)"><img id="slot0" src="" style="display:none;"><i id="icon0" class="fa-solid fa-plus"></i></div>
-                <div class="album-slot" onclick="cambiarFotoUrl(1)"><img id="slot1" src="" style="display:none;"><i id="icon1" class="fa-solid fa-plus"></i></div>
-                <div class="album-slot" onclick="cambiarFotoUrl(2)"><img id="slot2" src="" style="display:none;"><i id="icon2" class="fa-solid fa-plus"></i></div>
-            </div>
-        </div>
-
-        <button class="btn-save" id="btnSaveProfile">GUARDAR CAMBIOS</button>
+        <button class="btn-logout" id="btnLogoutAction">Cerrar Sesión</button>
     </div>
 
     <div class="nav-bar">
@@ -256,7 +66,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
@@ -272,77 +82,57 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        let currentUid = null;
-        let listaFotosLocales = ["", "", ""];
-
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "index.html";
             } else {
-                currentUid = user.uid;
-                cargarMisDatos();
+                cargarMisDatos(user.uid);
+                activarNotificacionesGlobales(user.uid);
             }
         });
 
-        function cargarMisDatos() {
-            onValue(ref(db, `users/${currentUid}`), (snap) => {
-                const data = snap.val() || {};
-                document.getElementById('pNombre').value = data.nombre || '';
-                document.getElementById('pEdad').value = data.edad || '';
-                document.getElementById('pGenero').value = data.genero || 'Hombre';
-                document.getElementById('pBusca').value = data.busca || 'Todos';
-                document.getElementById('pBio').value = data.bio || '';
+        function cargarMisDatos(uid) {
+            onValue(ref(db, `users/${uid}`), (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
 
+                document.getElementById('myProfileName').innerText = data.nombre || "Usuario Kinetic";
+                document.getElementById('myProfileBio').innerText = data.bio || "No has añadido una descripción todavía.";
+                document.getElementById('myProfileAge').innerText = data.edad ? `${data.edad} años` : "No definida";
+                
                 if (data.album && data.album.length > 0) {
-                    data.album.forEach((url, i) => {
-                        if (i < 3) refrescarVisualSlot(i, url);
-                    });
+                    document.getElementById('myAvatar').src = data.album[0];
                 }
             });
         }
 
-        window.cambiarFotoUrl = function(index) {
-            const nuevaUrl = prompt("Pega el enlace URL directo de tu foto (.jpg, .png, .webp):");
-            if (nuevaUrl && nuevaUrl.trim() !== "") {
-                refrescarVisualSlot(index, nuevaUrl.trim());
-            }
+        function activarNotificacionesGlobales(miUid) {
+            onValue(ref(db, 'chats'), (snapshot) => {
+                const listaChats = snapshot.val();
+                let alertarMensajeNuevo = false;
+
+                for (let idChat in listaChats) {
+                    if (idChat.includes(miUid) && listaChats[idChat].lastInfo?.unreadTarget === miUid) {
+                        alertarMensajeNuevo = true;
+                        break;
+                    }
+                }
+
+                const iconoMensajeria = document.querySelector('.nav-item i.fa-comment');
+                if (iconoMensajeria) {
+                    if (alertarMensajeNuevo) {
+                        iconoMensajeria.style.color = '#ff00ff';
+                        iconoMensajeria.style.filter = 'drop-shadow(0 0 8px #ff00ff)';
+                    } else {
+                        iconoMensajeria.style.color = '';
+                        iconoMensajeria.style.filter = '';
+                    }
+                }
+            });
         }
 
-        function refrescarVisualSlot(index, url) {
-            listaFotosLocales[index] = url;
-            const img = document.getElementById(`slot${index}`);
-            const icon = document.getElementById(`icon${index}`);
-            img.src = url;
-            img.style.display = 'block';
-            icon.style.display = 'none';
-        }
-
-        document.getElementById('btnSaveProfile').addEventListener('click', () => {
-            const nombre = document.getElementById('pNombre').value.trim();
-            const edad = document.getElementById('pEdad').value.trim();
-            const genero = document.getElementById('pGenero').value;
-            const busca = document.getElementById('pBusca').value;
-            const bio = document.getElementById('pBio').value.trim();
-
-            const albumFinal = listaFotosLocales.filter(url => url !== "");
-
-            update(ref(db, `users/${currentUid}`), {
-                nombre: nombre || "Anónimo",
-                edad: edad || "",
-                genero: genero,
-                busca: busca,
-                bio: bio,
-                album: albumFinal
-            }).then(() => {
-                alert("¡Perfil guardado con éxito!");
-                window.location.href = "radar.html";
-            });
-        });
-
-        document.getElementById('btnLogout').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            });
+        document.getElementById('btnLogoutAction').addEventListener('click', () => {
+            signOut(auth).then(() => { window.location.href = "index.html"; });
         });
     </script>
 </body>
