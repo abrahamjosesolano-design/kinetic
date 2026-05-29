@@ -2,69 +2,344 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Mosaico</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kinetic – Radar</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
-        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; padding-top: 70px; padding-bottom: 80px; display: flex; justify-content: center; }
-        .top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background-color: #12091f; border-bottom: 1px solid #25123e; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 100; }
-        .bar-title { font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #00f2ff, #ff00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .radar-container { width: 100%; max-width: 600px; padding: 10px; }
-        .mosaic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .mosaic-card { position: relative; aspect-ratio: 1 / 1; background-color: #12091f; border-radius: 16px; overflow: hidden; border: 1px solid rgba(61, 28, 99, 0.3); cursor: pointer; }
-        .mosaic-card img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 10px 10px 10px; background: linear-gradient(transparent, rgba(13, 6, 22, 0.95)); display: flex; flex-direction: column; gap: 2px; }
-        .info-name { font-size: 15px; font-weight: 700; color: #fff; }
-        .info-meta { font-size: 12px; color: #00f2ff; font-weight: 600; }
-        .empty-msg { text-align: center; padding: 50px 20px; color: #796699; font-size: 16px; }
-        
-        /* NAV BAR */
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #12091f; border-top: 1px solid #25123e; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #796699; text-decoration: none; font-size: 11px; font-weight: 600; gap: 4px; cursor: pointer; flex: 1; padding: 10px 0; }
-        .nav-item.active { color: #00f2ff; }
-        .nav-item i { font-size: 20px; transition: all 0.3s ease; }
+        :root {
+            --bg: #0d0616;
+            --card-bg: #12091f;
+            --text: #ffffff;
+            --text-secondary: #b8b8d4;
+            --neon: #ff00ff;
+            --cyan: #00ffff;
+            --online: #2ecc71;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --nav-height: 64px;
+            --header-height: 56px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid rgba(255,0,255,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            min-height: var(--header-height);
+            backdrop-filter: blur(10px);
+        }
+        .header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .icon-btn {
+            background: rgba(255,0,255,0.2);
+            border: none;
+            color: var(--text);
+            font-size: 1.3rem;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .icon-btn:active { background: rgba(255,0,255,0.5); }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            background: var(--card-bg);
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+            border-bottom: 1px solid rgba(255,0,255,0.2);
+        }
+        .filters::-webkit-scrollbar { display: none; }
+        .filter-chip {
+            background: rgba(255,0,255,0.15);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid transparent;
+        }
+        .filter-chip.active {
+            background: var(--neon);
+            color: white;
+            box-shadow: 0 0 12px var(--neon);
+            font-weight: 600;
+        }
+
+        .dynamic-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.7rem;
+            padding: 0.8rem;
+            overflow-y: auto;
+        }
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            aspect-ratio: 1 / 1.2;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255,0,255,0.2);
+        }
+        .profile-card:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 15px var(--neon);
+        }
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .profile-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 0.5rem;
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .online-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--online);
+            box-shadow: 0 0 8px var(--online);
+            border: 2px solid var(--card-bg);
+        }
+        .svg-avatar {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #12091f;
+        }
+
+        /* Map */
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 0 30px var(--neon);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 1.8rem 1.5rem 1rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--neon), #7B2CBF);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            background: rgba(0,0,0,0.3);
+            border: none;
+            color: white;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .modal-avatar {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            background-size: cover;
+            background-position: center;
+            border: 3px solid white;
+            box-shadow: 0 0 20px var(--neon);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+        }
+        .modal-body { padding: 1.5rem; text-align: center; }
+        .modal-actions { display: flex; gap: 1rem; padding: 0 1.5rem 1.8rem; }
+        .btn-like {
+            flex: 1; padding: 0.9rem; border: none; border-radius: 30px;
+            font-weight: 700; background: var(--neon); color: white; cursor: pointer;
+        }
+        .btn-message {
+            flex: 1; padding: 0.9rem; border: 2px solid var(--neon); border-radius: 30px;
+            font-weight: 700; background: transparent; color: var(--neon); cursor: pointer;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: rgba(13,6,22,0.9);
+            border-top: 1px solid rgba(255,0,255,0.3);
+            height: var(--nav-height);
+            padding-bottom: calc(0.5rem + var(--safe-bottom));
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: 0.2s;
+        }
+        .nav-item.active {
+            color: var(--neon);
+            text-shadow: 0 0 6px var(--neon);
+        }
+        .nav-item i { font-size: 1.4rem; }
+        .badge-counter {
+            position: absolute;
+            top: -6px;
+            right: 8px;
+            background: var(--neon);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 8px var(--neon);
+        }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="bar-title">Kinetic</div>
-    </div>
-
-    <div class="radar-container">
-        <div class="mosaic-grid" id="gridMosaico">
-            <div class="empty-msg">Buscando usuarios cerca...</div>
+    <!-- HEADER -->
+    <div class="header">
+        <h2>⚡ Kinetic</h2>
+        <div style="display:flex; gap:0.5rem;">
+            <button class="icon-btn" id="toggleViewBtn"><i class="fas fa-map-marked-alt"></i></button>
+            <button class="icon-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
         </div>
     </div>
 
-    <div class="nav-bar">
-        <div class="nav-item active">
-            <i class="fa-solid fa-border-all"></i>
-            <span>Mosaico</span>
+    <!-- FILTROS -->
+    <div class="filters" id="filtersContainer">
+        <span class="filter-chip active" data-gender="all">🌐 Todos</span>
+        <span class="filter-chip" data-gender="female">👩 Mujeres</span>
+        <span class="filter-chip" data-gender="male">👨 Hombres</span>
+        <span class="filter-chip" data-filter="modoExpress">⚡ Express</span>
+    </div>
+
+    <!-- CONTENEDOR DINÁMICO (GRID / MAPA) -->
+    <div class="dynamic-container" id="dynamicContainer" style="padding-bottom: var(--nav-height);"></div>
+
+    <!-- MODAL PERFIL -->
+    <div class="modal" id="profileModal"><div class="modal-content" id="modalContent"></div></div>
+
+    <!-- TOAST -->
+    <div id="toast" style="position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--neon); color:white; padding:0.8rem 1.5rem; border-radius:30px; font-size:0.9rem; z-index:300; display:none; box-shadow:0 0 15px var(--neon);"></div>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR UNIFICADA -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-screen="main">
+            <i class="fas fa-satellite"></i><span>Radar</span>
         </div>
-        <div class="nav-item" onclick="window.location.href='likes.html'">
-            <i class="fa-solid fa-heart"></i>
-            <span>Likes</span>
+        <div class="nav-item" onclick="window.location.href='myProfile.html'">
+            <i class="fas fa-user"></i><span>Perfil</span>
         </div>
-        <div class="nav-item" onclick="window.location.href='chats.html'">
-            <i class="fa-solid fa-comment"></i>
-            <span>Chats</span>
+        <div class="nav-item" id="navChats" onclick="window.location.href='chats.html'">
+            <i class="fas fa-comment"></i><span>Chats</span>
+            <span class="badge-counter" id="unreadBadge" style="display:none;">0</span>
         </div>
-        <div class="nav-item" onclick="window.location.href='perfil.html'">
-            <i class="fa-solid fa-user"></i>
-            <span>Mi Perfil</span>
+        <div class="nav-item" onclick="window.location.href='settings.html'">
+            <i class="fas fa-cog"></i><span>Ajustes</span>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, get, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
@@ -80,80 +355,230 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        const grid = document.getElementById('gridMosaico');
+        let currentUser = null;
+        let userProfile = null;
+        let nearbyUsers = [];
+        let currentView = 'grid';
+        let map = null;
+        let mapMarkers = [];
+        let unreadCounts = new Map();
 
-        onAuthStateChanged(auth, (user) => {
+        // DOM
+        const dynamicContainer = document.getElementById('dynamicContainer');
+        const toast = document.getElementById('toast');
+        const unreadBadge = document.getElementById('unreadBadge');
+        const profileModal = document.getElementById('profileModal');
+        const modalContent = document.getElementById('modalContent');
+
+        const defaultAvatarSVG = `<svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;background:#12091f;border-radius:50%;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>`;
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function getInitials(name) { return name?.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || '?'; }
+        function getAvatarColors(name) {
+            const p = [['#ff00ff','#7B2CBF'],['#00ffff','#0080ff'],['#ff00ff','#ff0080']];
+            let h = 0; for (let i=0; i<name.length; i++) h = name.charCodeAt(i) + ((h<<5)-h);
+            return p[Math.abs(h) % p.length];
+        }
+
+        // Autenticación
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.href = "index.html";
+                window.location.href = 'index.html'; // login
+                return;
+            }
+            currentUser = user;
+            const snap = await get(ref(db, 'users/' + user.uid));
+            if (snap.exists()) {
+                userProfile = snap.val();
+                userProfile.uid = user.uid;
+                update(ref(db, 'users/' + user.uid), { online: true });
+                onDisconnect(ref(db, 'users/' + user.uid)).update({ online: false });
+                loadNearbyUsers();
+                setupChatNotifications();
             } else {
-                cargarMosaico(user.uid);
-                activarNotificacionesGlobales(user.uid);
+                window.location.href = 'setup.html';
             }
         });
 
-        function cargarMosaico(miUid) {
-            onValue(ref(db, 'users'), (snapshot) => {
-                const users = snapshot.val();
-                if (!users) {
-                    grid.innerHTML = `<div class="empty-msg">No hay más usuarios registrados.</div>`;
-                    return;
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+        // Toggle vista
+        document.getElementById('toggleViewBtn').addEventListener('click', () => {
+            currentView = currentView === 'grid' ? 'map' : 'grid';
+            document.getElementById('toggleViewBtn').innerHTML = currentView === 'grid' ? '<i class="fas fa-map-marked-alt"></i>' : '<i class="fas fa-th"></i>';
+            loadNearbyUsers();
+        });
+
+        // Filtros
+        let filterGender = 'all';
+        let filterModoExpress = false;
+        document.getElementById('filtersContainer').addEventListener('click', (e) => {
+            if (!e.target.classList.contains('filter-chip')) return;
+            const chip = e.target;
+            if (chip.dataset.gender) {
+                document.querySelectorAll('.filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                filterGender = chip.dataset.gender;
+            } else if (chip.dataset.filter === 'modoExpress') {
+                filterModoExpress = !filterModoExpress;
+                chip.classList.toggle('active', filterModoExpress);
+            }
+            loadNearbyUsers();
+        });
+
+        // ====== RADAR ======
+        async function loadNearbyUsers() {
+            if (!currentUser || !userProfile) return;
+            const snap = await get(ref(db, 'users'));
+            if (!snap.exists()) { dynamicContainer.innerHTML = ''; return; }
+            const all = snap.val();
+            const me = currentUser.uid;
+            const myLat = userProfile.lat;
+            const myLng = userProfile.lng;
+
+            let users = Object.entries(all)
+                .filter(([uid]) => uid !== me)
+                .map(([uid, p]) => {
+                    let dist = null;
+                    if (myLat && myLng && p.lat && p.lng) {
+                        dist = getDistance(myLat, myLng, p.lat, p.lng);
+                    }
+                    return { uid, ...p, distance: dist };
+                })
+                .filter(u => {
+                    if (userProfile.interestedIn === 'female' && u.gender !== 'female') return false;
+                    if (userProfile.interestedIn === 'male' && u.gender !== 'male') return false;
+                    return true;
+                });
+
+            if (filterGender !== 'all') users = users.filter(u => u.gender === filterGender);
+            if (filterModoExpress) users = users.filter(u => u.modoExpress === true);
+            users.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+            nearbyUsers = users;
+
+            dynamicContainer.innerHTML = '';
+            if (currentView === 'grid') {
+                dynamicContainer.className = 'grid';
+                renderGrid();
+            } else {
+                dynamicContainer.className = '';
+                dynamicContainer.innerHTML = '<div id="map" style="flex:1;"></div>';
+                setTimeout(initMap, 200);
+            }
+        }
+
+        function renderGrid() {
+            dynamicContainer.innerHTML = nearbyUsers.map(u => {
+                const hasPhoto = u.profilePic?.startsWith('http') || (u.album?.length > 0 && u.album[0].startsWith('http'));
+                const photoUrl = hasPhoto ? (u.profilePic?.startsWith('http') ? u.profilePic : u.album[0]) : null;
+                let imgHtml = '';
+                if (photoUrl) {
+                    imgHtml = `<div class="profile-img" style="background-image:url(${photoUrl})">
+                        ${u.online ? '<span class="online-dot"></span>' : ''}
+                        <div class="profile-overlay">${u.name}, ${u.age || '?'}</div>
+                    </div>`;
+                } else {
+                    imgHtml = `<div class="svg-avatar" style="position:relative;">
+                        ${defaultAvatarSVG}
+                        ${u.online ? '<span class="online-dot"></span>' : ''}
+                        <div class="profile-overlay">${u.name}, ${u.age || '?'}</div>
+                    </div>`;
                 }
+                return `<div class="profile-card" data-uid="${u.uid}">${imgHtml}</div>`;
+            }).join('');
+            document.querySelectorAll('.profile-card').forEach(card => {
+                card.addEventListener('click', () => openProfile(card.dataset.uid));
+            });
+        }
 
-                grid.innerHTML = '';
-                let cont = 0;
-
-                for (let uId in users) {
-                    if (uId === miUid) continue;
-                    const u = users[uId];
-                    cont++;
-
-                    const foto = (u.album && u.album.length > 0) ? u.album[0] : 'https://via.placeholder.com/300?text=Kinetic';
-                    
-                    const card = document.createElement('div');
-                    card.className = 'mosaic-card';
-                    card.innerHTML = `
-                        <img src="${foto}">
-                        <div class="card-info">
-                            <span class="info-name">${u.nombre || 'Usuario Kinetic'}${u.edad ? ', ' + u.edad : ''}</span>
-                            <span class="info-meta">${u.genero || 'Definir'}</span>
-                        </div>
-                    `;
-
-                    card.onclick = () => {
-                        localStorage.setItem('selected_user_id', uId);
-                        window.location.href = 'perfil-detalle.html';
-                    };
-
-                    grid.appendChild(card);
-                }
-
-                if (cont === 0) {
-                    grid.innerHTML = `<div class="empty-msg">No hay otros usuarios disponibles.</div>`;
+        function initMap() {
+            if (!map) {
+                map = L.map('map').setView([0,0], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(map);
+            }
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+            if (userProfile?.lat && userProfile?.lng) {
+                map.setView([userProfile.lat, userProfile.lng], 13);
+                const myIcon = L.divIcon({html:'<div style="background:#ff00ff; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>'});
+                mapMarkers.push(L.marker([userProfile.lat, userProfile.lng], {icon: myIcon}).addTo(map).bindPopup('Yo'));
+            }
+            nearbyUsers.forEach(u => {
+                if (u.lat && u.lng) {
+                    const iconHtml = u.profilePic?.startsWith('http') ? `<img src="${u.profilePic}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : getInitials(u.name);
+                    const icon = L.divIcon({
+                        html: `<div style="background:#12091f; border:2px solid #ff00ff; border-radius:50%; width:30px;height:30px; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:12px;">${iconHtml}</div>`,
+                        iconSize: [34,34]
+                    });
+                    const marker = L.marker([u.lat, u.lng], {icon}).addTo(map);
+                    marker.on('click', () => openProfile(u.uid));
+                    mapMarkers.push(marker);
                 }
             });
         }
 
-        function activarNotificacionesGlobales(miUid) {
-            onValue(ref(db, 'chats'), (snapshot) => {
-                const listaChats = snapshot.val();
-                let alertarMensajeNuevo = false;
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2-lat1)*Math.PI/180;
+            const dLon = (lon2-lon1)*Math.PI/180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
 
-                for (let idChat in listaChats) {
-                    if (idChat.includes(miUid) && listaChats[idChat].lastInfo?.unreadTarget === miUid) {
-                        alertarMensajeNuevo = true;
-                        break;
+        // ====== PERFIL MODAL ======
+        async function openProfile(uid) {
+            const user = nearbyUsers.find(u => u.uid === uid);
+            if (!user) return;
+            const photoUrl = user.profilePic?.startsWith('http') ? user.profilePic : (user.album?.length > 0 && user.album[0].startsWith('http') ? user.album[0] : null);
+            const mainPic = photoUrl ? `<img src="${photoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : getInitials(user.name);
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <button class="modal-close" id="closeModalBtn">&times;</button>
+                    <div class="modal-avatar" style="background:${!photoUrl ? 'linear-gradient(135deg, #ff00ff, #7B2CBF)' : ''}">${mainPic}</div>
+                    <h3>${user.name}, ${user.age || '?'}</h3>
+                    <p>${user.distance ? '📍 '+user.distance.toFixed(1)+' km' : '🌍'} • ${user.online ? '🟢 En línea' : '⚫ Offline'}</p>
+                </div>
+                <div class="modal-body"><p>${user.bio || 'Sin descripción'}</p></div>
+                <div class="modal-actions">
+                    <button class="btn-like">❤️ Me gusta</button>
+                    <button class="btn-message" id="openChatBtn">💬 Chatear</button>
+                </div>`;
+            document.getElementById('closeModalBtn').addEventListener('click', () => profileModal.classList.remove('active'));
+            document.getElementById('openChatBtn').addEventListener('click', () => {
+                profileModal.classList.remove('active');
+                window.location.href = 'chat-interno.html?id=' + uid;
+            });
+            profileModal.classList.add('active');
+        }
+        window.closeModal = () => profileModal.classList.remove('active');
+        profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.remove('active'); });
+
+        // ====== NOTIFICACIONES DE CHATS ======
+        function setupChatNotifications() {
+            onValue(ref(db, 'chats'), (snap) => {
+                if (!snap.exists() || !currentUser) return;
+                const chats = snap.val();
+                unreadCounts.clear();
+                for (const chatId in chats) {
+                    if (!chatId.includes(currentUser.uid)) continue;
+                    const lastInfo = chats[chatId].lastInfo;
+                    if (lastInfo?.unreadTarget === currentUser.uid) {
+                        const partner = chatId.split('_').find(id => id !== currentUser.uid);
+                        unreadCounts.set(partner, (unreadCounts.get(partner)||0)+1);
                     }
                 }
-
-                const iconoMensajeria = document.querySelector('.nav-item i.fa-comment');
-                if (iconoMensajeria) {
-                    if (alertarMensajeNuevo) {
-                        iconoMensajeria.style.color = '#ff00ff';
-                        iconoMensajeria.style.filter = 'drop-shadow(0 0 8px #ff00ff)';
-                    } else {
-                        iconoMensajeria.style.color = '';
-                        iconoMensajeria.style.filter = '';
-                    }
+                let total = 0;
+                for (const c of unreadCounts.values()) total += c;
+                if (total > 0) {
+                    unreadBadge.textContent = total > 99 ? '99+' : total;
+                    unreadBadge.style.display = 'flex';
+                } else {
+                    unreadBadge.style.display = 'none';
                 }
             });
         }
