@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetic - Radar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Urbanist', sans-serif;
+        }
+
+        body {
+            background-color: #0d0616;
+            color: #ffffff;
+            min-height: 100vh;
+            padding-top: 70px;
+            padding-bottom: 80px;
+        }
+
+        /* BARRA SUPERIOR */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: #12091f;
+            border-bottom: 1px solid #25123e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .brand-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #00f2ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-express {
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid #00f2ff;
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: #00f2ff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-express.active {
+            background: linear-gradient(135deg, #00f2ff, #8a2be2);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
+        }
+
+        /* REJILLA / MOSAICO (ESTILO GRINDR) */
+        .radar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            padding: 3px;
+        }
+
+        @media (min-width: 600px) {
+            .radar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 900px) {
+            .radar-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        .grid-item {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            background-color: #1a0b2e;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .grid-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* INFORMACIÓN SOBRE LA FOTO */
+        .item-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .item-name {
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-distance {
+            font-size: 11px;
+            color: #00f2ff;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .badge-online {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 10px;
+            height: 10px;
+            background-color: #00ff66;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ff66;
+        }
+
+        /* BARRA DE NAVEGACIÓN INFERIOR */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 65px;
+            background-color: #12091f;
+            border-top: 1px solid #25123e;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #796699;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+            padding: 10px 0;
+        }
+
+        .nav-item.active {
+            color: #ff00ff;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+        }
+
+        /* MENSAJE DE ESPERA / ESTADO VACÍO */
+        .status-msg {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a094b8;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="brand-title">KINETIC</div>
+        <button id="btnExpress" class="btn-express">
+            <i class="fa-solid fa-bolt"></i> Diversión Rápida
+        </button>
+    </div>
+
+    <div id="radarContainer">
+        <div class="status-msg" id="loadingMsg">Obteniendo tu ubicación y cargando perfiles...</div>
+        <div class="radar-grid" id="grid"></div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active">
+            <i class="fa-solid fa-border-all"></i>
+            <span>Mosaico</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='chats.html'">
+            <i class="fa-solid fa-comment"></i>
+            <span>Chats</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='perfil.html'">
+            <i class="fa-solid fa-user"></i>
+            <span>Mi Perfil</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+            authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+            projectId: "kinetic-app-67ae5",
+            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+            messagingSenderId: "825570718975",
+            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUserData = null;
+        let userLocation = null;
+        let modoExpressFiltro = false;
+
+        const grid = document.getElementById('grid');
+        const loadingMsg = document.getElementById('loadingMsg');
+        const btnExpress = document.getElementById('btnExpress');
+
+        // FÓRMULA HAVERSINE: Calcula la distancia exacta en kilómetros entre dos coordenadas
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // FORMATO DE DISTANCIA DE GRINDR: Muestra metros si es menor a 1km
+        function formatDistancia(km) {
+            if (km < 1) {
+                return `${Math.round(km * 1000)} m`;
+            }
+            return `${km.toFixed(1)} km`;
+        }
+
+        // Control de Sesión
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            } else {
+                initGeolocalizacion(user.uid);
+            }
+        });
+
+        // Activar rastreo de ubicación real
+        function initGeolocalizacion(uid) {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition((position) => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // Actualizar mi posición y estado online en Firebase
+                    update(ref(db, `users/${uid}`), {
+                        lat: userLocation.lat,
+                        lng: userLocation.lng,
+                        online: true,
+                        lastActive: Date.now()
+                    });
+
+                    // Cargar los perfiles una vez tenemos la ubicación propia
+                    obtenerDatosUsuarioActual(uid);
+
+                }, (error) => {
+                    console.error("Error de geolocalización:", error);
+                    loadingMsg.innerText = "Por favor, activa el GPS/Ubicación para poder ver el mosaico.";
+                }, { enableHighAccuracy: true });
+            } else {
+                loadingMsg.innerText = "Tu navegador no soporta geolocalización.";
+            }
+        }
+
+        function obtenerDatosUsuarioActual(uid) {
+            onValue(ref(db, `users/${uid}`), (snapshot) => {
+                currentUserData = snapshot.val() || {};
+                cargarRadar();
+            });
+        }
+
+        function cargarRadar() {
+            if (!userLocation || !currentUserData) return;
+
+            onValue(ref(db, 'users'), (snapshot) => {
+                const data = snapshot.val();
+                grid.innerHTML = '';
+                
+                if (!data) {
+                    loadingMsg.innerText = "No hay usuarios registrados aún.";
+                    return;
+                }
+
+                let listaUsuarios = [];
+
+                // Procesar y calcular distancias
+                for (let id in data) {
+                    if (id === auth.currentUser.uid) continue; // Ignorarme a mí mismo
+
+                    const target = data[id];
+                    if (!target.lat || !target.lng) continue; // Si no tiene coordenadas, saltar
+
+                    // 1. FILTRO DE MUTUALIDAD ESTRICTO (Género vs Qué busca)
+                    const miGenero = currentUserData.genero || 'Todos';
+                    const loQueBusco = currentUserData.busca || 'Todos';
+                    const suGenero = target.genero || 'Todos';
+                    const loQueBuscaTarget = target.busca || 'Todos';
+
+                    const yoLoAcepto = (loQueBusco === 'Todos' || loQueBusco === suGenero);
+                    const elMeAcepta = (loQueBuscaTarget === 'Todos' || loQueBuscaTarget === miGenero);
+
+                    if (!yoLoAcepto || !elMeAcepta) continue;
+
+                    // 2. FILTRO MODO EXPRESS (DIVERSIÓN RÁPIDA)
+                    if (modoExpressFiltro && !target.modoExpress) continue;
+
+                    const distancia = calcularDistancia(userLocation.lat, userLocation.lng, target.lat, target.lng);
+                    
+                    listaUsuarios.push({
+                        id: id,
+                        ...target,
+                        distanciaKM: distancia
+                    });
+                }
+
+                // ORDENAR: El más cercano primero (Core de Grindr)
+                listaUsuarios.sort((a, b) => a.distanciaKM - b.distanciaKM);
+
+                if (listaUsuarios.length === 0) {
+                    loadingMsg.style.display = 'block';
+                    loadingMsg.innerText = "No hay perfiles cerca que coincidan con tus filtros.";
+                    return;
+                }
+
+                loadingMsg.style.display = 'none';
+
+                // Renderizar las fotos del mosaico
+                listaUsuarios.forEach(u => {
+                    const item = document.createElement('div');
+                    item.className = 'grid-item';
+                    
+                    // Si no tiene foto de álbum configurada, usa una por defecto
+                    const fotoUrl = (u.album && u.album.length > 0) ? u.album[0] : 'https://via.placeholder.com/150/1a0b2e/fff?text=Kinetic';
+
+                    item.innerHTML = `
+                        <img src="${fotoUrl}" alt="${u.nombre}">
+                        ${u.online ? '<div class="badge-online"></div>' : ''}
+                        <div class="item-info">
+                            <div class="item-name">${u.nombre || 'Anónimo'}, ${u.edad || ''}</div>
+                            <div class="item-distance">${formatDistancia(u.distanciaKM)}</div>
+                        </div>
+                    `;
+
+                    // Al tocar un perfil, guardamos su ID y abrimos su detalle
+                    item.addEventListener('click', () => {
+                        localStorage.setItem('selected_user_id', u.id);
+                        window.location.href = 'perfil-detalle.html';
+                    });
+
+                    grid.appendChild(item);
+                });
+            });
+        }
+
+        // Switch de Diversión Rápida
+        btnExpress.addEventListener('click', () => {
+            modoExpressFiltro = !modoExpressFiltro;
+            btnExpress.classList.toggle('active', modoExpressFiltro);
+            cargarRadar();
+        });
+    </script>
+</body>
+</html>
