@@ -3,220 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Detalle de Perfil</title>
+    <title>Kinetic - Perfil</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Urbanist', sans-serif;
-        }
-
-        body {
-            background-color: #0d0616;
-            color: #ffffff;
-            min-height: 100vh;
-            padding-bottom: 40px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .profile-wrapper {
-            width: 100%;
-            max-width: 500px;
-            background-color: #0d0616;
-            position: relative;
-        }
-
-        /* BOTÓN VOLVER ATRÁS */
-        .btn-top-back {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 45px;
-            height: 45px;
-            background: rgba(18, 9, 31, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            cursor: pointer;
-            z-index: 10;
-            backdrop-filter: blur(5px);
-        }
-
-        /* FOTO PRINCIPAL (GRANDE) */
-        .main-photo-container {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            position: relative;
-            background-color: #12091f;
-        }
-
-        .main-photo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* PANEL DE ACCIONES FLOTANTE (LIKE & CHAT) */
-        .action-float-bar {
-            position: absolute;
-            bottom: -30px;
-            right: 30px;
-            display: flex;
-            gap: 15px;
-            z-index: 20;
-        }
-
-        .action-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            transition: transform 0.2s;
-        }
-
-        .action-btn:active {
-            transform: scale(0.9);
-        }
-
-        .btn-like {
-            background: linear-gradient(135deg, #ff0055, #ff00ff);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
+        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; display: flex; justify-content: center; }
+        .profile-wrapper { width: 100%; max-width: 500px; background-color: #0d0616; position: relative; padding-bottom: 30px; }
+        .btn-top-back { position: absolute; top: 20px; left: 20px; width: 45px; height: 45px; background: rgba(18, 9, 31, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); }
+        .main-photo-container { width: 100%; aspect-ratio: 1 / 1; position: relative; background-color: #12091f; }
+        .main-photo-container img { width: 100%; height: 100%; object-fit: cover; }
+        .action-float-bar { position: absolute; bottom: -30px; right: 30px; display: flex; gap: 15px; z-index: 20; }
         
-        .btn-like.liked {
-            background: #ffffff;
-            color: #ff0055;
-            box-shadow: 0 0 15px #ff0055;
-        }
-
-        .btn-chat {
-            background: linear-gradient(135deg, #00f2ff, #0077ff);
-        }
-
-        /* INFORMACIÓN DETALLADA */
-        .profile-details {
-            padding: 45px 25px 25px 25px;
-        }
-
-        .identity-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-
-        .user-name-age {
-            font-size: 26px;
-            font-weight: 800;
-            color: #ffffff;
-        }
-
-        .online-badge {
-            padding: 4px 10px;
-            background-color: rgba(0, 255, 102, 0.1);
-            border: 1px solid #00ff66;
-            color: #00ff66;
-            font-size: 11px;
-            font-weight: 700;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .user-meta-info {
-            font-size: 14px;
-            color: #00f2ff;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .bio-box {
-            background-color: #12091f;
-            border: 1px solid #25123e;
-            padding: 15px;
-            border-radius: 14px;
-            font-size: 15px;
-            line-height: 1.5;
-            color: #dcd1f0;
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            font-size: 14px;
-            color: #ff00ff;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        /* MINIÁLBUM */
-        .sub-album-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .sub-album-item {
-            aspect-ratio: 1 / 1;
-            background-color: #12091f;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid rgba(61, 28, 99, 0.4);
-            cursor: pointer;
-        }
-
-        .sub-album-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        /* BOTONES ACCION */
+        .action-btn { width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: transform 0.2s; }
+        .action-btn:active { transform: scale(0.9); }
+        
+        .btn-like { background: linear-gradient(135deg, #ff0055, #ff00ff); }
+        /* Estado activo cuando tiene Like */
+        .btn-like.liked { background: #ffffff !important; color: #ff0055 !important; box-shadow: 0 0 20px #ff0055 !important; }
+        
+        .btn-chat { background: linear-gradient(135deg, #00f2ff, #0077ff); }
+        .profile-details { padding: 45px 25px 25px 25px; }
+        .identity-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .user-name-age { font-size: 26px; font-weight: 800; }
+        .online-badge { padding: 4px 10px; background-color: rgba(0, 255, 102, 0.1); border: 1px solid #00ff66; color: #00ff66; font-size: 11px; font-weight: 700; border-radius: 20px; text-transform: uppercase; }
+        .user-meta-info { font-size: 14px; color: #00f2ff; font-weight: 600; margin-bottom: 20px; }
+        .bio-box { background-color: #12091f; border: 1px solid #25123e; padding: 15px; border-radius: 14px; font-size: 15px; line-height: 1.5; color: #dcd1f0; margin-bottom: 25px; }
+        .section-title { font-size: 14px; color: #ff00ff; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
+        .sub-album-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .sub-album-item { aspect-ratio: 1 / 1; background-color: #12091f; border-radius: 10px; overflow: hidden; border: 1px solid rgba(61, 28, 99, 0.4); cursor: pointer; }
+        .sub-album-item img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
-
     <div class="profile-wrapper">
-        <button class="btn-top-back" onclick="window.location.href='radar.html'">
-            <i class="fa-solid fa-arrow-left"></i>
-        </button>
-
+        <button class="btn-top-back" onclick="window.location.href='radar.html'"><i class="fa-solid fa-arrow-left"></i></button>
         <div class="main-photo-container">
             <img id="mainTargetPhoto" src="https://via.placeholder.com/500" alt="Foto">
-            
             <div class="action-float-bar">
                 <button class="action-btn btn-like" id="btnLikeAction"><i class="fa-solid fa-heart"></i></button>
                 <button class="action-btn btn-chat" id="btnChatAction"><i class="fa-solid fa-comment"></i></button>
             </div>
         </div>
-
         <div class="profile-details">
             <div class="identity-row">
                 <span id="txtNombreEdad" class="user-name-age">Cargando...</span>
                 <span id="badgeOnline" class="online-badge" style="display:none;">En línea</span>
             </div>
-            
             <div id="txtBusquedaMeta" class="user-meta-info">...</div>
-            
             <div class="section-title">Sobre mí</div>
             <p id="txtBio" class="bio-box">Sin descripción disponible.</p>
-
             <div class="section-title">Álbum de fotos</div>
             <div class="sub-album-grid" id="albumGrid"></div>
         </div>
@@ -241,11 +81,14 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // Captura el ID seleccionado
         const targetUserId = localStorage.getItem('selected_user_id');
         let currentUid = null;
 
         onAuthStateChanged(auth, (user) => {
-            if (!user || !targetUserId) {
+            if (!user) {
+                window.location.href = "index.html";
+            } else if (!targetUserId) {
                 window.location.href = "radar.html";
             } else {
                 currentUid = user.uid;
@@ -259,25 +102,14 @@
                 const data = snapshot.val();
                 if (!data) return;
 
-                // Reparación del nombre automático (quita el Anónimo de raíz)
-                const nombreVisual = data.nombre ? data.nombre : "Usuario Kinetic";
-                const edadVisual = data.edad ? `, ${data.edad}` : "";
-                document.getElementById('txtNombreEdad').innerText = nombreVisual + edadVisual;
-                
+                document.getElementById('txtNombreEdad').innerText = `${data.nombre || 'Usuario Kinetic'}${data.edad ? ', ' + data.edad : ''}`;
                 document.getElementById('txtBusquedaMeta').innerText = `Género: ${data.genero || 'No definido'} • Busca: ${data.busca || 'Todos'}`;
                 document.getElementById('txtBio').innerText = data.bio || "¡Hola! Estoy usando Kinetic.";
+                document.getElementById('badgeOnline').style.display = data.online ? 'inline-block' : 'none';
 
-                if (data.online) {
-                    document.getElementById('badgeOnline').style.display = 'inline-block';
-                } else {
-                    document.getElementById('badgeOnline').style.display = 'none';
-                }
-
-                // Renderizar Álbum
                 const grid = document.getElementById('albumGrid');
                 grid.innerHTML = '';
                 const listaFotos = data.album || [];
-                
                 if (listaFotos.length > 0) {
                     document.getElementById('mainTargetPhoto').src = listaFotos[0];
                     listaFotos.forEach(url => {
@@ -293,15 +125,14 @@
             });
         }
 
-        // SISTEMA REAL DE DAR LIKES
         function verificarEstadoLike() {
             onValue(ref(db, `likes/${currentUid}/${targetUserId}`), (snap) => {
                 const btn = document.getElementById('btnLikeAction');
                 if (snap.exists()) {
-                    btn.className = "action-btn btn-like liked";
+                    btn.classList.add('liked');
                     btn.innerHTML = `<i class="fa-solid fa-heart-circle-check"></i>`;
                 } else {
-                    btn.className = "action-btn btn-like";
+                    btn.classList.remove('liked');
                     btn.innerHTML = `<i class="fa-solid fa-heart"></i>`;
                 }
             });
@@ -309,13 +140,14 @@
 
         document.getElementById('btnLikeAction').addEventListener('click', () => {
             const btn = document.getElementById('btnLikeAction');
+            
             if (btn.classList.contains('liked')) {
-                // Quitar Like
+                // Quitar el Like en tiempo real de Firebase
                 remove(ref(db, `likes/${currentUid}/${targetUserId}`)).then(() => {
                     remove(ref(db, `recibidos/${targetUserId}/${currentUid}`));
                 });
             } else {
-                // Dar Like
+                // Asignar el Like de manera efectiva
                 set(ref(db, `likes/${currentUid}/${targetUserId}`), true).then(() => {
                     set(ref(db, `recibidos/${targetUserId}/${currentUid}`), true);
                 });
