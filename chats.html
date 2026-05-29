@@ -1,367 +1,891 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Kinetic – Chats</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        :root {
-            --bg: #0d0616;
-            --card-bg: #12091f;
-            --text: #ffffff;
-            --text-secondary: #b8b8d4;
-            --neon: #ff00ff;
-            --online: #2ecc71;
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0616" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Kinetic · Chats</title>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-        body {
-            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            max-width: 480px;
-            margin: 0 auto;
-            height: 100vh;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <style>
+    /* ════════════════════════════════════════
+       TOKENS
+    ════════════════════════════════════════ */
+    :root {
+      --bg:          #0d0616;
+      --bg-row:      #12091f;
+      --bg-row-hi:   #180d2a;
+      --bg-row-unrd: #1a0a2e;
+      --purple:      #8a2be2;
+      --purple-hi:   #a020f0;
+      --magenta:     #ff00ff;
+      --cyan:        #00f2ff;
+      --green:       #39ff14;
+      --text:        #ede0ff;
+      --text-2:      #9880bc;
+      --text-3:      #52406e;
+      --border:      rgba(138,43,226,.16);
+      --border-row:  rgba(138,43,226,.1);
+      --nav-h:       66px;
+      --av-size:     55px;
+      --r:           14px;
+      --r-sm:        8px;
+      --grad:        linear-gradient(135deg,#8a2be2 0%,#ff00ff 100%);
+      --glow-p:      0 0 16px rgba(138,43,226,.55);
+      --glow-m:      0 0 12px rgba(255,0,255,.7);
+    }
 
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            background: var(--card-bg);
-            border-bottom: 1px solid rgba(255,0,255,0.3);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            min-height: 56px;
-            backdrop-filter: blur(10px);
-        }
-        .header h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--neon);
-            text-shadow: 0 0 8px var(--neon);
-        }
-        .back-btn {
-            background: rgba(255,0,255,0.2);
-            border: none;
-            color: var(--text);
-            font-size: 1.4rem;
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-        .back-btn:active { background: rgba(255,0,255,0.5); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.8rem;
-            scrollbar-width: thin;
-            scrollbar-color: var(--neon) var(--bg);
-        }
-        .chat-list::-webkit-scrollbar { width: 4px; }
-        .chat-list::-webkit-scrollbar-track { background: var(--bg); }
-        .chat-list::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 2px; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Urbanist', sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
 
-        .chat-row {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem;
-            background: var(--card-bg);
-            border-radius: 16px;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
-            position: relative;
-            border: 1px solid rgba(255,0,255,0.15);
-        }
-        .chat-row:active {
-            background: #1e1030;
-            transform: scale(0.98);
-            border-color: var(--neon);
-        }
-        .avatar-container {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            overflow: hidden;
-            flex-shrink: 0;
-            border: 2px solid var(--neon);
-            box-shadow: 0 0 8px rgba(255,0,255,0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #12091f;
-        }
-        .avatar-container img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
-        .chat-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .chat-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .online-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: var(--online);
-            box-shadow: 0 0 6px var(--online);
-        }
-        .last-message {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 0.2rem;
-        }
-        .badge-new-msg {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            background: var(--neon);
-            box-shadow: 0 0 12px var(--neon);
-        }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
 
-        .bottom-nav {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: var(--card-bg);
-            border-top: 1px solid rgba(255,0,255,0.3);
-            height: 64px;
-            padding-bottom: calc(0.5rem + var(--safe-bottom));
-            flex-shrink: 0;
-            backdrop-filter: blur(10px);
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.2rem;
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            position: relative;
-            transition: color 0.2s, text-shadow 0.2s;
-        }
-        .nav-item.active {
-            color: var(--neon);
-            text-shadow: 0 0 6px var(--neon);
-        }
-        .nav-item i { font-size: 1.4rem; }
-        .badge-counter {
-            position: absolute;
-            top: -6px;
-            right: 8px;
-            background: var(--neon);
-            color: white;
-            font-size: 0.6rem;
-            font-weight: 700;
-            min-width: 18px;
-            height: 18px;
-            border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 8px var(--neon);
-            padding: 0 4px;
-            line-height: 1;
-        }
+    /* ── ATMOSPHERE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.035) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.035) 40px);
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 38% at 10%  5%,  rgba(138,43,226,.15) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 30% at 88% 90%, rgba(255,0,255,.10)  0%, transparent 60%);
+    }
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
-        }
-        .empty-state i {
-            font-size: 3rem;
-            color: var(--neon);
-            margin-bottom: 1rem;
-            text-shadow: 0 0 12px var(--neon);
-        }
-        .empty-state h3 { margin: 0.5rem 0; color: var(--text); }
-    </style>
+    /* ════════════════════════════════════════
+       PAGE
+    ════════════════════════════════════════ */
+    #page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      padding-bottom: var(--nav-h);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* ════════════════════════════════════════
+       TOP BAR
+    ════════════════════════════════════════ */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px;
+      background: rgba(13,6,22,.94);
+      backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .topbar-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.18rem; font-weight: 900; letter-spacing: .18em;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 7px rgba(138,43,226,.7));
+    }
+    .topbar-center {
+      font-family: 'Orbitron', monospace;
+      font-size: .6rem; font-weight: 700;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .topbar-right {
+      width: 32px; /* spacer so center stays truly centred */
+    }
+
+    /* ════════════════════════════════════════
+       SECTION DIVIDER
+    ════════════════════════════════════════ */
+    .section-label {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 18px 10px;
+      flex-shrink: 0;
+    }
+    .section-label::before,
+    .section-label::after {
+      content: ''; flex: 1; height: 1px;
+    }
+    .section-label::before  { background: linear-gradient(90deg, transparent, var(--border)); }
+    .section-label::after   { background: linear-gradient(90deg, var(--border), transparent); }
+    .section-label span {
+      font-family: 'Orbitron', monospace;
+      font-size: .56rem; font-weight: 700; letter-spacing: .22em;
+      text-transform: uppercase; color: var(--text-3);
+      white-space: nowrap;
+    }
+
+    /* ════════════════════════════════════════
+       CHAT LIST
+    ════════════════════════════════════════ */
+    #chatList {
+      flex: 1;
+      display: flex; flex-direction: column;
+      padding: 0 10px;
+      gap: 4px;
+    }
+
+    /* ── SINGLE ROW ─────────────────────────
+       Layout:
+         [avatar 55px] [body flex-grow:1] [badge absolute]
+       position:relative on the row allows
+       the badge to anchor without affecting
+       the flex children at all.
+    ──────────────────────────────────────── */
+    .chat-row {
+      position: relative;           /* anchor for absolute badge */
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 11px 14px;
+      /*
+        Right padding is enlarged so the flex body
+        never bleeds under the absolute badge.
+        badge is ~40px wide + 20px right offset = 60px clearance.
+      */
+      padding-right: 68px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: background .18s, border-color .2s, transform .15s;
+      text-decoration: none;
+      animation: rowIn .28s ease both;
+    }
+    .chat-row:hover {
+      background: var(--bg-row-hi);
+      border-color: rgba(138,43,226,.28);
+      transform: translateX(2px);
+    }
+    .chat-row:active { transform: scale(.99) translateX(0); }
+    .chat-row.has-unread {
+      background: var(--bg-row-unrd);
+      border-color: rgba(255,0,255,.2);
+    }
+
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── AVATAR ── */
+    .chat-avatar {
+      position: relative;
+      width:  var(--av-size);
+      height: var(--av-size);
+      flex-shrink: 0;  /* NEVER compress */
+    }
+    .chat-avatar img,
+    .chat-avatar .av-ph {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      border: 2px solid rgba(138,43,226,.3);
+      background: #1a0f2e;
+    }
+    .chat-avatar .av-ph {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .chat-row.has-unread .chat-avatar img,
+    .chat-row.has-unread .chat-avatar .av-ph {
+      border-color: rgba(255,0,255,.45);
+      box-shadow: 0 0 10px rgba(255,0,255,.25);
+    }
+
+    /* Online dot */
+    .av-online {
+      position: absolute; bottom: 1px; right: 1px;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: var(--green);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    /* ── BODY (text block) ── */
+    .chat-body {
+      flex: 1 1 0;      /* grow to fill, shrink if needed, base 0 */
+      min-width: 0;     /* essential: allows children to truncate */
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .chat-name {
+      font-size: .95rem; font-weight: 700;
+      color: var(--text);
+      /* Truncate long names */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-row.has-unread .chat-name { color: #fff; }
+
+    .chat-preview {
+      font-size: .8rem; font-weight: 500;
+      color: var(--text-3);
+      white-space: nowrap;   /* single-line preview */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+    .chat-row.has-unread .chat-preview {
+      color: rgba(255,0,255,.65);
+      font-weight: 600;
+    }
+
+    .chat-time {
+      font-family: 'Orbitron', monospace;
+      font-size: .52rem; font-weight: 600;
+      color: var(--text-3);
+      margin-top: 1px;
+      letter-spacing: .04em;
+    }
+    .chat-row.has-unread .chat-time { color: rgba(255,0,255,.5); }
+
+    /* ── BADGE (absolute — NEVER disrupts flex layout) ──
+       Sits at right:20px, vertically centred via transform.
+       Because it is absolute it is completely outside the
+       normal flow and cannot push or pull any other element.
+    ── */
+    .badge-new-msg {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      /* Dimensions */
+      min-width: 22px;
+      height: 22px;
+      padding: 0 5px;
+
+      /* Neon fuchsia style */
+      background: var(--magenta);
+      border: 2px solid rgba(13,6,22,.9);
+      border-radius: 11px;
+      box-shadow: 0 0 10px rgba(255,0,255,.85), 0 0 20px rgba(255,0,255,.3);
+
+      /* Typography */
+      font-family: 'Urbanist', sans-serif;
+      font-size: .62rem; font-weight: 900;
+      color: #fff;
+      letter-spacing: .02em;
+
+      /* Center content */
+      display: flex; align-items: center; justify-content: center;
+
+      animation: badgePop .28s cubic-bezier(.36,.07,.19,.97) both;
+      pointer-events: none;   /* clicks pass through to the row */
+    }
+    @keyframes badgePop {
+      0%   { transform: translateY(-50%) scale(0); }
+      70%  { transform: translateY(-50%) scale(1.18); }
+      100% { transform: translateY(-50%) scale(1); }
+    }
+
+    /* ════════════════════════════════════════
+       SKELETON LOADER
+    ════════════════════════════════════════ */
+    .skel-row {
+      display: flex; align-items: center; gap: 13px;
+      padding: 11px 14px;
+      background: var(--bg-row);
+      border: 1px solid var(--border-row);
+      border-radius: var(--r-sm);
+    }
+    .skel-av {
+      width: var(--av-size); height: var(--av-size);
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .skel-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .skel-line  { border-radius: 5px; }
+    .skel-shimmer {
+      background: linear-gradient(90deg,
+        rgba(138,43,226,.06) 0%,
+        rgba(138,43,226,.14) 50%,
+        rgba(138,43,226,.06) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ════════════════════════════════════════
+       EMPTY / AUTH STATES
+    ════════════════════════════════════════ */
+    .state-centered {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; text-align: center; padding: 40px 24px;
+    }
+    .state-centered.show { display: flex; }
+
+    .state-icon {
+      width: 76px; height: 76px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      background: rgba(138,43,226,.1);
+      border: 1px solid rgba(138,43,226,.25);
+      box-shadow: var(--glow-p);
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+    @keyframes iconPulse {
+      0%,100% { box-shadow: var(--glow-p); }
+      50%     { box-shadow: 0 0 30px rgba(138,43,226,.45); }
+    }
+    .state-title {
+      font-family: 'Orbitron', monospace;
+      font-size: .9rem; font-weight: 700; letter-spacing: .06em;
+      color: var(--text-2);
+    }
+    .state-sub {
+      font-size: .84rem; color: var(--text-3); line-height: 1.6;
+      max-width: 260px;
+    }
+    .state-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px;
+      background: rgba(138,43,226,.12);
+      border: 1px solid rgba(138,43,226,.3);
+      border-radius: 22px;
+      font-size: .82rem; font-weight: 700; letter-spacing: .07em;
+      color: var(--purple-hi); text-decoration: none;
+      transition: background .2s, box-shadow .2s;
+    }
+    .state-cta:hover { background: rgba(138,43,226,.22); box-shadow: var(--glow-p); }
+
+    /* ════════════════════════════════════════
+       TOAST
+    ════════════════════════════════════════ */
+    #toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + 14px);
+      left: 50%; transform: translateX(-50%) translateY(8px);
+      background: rgba(18,9,31,.97);
+      border: 1px solid rgba(138,43,226,.5);
+      border-radius: var(--r-sm);
+      padding: 10px 18px;
+      font-size: .84rem; font-weight: 600; color: var(--text);
+      box-shadow: var(--glow-p);
+      backdrop-filter: blur(16px);
+      z-index: 9999; white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ════════════════════════════════════════
+       BOTTOM NAV
+    ════════════════════════════════════════ */
+    nav.bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(13,6,22,.97);
+      backdrop-filter: blur(22px);
+      border-top: 1px solid rgba(138,43,226,.16);
+      display: flex; align-items: stretch;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;          /* badge anchor */
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .nav-item:active { opacity: .6; }
+
+    .nav-item i {
+      font-size: 1.2rem;
+      color: var(--text-3);
+      transition: color .25s, filter .25s, transform .25s;
+    }
+    .nav-item span {
+      font-size: .59rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-3);
+      transition: color .25s;
+    }
+    .nav-item.active i {
+      color: var(--purple-hi);
+      filter: drop-shadow(0 0 5px rgba(160,32,240,.8));
+      transform: scale(1.15);
+    }
+    .nav-item.active span { color: var(--purple-hi); }
+
+    /* Fuchsia neon state */
+    .nav-item i.has-notif {
+      color: var(--magenta) !important;
+      filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45)) !important;
+      animation: navIconPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes navIconPulse {
+      0%,100% { filter: drop-shadow(0 0 6px #ff00ff); }
+      50%     { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 5px #fff); }
+    }
+
+    /* ── BADGE COUNTER on nav ── */
+    .badge-counter {
+      position: absolute;
+      /* Offset so badge sits top-right of the icon area */
+      top: 8px;
+      left: calc(50% + 4px);
+      min-width: 17px; height: 17px;
+      padding: 0 3px;
+      background: var(--magenta);
+      border: 2px solid var(--bg);
+      border-radius: 10px;
+      font-family: 'Urbanist', sans-serif;
+      font-size: .58rem; font-weight: 900;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(255,0,255,.9);
+      pointer-events: none;
+      animation: badgeIn .3s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes badgeIn {
+      from { transform: scale(0); }
+      70%  { transform: scale(1.2); }
+      to   { transform: scale(1); }
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i></button>
-        <h2>Mensajes</h2>
-        <div style="width:40px;"></div>
+
+<div id="page">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="topbar-logo">KINETIC</span>
+    <span class="topbar-center">Mensajes</span>
+    <div class="topbar-right"></div>
+  </div>
+
+  <!-- SECTION LABEL -->
+  <div class="section-label"><span>💬 Conversaciones</span></div>
+
+  <!-- SKELETON (shown until first data) -->
+  <div id="skeleton" style="padding:0 10px;display:flex;flex-direction:column;gap:4px">
+    <div class="skel-row">
+      <div class="skel-av skel-shimmer"></div>
+      <div class="skel-lines">
+        <div class="skel-line skel-shimmer" style="height:14px;width:55%"></div>
+        <div class="skel-line skel-shimmer" style="height:11px;width:80%"></div>
+      </div>
     </div>
-
-    <div class="chat-list" id="chatListContainer">
-        <p style="text-align:center; padding:2rem; color:var(--text-secondary);">Cargando conversaciones...</p>
+    <div class="skel-row">
+      <div class="skel-av skel-shimmer"></div>
+      <div class="skel-lines">
+        <div class="skel-line skel-shimmer" style="height:14px;width:40%"></div>
+        <div class="skel-line skel-shimmer" style="height:11px;width:70%"></div>
+      </div>
     </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="window.location.href='index.html'">
-            <i class="fas fa-satellite"></i><span>Radar</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='myProfile.html'">
-            <i class="fas fa-user"></i><span>Perfil</span>
-        </div>
-        <div class="nav-item active" id="navChats">
-            <i class="fas fa-comment"></i><span>Chats</span>
-            <span class="badge-counter" id="globalBadge" style="display:none;">0</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='settings.html'">
-            <i class="fas fa-cog"></i><span>Ajustes</span>
-        </div>
+    <div class="skel-row">
+      <div class="skel-av skel-shimmer"></div>
+      <div class="skel-lines">
+        <div class="skel-line skel-shimmer" style="height:14px;width:62%"></div>
+        <div class="skel-line skel-shimmer" style="height:11px;width:50%"></div>
+      </div>
     </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  <!-- CHAT LIST -->
+  <div id="chatList" style="display:none"></div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-            authDomain: "kinetic-app-67ae5.firebaseapp.com",
-            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-            projectId: "kinetic-app-67ae5",
-            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-            messagingSenderId: "825570718975",
-            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-        };
+  <!-- EMPTY STATE -->
+  <div class="state-centered" id="emptyState">
+    <div class="state-icon">💬</div>
+    <div class="state-title">Sin conversaciones</div>
+    <div class="state-sub">Explora el Radar y conecta con alguien para iniciar tu primer chat.</div>
+    <a class="state-cta" href="index.html">
+      <i class="fa-solid fa-location-crosshairs"></i> Ir al Radar
+    </a>
+  </div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+  <!-- AUTH GATE -->
+  <div class="state-centered" id="authGate">
+    <div class="state-icon" style="background:rgba(255,0,85,.08);border-color:rgba(255,0,85,.22)">
+      <i class="fa-solid fa-lock" style="font-size:1.6rem;color:#ff4466"></i>
+    </div>
+    <div class="state-title">Acceso restringido</div>
+    <div class="state-sub">Inicia sesión para ver tus conversaciones.</div>
+    <a class="state-cta" href="index.html">← Ir al inicio</a>
+  </div>
 
-        const globalBadge = document.getElementById('globalBadge');
-        const chatListContainer = document.getElementById('chatListContainer');
-        const defaultAvatarSVG = `<svg viewBox="0 0 24 24" fill="none" style="width:50px;height:50px;stroke:#ff00ff;stroke-width:1.5;background:#12091f;border-radius:50%;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>`;
+</div><!-- /page -->
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
-            }
-            const miUid = user.uid;
-            const chatsRef = ref(db, 'chats');
-            onValue(chatsRef, async (snapshot) => {
-                chatListContainer.innerHTML = '';
-                let totalUnread = 0;
-                const chatRows = [];
+<!-- TOAST -->
+<div id="toast"></div>
 
-                if (!snapshot.exists()) {
-                    chatListContainer.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-comments"></i>
-                            <h3>No tienes conversaciones activas</h3>
-                            <p>Ve al radar y rompe el hielo ⚡</p>
-                        </div>`;
-                    globalBadge.style.display = 'none';
-                    document.getElementById('navChats').classList.remove('active');
-                    return;
-                }
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <i class="fa-solid fa-location-crosshairs"></i>
+    <span>Radar</span>
+  </a>
+  <a class="nav-item active" href="chats.html" id="navChats">
+    <i class="fa-solid fa-comment-dots" id="navChatIcon"></i>
+    <span>Chats</span>
+  </a>
+  <a class="nav-item" href="likes.html">
+    <i class="fa-solid fa-heart"></i>
+    <span>Likes</span>
+  </a>
+  <a class="nav-item" href="perfil.html">
+    <i class="fa-solid fa-user"></i>
+    <span>Perfil</span>
+  </a>
+</nav>
 
-                const chats = snapshot.val();
-                const processPromises = [];
+<!-- ════════════════════════════════════════
+     FIREBASE SDK v10 modular CDN
+════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase, ref, get, onValue, off }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-                for (const chatId in chats) {
-                    const participants = chatId.split('_');
-                    if (!participants.includes(miUid)) continue;
+/* ────────────────────────────────────
+   CONFIG
+──────────────────────────────────── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
+  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+  projectId:         "kinetic-app-67ae5",
+  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
+  messagingSenderId: "825570718975",
+  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+};
 
-                    const targetUid = participants.find(id => id !== miUid);
-                    if (!targetUid) continue;
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getDatabase(app);
 
-                    const lastInfo = chats[chatId].lastInfo || {};
-                    const lastMessage = lastInfo.message || 'Mensaje multimedia...';
-                    const unreadTarget = lastInfo.unreadTarget || null;
-                    const isUnread = (unreadTarget === miUid);
-                    if (isUnread) totalUnread++;
+/* ────────────────────────────────────
+   STATE
+──────────────────────────────────── */
+let currentUser  = null;
+let chatsUnsub   = null;
+let renderVer    = 0;   // stale-render guard
 
-                    const promise = get(ref(db, 'users/' + targetUid)).then(userSnap => {
-                        let targetName = 'Usuario de Kinetic';
-                        let targetPhoto = null;
-                        let targetOnline = false;
-                        if (userSnap.exists()) {
-                            const userData = userSnap.val();
-                            targetName = userData.name || targetName;
-                            targetOnline = userData.online || false;
-                            if (userData.profilePic && userData.profilePic.startsWith('http')) {
-                                targetPhoto = userData.profilePic;
-                            } else if (userData.album && Array.isArray(userData.album) && userData.album.length > 0 && userData.album[0].startsWith('http')) {
-                                targetPhoto = userData.album[0];
-                            }
-                        }
+/* ────────────────────────────────────
+   TOAST
+──────────────────────────────────── */
+let _tt = null;
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = err ? `⚠  ${msg}` : `✓  ${msg}`;
+  el.style.borderColor = err ? 'rgba(255,34,85,.5)' : 'rgba(138,43,226,.5)';
+  el.classList.add('show');
+  clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), 3200);
+}
 
-                        let avatarHTML = targetPhoto ? 
-                            `<img src="${targetPhoto}" alt="${targetName}" onerror="this.style.display='none';this.parentElement.innerHTML='${defaultAvatarSVG.replace(/'/g, "\\'")}';">` :
-                            defaultAvatarSVG;
+/* ────────────────────────────────────
+   HELPERS
+──────────────────────────────────── */
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
-                        return { targetUid, targetName, avatarHTML, online: targetOnline, lastMessage, isUnread };
-                    });
-                    processPromises.push(promise);
-                }
+function firstPhoto(data) {
+  if (Array.isArray(data.album)  && data.album.length  > 0) return data.album.find(u => u?.trim())  || '';
+  if (Array.isArray(data.photos) && data.photos.length > 0) return data.photos.find(u => u?.trim()) || '';
+  return '';
+}
 
-                const results = await Promise.all(processPromises);
-                results.sort((a, b) => b.lastMessage.localeCompare(a.lastMessage));
+function relTime(ts) {
+  if (!ts) return '';
+  const d = Date.now() - ts;
+  if (d < 60_000)      return 'ahora';
+  if (d < 3_600_000)   return `${Math.floor(d/60_000)}m`;
+  if (d < 86_400_000)  return `${Math.floor(d/3_600_000)}h`;
+  if (d < 604_800_000) return `${Math.floor(d/86_400_000)}d`;
+  return new Date(ts).toLocaleDateString('es',{day:'2-digit',month:'2-digit'});
+}
 
-                if (results.length === 0) {
-                    chatListContainer.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-comments"></i>
-                            <h3>No tienes conversaciones activas</h3>
-                            <p>Ve al radar y rompe el hielo ⚡</p>
-                        </div>`;
-                } else {
-                    chatListContainer.innerHTML = results.map(row => `
-                        <div class="chat-row" data-target="${row.targetUid}">
-                            <div class="avatar-container">${row.avatarHTML}</div>
-                            <div class="chat-info">
-                                <div class="chat-name">${row.targetName} ${row.online ? '<span class="online-dot"></span>' : ''}</div>
-                                <div class="last-message">${row.lastMessage}</div>
-                            </div>
-                            ${row.isUnread ? '<span class="badge-new-msg"></span>' : ''}
-                        </div>
-                    `).join('');
+/* ────────────────────────────────────
+   AUTH INIT
+──────────────────────────────────── */
+onAuthStateChanged(auth, user => {
+  if (user) {
+    currentUser = user;
+    hideSkeleton();
+    listenChats();
+  } else {
+    hideSkeleton();
+    document.getElementById('authGate').classList.add('show');
+  }
+});
 
-                    document.querySelectorAll('.chat-row').forEach(row => {
-                        row.addEventListener('click', function() {
-                            const target = this.getAttribute('data-target');
-                            window.location.href = 'chat-interno.html?id=' + target;
-                        });
-                    });
-                }
+function hideSkeleton() {
+  const sk = document.getElementById('skeleton');
+  if (sk) sk.style.display = 'none';
+}
 
-                if (totalUnread > 0) {
-                    globalBadge.textContent = totalUnread > 99 ? '99+' : totalUnread;
-                    globalBadge.style.display = 'flex';
-                    document.getElementById('navChats').classList.add('active');
-                } else {
-                    globalBadge.style.display = 'none';
-                    document.getElementById('navChats').classList.remove('active');
-                }
-            });
-        });
-    </script>
+/* ────────────────────────────────────
+   MAIN LISTENER — chats node
+──────────────────────────────────── */
+function listenChats() {
+  const chatsRef = ref(db, 'chats');
+  if (chatsUnsub) off(chatsRef);
+
+  chatsUnsub = onValue(chatsRef, async snap => {
+    const ver = ++renderVer;   // bump version to discard stale renders
+
+    hideSkeleton();
+
+    if (!snap.exists()) { showEmpty(); return; }
+
+    /* ── 1. Collect rooms that include the current user ── */
+    const rooms = [];
+    snap.forEach(chatSnap => {
+      const cid  = chatSnap.key;
+      const data = chatSnap.val();
+      if (!data) return;
+
+      // Membership check: room id is "uid1_uid2" OR stored in participants map
+      const inId    = cid.split('_').includes(currentUser.uid);
+      const inParts = data.participants?.[currentUser.uid] === true;
+      if (!inId && !inParts) return;
+
+      // Determine the other participant's uid
+      const parts = cid.split('_');
+      const targetUid = parts.length === 2
+        ? parts.find(p => p !== currentUser.uid)
+        : Object.keys(data.participants || {}).find(p => p !== currentUser.uid);
+
+      if (!targetUid) return;
+
+      // Unread detection (dual strategy)
+      const hasUnread =
+        data.lastInfo?.unreadTarget === currentUser.uid ||
+        hasUnreadMessages(data.messages, currentUser.uid);
+
+      rooms.push({
+        cid,
+        targetUid,
+        lastMsg:   data.lastInfo?.text    || data.lastMessage || '',
+        lastTs:    data.lastInfo?.ts      || data.lastTs      || 0,
+        hasUnread,
+      });
+    });
+
+    if (rooms.length === 0) { showEmpty(); return; }
+
+    // Sort by latest message
+    rooms.sort((a, b) => b.lastTs - a.lastTs);
+
+    /* ── 2. Fetch all target profiles concurrently ── */
+    let profiles;
+    try {
+      profiles = await fetchProfiles(rooms.map(r => r.targetUid));
+    } catch (e) {
+      toast('Error al cargar perfiles.', true);
+      return;
+    }
+    if (ver !== renderVer) return;  // stale — a newer snapshot arrived
+
+    /* ── 3. Render rows + calculate global unread count ── */
+    const merged = rooms.map(r => ({ ...r, profile: profiles[r.targetUid] }));
+    renderChatList(merged);
+    updateNavBadge(merged.filter(r => r.hasUnread).length);
+
+  }, err => {
+    hideSkeleton();
+    toast('Error al cargar conversaciones.', true);
+    console.error('[listenChats]', err);
+  });
+}
+
+/* ────────────────────────────────────
+   UNREAD DETECTION (fallback scan)
+──────────────────────────────────── */
+function hasUnreadMessages(messages, myUid) {
+  if (!messages || typeof messages !== 'object') return false;
+  return Object.values(messages).some(
+    m => m?.senderId !== myUid && m?.unread === true
+  );
+}
+
+/* ────────────────────────────────────
+   BATCH PROFILE FETCH
+   Returns map: { uid → profileData }
+──────────────────────────────────── */
+async function fetchProfiles(uids) {
+  const results = await Promise.allSettled(
+    uids.map(uid => get(ref(db, `users/${uid}`)))
+  );
+  const map = {};
+  results.forEach((res, i) => {
+    const uid = uids[i];
+    map[uid] = (res.status === 'fulfilled' && res.value.exists())
+      ? res.value.val()
+      : { uid, nombre: 'Usuario', name: 'Usuario' };
+  });
+  return map;
+}
+
+/* ────────────────────────────────────
+   RENDER CHAT LIST
+──────────────────────────────────── */
+function renderChatList(rooms) {
+  const list  = document.getElementById('chatList');
+  const empty = document.getElementById('emptyState');
+
+  if (rooms.length === 0) { showEmpty(); return; }
+
+  empty.classList.remove('show');
+  list.style.display = 'flex';
+  list.style.flexDirection = 'column';
+  list.style.gap = '4px';
+  list.style.padding = '0 10px';
+  list.innerHTML = '';
+
+  rooms.forEach((room, idx) => {
+    const row = buildRow(room, idx);
+    list.appendChild(row);
+  });
+}
+
+/* ────────────────────────────────────
+   BUILD SINGLE ROW
+   ─────────────────────────────────
+   LAYOUT GUARANTEE:
+   • .chat-row       → position:relative (badge anchor), flexbox, padding-right:68px
+   • .chat-avatar    → fixed 55×55, flex-shrink:0
+   • .chat-body      → flex:1 min-width:0 (allows text truncation)
+   • .badge-new-msg  → position:absolute right:16px top:50% translateY(-50%)
+                       ⟹ zero impact on flex children layout
+──────────────────────────────────── */
+function buildRow(room, idx) {
+  const { cid, targetUid, lastMsg, lastTs, hasUnread, profile } = room;
+
+  const name    = profile.nombre || profile.name || 'Desconocido';
+  const online  = profile.online === true;
+  const photo   = firstPhoto(profile);
+  const time    = relTime(lastTs);
+  const preview = lastMsg || 'Inicia la conversación…';
+
+  const row = document.createElement('a');
+  row.className  = 'chat-row' + (hasUnread ? ' has-unread' : '');
+  row.href       = '#';
+  row.style.animationDelay = `${Math.min(idx * 0.045, 0.5)}s`;
+
+  // Avatar HTML
+  const avatarHTML = photo
+    ? `<img src="${esc(photo)}" alt="${esc(name)}"
+           onerror="this.outerHTML='<div class=\\'av-ph\\'>👤</div>'" />`
+    : `<div class="av-ph">👤</div>`;
+
+  const onlineDot = online ? `<div class="av-online"></div>` : '';
+
+  // Badge HTML — only when unread
+  const badgeHTML = hasUnread
+    ? `<div class="badge-new-msg" aria-label="Mensaje nuevo">●</div>`
+    : '';
+
+  row.innerHTML = `
+    <div class="chat-avatar">
+      ${avatarHTML}
+      ${onlineDot}
+    </div>
+    <div class="chat-body">
+      <div class="chat-name">${esc(name)}</div>
+      <div class="chat-preview">${esc(preview)}</div>
+      ${time ? `<div class="chat-time">${esc(time)}</div>` : ''}
+    </div>
+    ${badgeHTML}
+  `;
+
+  // Navigate to individual chat
+  row.addEventListener('click', e => {
+    e.preventDefault();
+    openChat(cid, targetUid);
+  });
+
+  return row;
+}
+
+/* ────────────────────────────────────
+   OPEN CHAT → chat.html
+──────────────────────────────────── */
+function openChat(cid, targetUid) {
+  try {
+    localStorage.setItem('active_chat_id',   cid);
+    localStorage.setItem('selected_user_id', targetUid);
+  } catch(_) {}
+  window.location.href = 'chat.html';
+}
+
+/* ────────────────────────────────────
+   EMPTY STATE
+──────────────────────────────────── */
+function showEmpty() {
+  document.getElementById('chatList').style.display  = 'none';
+  document.getElementById('emptyState').classList.add('show');
+  updateNavBadge(0);
+}
+
+/* ────────────────────────────────────
+   NAV BADGE — global unread counter
+   Inserts / updates / removes .badge-counter
+   on #navChats. Changes icon to fuchsia neon
+   when count > 0, restores when 0.
+──────────────────────────────────── */
+function updateNavBadge(count) {
+  const iconEl  = document.getElementById('navChatIcon');
+  const navItem = document.getElementById('navChats');
+
+  // Remove stale badge
+  navItem.querySelectorAll('.badge-counter').forEach(b => b.remove());
+
+  if (count > 0) {
+    // Fuchsia neon icon
+    iconEl.classList.add('has-notif');
+
+    // Create badge
+    const badge = document.createElement('div');
+    badge.className  = 'badge-counter';
+    badge.textContent = count > 9 ? '9+' : String(count);
+    navItem.appendChild(badge);
+  } else {
+    iconEl.classList.remove('has-notif');
+  }
+}
+</script>
 </body>
 </html>
