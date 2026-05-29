@@ -25,7 +25,6 @@
             padding-bottom: 80px;
         }
 
-        /* BARRA SUPERIOR */
         .top-bar {
             position: fixed;
             top: 0;
@@ -47,7 +46,6 @@
             color: #fff;
         }
 
-        /* LISTA DE CONVERSACIONES */
         .chats-list {
             display: flex;
             flex-direction: column;
@@ -61,7 +59,6 @@
             border-bottom: 1px solid rgba(61, 28, 99, 0.15);
             cursor: pointer;
             transition: background-color 0.2s;
-            position: relative;
         }
 
         .chat-item:hover {
@@ -113,15 +110,11 @@
             font-size: 16px;
             font-weight: 700;
             color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .chat-time {
             font-size: 12px;
             color: #796699;
-            flex-shrink: 0;
         }
 
         .chat-last-msg {
@@ -130,15 +123,23 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            flex-grow: 1;
         }
 
-        /* ESTADOS VACÍOS O CARGANDO */
+        .badge-unread {
+            width: 10px;
+            height: 10px;
+            background-color: #ff00ff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ff00ff;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
         .status-msg {
             text-align: center;
             padding: 50px 20px;
             color: #a094b8;
-            font-size: 15px;
-            line-height: 1.5;
         }
 
         .status-msg i {
@@ -148,7 +149,7 @@
             display: block;
         }
 
-        /* BARRA DE NAVEGACIÓN INFERIOR */
+        /* NAVBAR DE 4 BOTONES */
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -193,7 +194,7 @@
     </div>
 
     <div id="chatsContainer">
-        <div class="status-msg" id="statusState"><i class="fa-solid fa-spinner fa-spin"></i>Buscando tus conversaciones...</div>
+        <div class="status-msg" id="statusState"><i class="fa-solid fa-spinner fa-spin"></i>Buscando conversaciones...</div>
         <div class="chats-list" id="chatsList"></div>
     </div>
 
@@ -201,6 +202,10 @@
         <div class="nav-item" onclick="window.location.href='radar.html'">
             <i class="fa-solid fa-border-all"></i>
             <span>Mosaico</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='likes.html'">
+            <i class="fa-solid fa-heart"></i>
+            <span>Likes</span>
         </div>
         <div class="nav-item active">
             <i class="fa-solid fa-comment"></i>
@@ -234,8 +239,12 @@
         const chatsList = document.getElementById('chatsList');
         const statusState = document.getElementById('statusState');
         let currentUid = null;
+        let primerCarga = true;
 
-        // Proteger ruta
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "index.html";
@@ -252,51 +261,47 @@
 
                 if (!todosLosChats) {
                     statusState.style.display = 'block';
-                    statusState.innerHTML = `<i class="fa-solid fa-comments"></i>No tienes chats activos todavía.<br>¡Ve al mosaico y rompe el hielo!`;
+                    statusState.innerHTML = `<i class="fa-solid fa-comments"></i>No hay chats activos.<br>¡Ve al mosaico y rompe el hielo!`;
+                    primerCarga = false;
                     return;
                 }
 
                 let misChatsPromesas = [];
 
-                // Recorrer las salas existentes para filtrar las que me pertenecen
                 for (let cId in todosLosChats) {
                     if (cId.includes(currentUid)) {
                         const mensajesNodo = todosLosChats[cId].messages;
-                        if (!mensajesNodo) continue; // Si borraron todos los mensajes, saltar
+                        if (!mensajesNodo) continue;
 
-                        // Extraer los IDs de la sala unificada (id1_id2)
                         const ids = cId.split('_');
                         const targetId = ids[0] === currentUid ? ids[1] : ids[0];
 
-                        // Obtener el último mensaje cronológico
-                        const keys = Object.keys(mensajesNodo);
-                        const ultimoMsg = mensajesNodo[keys[keys.length - 1]];
+                        const infoNodo = todosLosChats[cId].lastInfo || {};
 
-                        // Guardamos la info temporalmente para procesarla junto a los datos del perfil
                         misChatsPromesas.push({
                             targetId: targetId,
-                            lastText: ultimoMsg.text,
-                            timestamp: ultimoMsg.timestamp
+                            lastText: infoNodo.text || "Archivo multimedia",
+                            timestamp: infoNodo.timestamp || Date.now(),
+                            unreadTarget: infoNodo.unreadTarget || "",
+                            cId: cId
                         });
                     }
                 }
 
                 if (misChatsPromesas.length === 0) {
                     statusState.style.display = 'block';
-                    statusState.innerHTML = `<i class="fa-solid fa-comments"></i>No tienes chats activos todavía.<br>¡Ve al mosaico y rompe el hielo!`;
+                    statusState.innerHTML = `<i class="fa-solid fa-comments"></i>No hay chats activos.`;
+                    primerCarga = false;
                     return;
                 }
 
-                // Ordenar chats: el mensaje más reciente arriba
                 misChatsPromesas.sort((a, b) => b.timestamp - a.timestamp);
                 statusState.style.display = 'none';
 
-                // Renderizar cada chat trayendo la información del usuario del nodo /users/
                 misChatsPromesas.forEach(chatData => {
                     onValue(ref(db, `users/${chatData.targetId}`), (userSnap) => {
                         const uInfo = userSnap.val() || {};
                         
-                        // Evitar duplicación si el elemento ya existe en el DOM por refresco en tiempo real
                         const idExistente = document.getElementById(`item-${chatData.targetId}`);
                         if (idExistente) idExistente.remove();
 
@@ -307,14 +312,22 @@
                         const fotoUrl = (uInfo.album && uInfo.album.length > 0) ? uInfo.album[0] : 'https://via.placeholder.com/150';
                         const horaStr = new Date(chatData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-                        // Detectar si el último mensaje es un enlace multimedia para amoldar la vista previa
                         let vistaPreviaTexto = chatData.lastText;
                         if (typeof vistaPreviaTexto === 'string') {
                             const limpia = vistaPreviaTexto.split('?')[0].toLowerCase();
-                            if (limpia.match(/\.(jpeg|jpg|gif|png|webp)/) != null) {
-                                vistaPreviaTexto = "📷 Foto enviada";
-                            } else if (limpia.match(/\.(mp4|webm|ogg|mov)/) != null) {
-                                vistaPreviaTexto = "🎥 Video enviado";
+                            if (limpia.match(/\.(jpeg|jpg|gif|png|webp)/) != null) vistaPreviaTexto = "📷 Foto";
+                            else if (limpia.match(/\.(mp4|webm|ogg|mov)/) != null) vistaPreviaTexto = "🎥 Video";
+                        }
+
+                        let unreadBadgeHTML = "";
+                        if (chatData.unreadTarget === currentUid) {
+                            unreadBadgeHTML = `<div class="badge-unread"></div>`;
+                            
+                            if (!primerCarga && Notification.permission === "granted") {
+                                new Notification(`Kinetic - ${uInfo.nombre}`, {
+                                    body: vistaPreviaTexto,
+                                    icon: fotoUrl
+                                });
                             }
                         }
 
@@ -328,19 +341,16 @@
                                     <span class="chat-name">${uInfo.nombre || "Anónimo"}</span>
                                     <span class="chat-time">${horaStr}</span>
                                 </div>
-                                <div class="chat-last-msg">${vistaPreviaTexto}</div>
+                                <div class="chat-meta" style="margin-top:2px;">
+                                    <div class="chat-last-msg">${vistaPreviaTexto}</div>
+                                    ${unreadBadgeHTML}
+                                </div>
                             </div>
                         `;
 
-                        // Activar punto verde online dinámicamente
                         const badge = item.querySelector(`#online-${chatData.targetId}`);
-                        if (uInfo.online) {
-                            badge.style.display = 'block';
-                        } else {
-                            badge.style.display = 'none';
-                        }
+                        if (badge) badge.style.display = uInfo.online ? 'block' : 'none';
 
-                        // Al tocar el chat, reconfigurar la variable global de destino y abrir la conversación
                         item.addEventListener('click', () => {
                             localStorage.setItem('selected_user_id', chatData.targetId);
                             window.location.href = 'chat-interno.html';
@@ -349,6 +359,7 @@
                         chatsList.appendChild(item);
                     });
                 });
+                primerCarga = false;
             });
         }
     </script>
