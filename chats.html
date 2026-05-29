@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Mensajes</title>
+    <title>Kinetic - Chats</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -23,6 +23,13 @@
             min-height: 100vh;
             padding-top: 70px;
             padding-bottom: 80px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .chats-wrapper {
+            width: 100%;
+            max-width: 600px;
         }
 
         .top-bar {
@@ -42,33 +49,32 @@
         .bar-title {
             font-size: 22px;
             font-weight: 800;
-            letter-spacing: 1px;
-            color: #fff;
+            background: linear-gradient(90deg, #00f2ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .chats-list {
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            padding: 10px 0;
+            gap: 8px;
         }
 
-        .chat-item {
+        /* FILAS DE CONVERSACIÓN */
+        .chat-row {
             display: flex;
             align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(61, 28, 99, 0.15);
+            padding: 15px;
+            background-color: #12091f;
+            border: 1px solid rgba(61, 28, 99, 0.2);
+            border-radius: 16px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background 0.2s;
         }
 
-        .chat-item:hover {
-            background-color: rgba(37, 18, 62, 0.2);
-        }
-
-        .avatar-container {
-            position: relative;
-            margin-right: 15px;
-            flex-shrink: 0;
+        .chat-row:hover {
+            background-color: #1a0b2e;
         }
 
         .chat-avatar {
@@ -76,34 +82,20 @@
             height: 55px;
             border-radius: 50%;
             object-fit: cover;
-            border: 1px solid #3d1c63;
+            margin-right: 15px;
+            border: 2px solid #3d1c63;
         }
 
-        .badge-online {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 13px;
-            height: 13px;
-            background-color: #00ff66;
-            border-radius: 50%;
-            border: 2px solid #0d0616;
-            box-shadow: 0 0 8px #00ff66;
-            display: none;
-        }
-
-        .chat-details {
+        .chat-body {
             flex-grow: 1;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
         }
 
-        .chat-meta {
+        .chat-name-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 4px;
         }
 
         .chat-name {
@@ -112,44 +104,33 @@
             color: #fff;
         }
 
-        .chat-time {
-            font-size: 12px;
-            color: #796699;
-        }
-
         .chat-last-msg {
             font-size: 14px;
             color: #a094b8;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            flex-grow: 1;
         }
 
-        .badge-unread {
-            width: 10px;
-            height: 10px;
+        /* ICONO DE NOTIFICACIÓN NEÓN */
+        .badge-new-msg {
+            width: 12px;
+            height: 12px;
             background-color: #ff00ff;
             border-radius: 50%;
-            box-shadow: 0 0 8px #ff00ff;
+            box-shadow: 0 0 10px #ff00ff;
             margin-left: 10px;
             flex-shrink: 0;
         }
 
-        .status-msg {
+        .empty-msg {
             text-align: center;
-            padding: 50px 20px;
-            color: #a094b8;
+            padding: 60px 20px;
+            color: #796699;
+            font-size: 16px;
         }
 
-        .status-msg i {
-            font-size: 40px;
-            color: #3d1c63;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        /* NAVBAR DE 4 BOTONES */
+        /* NAV BAR */
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -178,13 +159,8 @@
             padding: 10px 0;
         }
 
-        .nav-item.active {
-            color: #ff00ff;
-        }
-
-        .nav-item i {
-            font-size: 20px;
-        }
+        .nav-item.active { color: #00f2ff; }
+        .nav-item i { font-size: 20px; }
     </style>
 </head>
 <body>
@@ -193,9 +169,10 @@
         <div class="bar-title">Mensajes</div>
     </div>
 
-    <div id="chatsContainer">
-        <div class="status-msg" id="statusState"><i class="fa-solid fa-spinner fa-spin"></i>Buscando conversaciones...</div>
-        <div class="chats-list" id="chatsList"></div>
+    <div class="chats-wrapper">
+        <div class="chats-list" id="listaConversaciones">
+            <div class="empty-msg">Buscando conversaciones...</div>
+        </div>
     </div>
 
     <div class="nav-bar">
@@ -236,130 +213,79 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        const chatsList = document.getElementById('chatsList');
-        const statusState = document.getElementById('statusState');
         let currentUid = null;
-        let primerCarga = true;
-
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
+        const container = document.getElementById('listaConversaciones');
 
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "index.html";
             } else {
                 currentUid = user.uid;
-                cargarBandejaEntrada();
+                escucharSalasChat();
             }
         });
 
-        function cargarBandejaEntrada() {
+        function escucharSalasChat() {
             onValue(ref(db, 'chats'), (snapshot) => {
-                chatsList.innerHTML = '';
-                const todosLosChats = snapshot.val();
-
-                if (!todosLosChats) {
-                    statusState.style.display = 'block';
-                    statusState.innerHTML = `<i class="fa-solid fa-comments"></i>No hay chats activos.<br>¡Ve al mosaico y rompe el hielo!`;
-                    primerCarga = false;
+                const chats = snapshot.val();
+                if (!chats) {
+                    container.innerHTML = `<div class="empty-msg">No tienes chats activos aún. ¡Inicia uno desde el Radar!</div>`;
                     return;
                 }
 
-                let misChatsPromesas = [];
+                container.innerHTML = '';
+                let promesasCarga = [];
 
-                for (let cId in todosLosChats) {
-                    if (cId.includes(currentUid)) {
-                        const mensajesNodo = todosLosChats[cId].messages;
-                        if (!mensajesNodo) continue;
+                for (let chatId in chats) {
+                    if (chatId.includes(currentUid)) {
+                        const partes = chatId.split('_');
+                        const targetId = partes[0] === currentUid ? partes[1] : partes[0];
+                        const lastInfo = chats[chatId].lastInfo || {};
 
-                        const ids = cId.split('_');
-                        const targetId = ids[0] === currentUid ? ids[1] : ids[0];
-
-                        const infoNodo = todosLosChats[cId].lastInfo || {};
-
-                        misChatsPromesas.push({
-                            targetId: targetId,
-                            lastText: infoNodo.text || "Archivo multimedia",
-                            timestamp: infoNodo.timestamp || Date.now(),
-                            unreadTarget: infoNodo.unreadTarget || "",
-                            cId: cId
-                        });
+                        // Guardar datos temporalmente para no perder orden
+                        promesasCarga.push({ targetId, lastInfo });
                     }
                 }
 
-                if (misChatsPromesas.length === 0) {
-                    statusState.style.display = 'block';
-                    statusState.innerHTML = `<i class="fa-solid fa-comments"></i>No hay chats activos.`;
-                    primerCarga = false;
+                if(promesasCarga.length === 0){
+                    container.innerHTML = `<div class="empty-msg">No tienes chats activos aún.</div>`;
                     return;
                 }
 
-                misChatsPromesas.sort((a, b) => b.timestamp - a.timestamp);
-                statusState.style.display = 'none';
-
-                misChatsPromesas.forEach(chatData => {
-                    onValue(ref(db, `users/${chatData.targetId}`), (userSnap) => {
-                        const uInfo = userSnap.val() || {};
+                // Dibujar cada fila consultando el nombre real en vivo
+                promesasCarga.forEach(item => {
+                    onValue(ref(db, `users/${item.targetId}`), (uSnap) => {
+                        const uData = uSnap.val() || {};
                         
-                        const idExistente = document.getElementById(`item-${chatData.targetId}`);
-                        if (idExistente) idExistente.remove();
+                        // Quitar el bug de los "Anónimos" en la lista de chats
+                        const nombreChat = uData.nombre ? uData.nombre : "Usuario de Kinetic";
+                        const fotoChat = (uData.album && uData.album.length > 0) ? uData.album[0] : 'https://via.placeholder.com/150';
 
-                        const item = document.createElement('div');
-                        item.className = 'chat-item';
-                        item.id = `item-${chatData.targetId}`;
+                        // Verificar si hay una notificación pendiente para mí
+                        const tieneNotificacion = item.lastInfo.unreadTarget === currentUid;
 
-                        const fotoUrl = (uInfo.album && uInfo.album.length > 0) ? uInfo.album[0] : 'https://via.placeholder.com/150';
-                        const horaStr = new Date(chatData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-                        let vistaPreviaTexto = chatData.lastText;
-                        if (typeof vistaPreviaTexto === 'string') {
-                            const limpia = vistaPreviaTexto.split('?')[0].toLowerCase();
-                            if (limpia.match(/\.(jpeg|jpg|gif|png|webp)/) != null) vistaPreviaTexto = "📷 Foto";
-                            else if (limpia.match(/\.(mp4|webm|ogg|mov)/) != null) vistaPreviaTexto = "🎥 Video";
-                        }
-
-                        let unreadBadgeHTML = "";
-                        if (chatData.unreadTarget === currentUid) {
-                            unreadBadgeHTML = `<div class="badge-unread"></div>`;
-                            
-                            if (!primerCarga && Notification.permission === "granted") {
-                                new Notification(`Kinetic - ${uInfo.nombre}`, {
-                                    body: vistaPreviaTexto,
-                                    icon: fotoUrl
-                                });
-                            }
-                        }
-
-                        item.innerHTML = `
-                            <div class="avatar-container">
-                                <img src="${fotoUrl}" class="chat-avatar" alt="${uInfo.nombre}">
-                                <div class="badge-online" id="online-${chatData.targetId}"></div>
-                            </div>
-                            <div class="chat-details">
-                                <div class="chat-meta">
-                                    <span class="chat-name">${uInfo.nombre || "Anónimo"}</span>
-                                    <span class="chat-time">${horaStr}</span>
+                        // Crear elemento visual
+                        const row = document.createElement('div');
+                        row.className = 'chat-row';
+                        row.innerHTML = `
+                            <img class="chat-avatar" src="${fotoChat}">
+                            <div class="chat-body">
+                                <div class="chat-name-row">
+                                    <span class="chat-name">${nombreChat}</span>
                                 </div>
-                                <div class="chat-meta" style="margin-top:2px;">
-                                    <div class="chat-last-msg">${vistaPreviaTexto}</div>
-                                    ${unreadBadgeHTML}
-                                </div>
+                                <div class="chat-last-msg">${item.lastInfo.text || 'Mensaje multimedia...'}</div>
                             </div>
+                            ${tieneNotificacion ? '<div class="badge-new-msg"></div>' : ''}
                         `;
 
-                        const badge = item.querySelector(`#online-${chatData.targetId}`);
-                        if (badge) badge.style.display = uInfo.online ? 'block' : 'none';
-
-                        item.addEventListener('click', () => {
-                            localStorage.setItem('selected_user_id', chatData.targetId);
+                        row.onclick = () => {
+                            localStorage.setItem('selected_user_id', item.targetId);
                             window.location.href = 'chat-interno.html';
-                        });
+                        };
 
-                        chatsList.appendChild(item);
-                    });
+                        container.appendChild(row);
+                    }, { onlyOnce: true });
                 });
-                primerCarga = false;
             });
         }
     </script>
