@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kinetic - Conversación</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,14 +17,28 @@
             font-family: 'Urbanist', sans-serif;
         }
 
-        body {
+        /* DISEÑO RESPONSIVO PARA ASEGURAR QUE TODO QUEPA EN LA PANTALLA */
+        html, body {
             background-color: #0d0616;
             color: #ffffff;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Contenedor maestro: en laptops se centra como un teléfono premium, en celular ocupa todo */
+        .app-chat-wrapper {
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            height: -webkit-fill-available; 
-            overflow: hidden;
+            width: 100%;
+            max-width: 600px; /* Evita que en laptops se deforme estirándose a los lados */
+            height: 100%;
+            background-color: #0d0616;
+            border-left: 1px solid rgba(61, 28, 99, 0.3);
+            border-right: 1px solid rgba(61, 28, 99, 0.3);
+            position: relative;
         }
 
         /* CABECERA DEL CHAT */
@@ -49,13 +63,18 @@
             margin-right: 5px;
         }
 
+        .header-avatar-container {
+            position: relative;
+            margin-right: 12px;
+        }
+
         .header-avatar {
             width: 45px;
             height: 45px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #ff00ff;
-            margin-right: 12px;
+            display: block;
         }
 
         .header-user-info {
@@ -82,15 +101,31 @@
             color: #a094b8;
         }
 
-        /* ÁREA DE MENSAJES */
+        /* SOLUCIÓN AL SCROLL: El contenedor tiene tamaño flexible pero estricto */
         .messages-container {
-            flex-grow: 1;
+            flex: 1 1 auto; /* Ocupa todo el espacio intermedio disponible */
             padding: 20px 15px;
-            overflow-y: auto;
+            overflow-y: scroll; /* Fuerza la barra espaciadora / scroll táctil */
+            -webkit-overflow-scrolling: touch; /* Scroll ultra suave en celulares */
             display: flex;
             flex-direction: column;
             gap: 12px;
             background: radial-gradient(circle at top right, rgba(138, 43, 226, 0.05), transparent);
+        }
+
+        /* Estilizar barra de scroll para laptops y PCs (Estilo Cyberpunk fino) */
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages-container::-webkit-scrollbar-track {
+            background: #0d0616;
+        }
+        .messages-container::-webkit-scrollbar-thumb {
+            background: #3d1c63;
+            border-radius: 10px;
+        }
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: #ff00ff;
         }
 
         /* BURBUJAS DE MENSAJE */
@@ -103,19 +138,14 @@
         .msg-row.them { justify-content: flex-start; }
 
         .msg-bubble {
-            max-width: 75%;
+            max-width: 80%;
             padding: 12px 16px;
             border-radius: 20px;
             font-size: 15px;
             line-height: 1.4;
             position: relative;
-            cursor: pointer;
-            transition: transform 0.2s;
+            word-wrap: break-word; /* Evita que textos largos rompan la burbuja */
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .msg-bubble:active {
-            transform: scale(0.97);
         }
 
         .msg-row.me .msg-bubble {
@@ -143,63 +173,13 @@
             color: #796699;
         }
 
-        /* RENDERIZADO MULTIMEDIA */
-        .msg-media {
-            max-width: 100%;
-            border-radius: 12px;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        /* ESTRUCTURA DE RESPUESTA EN BURBUJA */
-        .reply-box-in-bubble {
-            background: rgba(0, 0, 0, 0.2);
-            border-left: 3px solid #00f2ff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 12px;
-            color: #00f2ff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* BARRA INFERIOR DE ENTRADA CORREGIDA */
+        /* BARRA INFERIOR FIJA */
         .chat-input-area {
             background-color: #12091f;
             border-top: 1px solid #25123e;
             padding: 12px 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex-shrink: 0;
+            flex-shrink: 0; /* Impide que la barra se encoja o se mueva */
             margin-bottom: env(safe-area-inset-bottom);
-        }
-
-        /* INDICADOR DE MENSAJE QUE ESTÁS RESPONDIENDO */
-        .reply-preview-bar {
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(61, 28, 99, 0.3);
-            border-left: 3px solid #ff00ff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-
-        .reply-preview-bar span {
-            color: #ff00ff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 85%;
-        }
-
-        .reply-preview-bar i {
-            color: #a094b8;
-            cursor: pointer;
         }
 
         .input-row {
@@ -208,18 +188,8 @@
             gap: 10px;
         }
 
-        .btn-media-trigger {
-            background: transparent;
-            border: none;
-            color: #00f2ff;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px;
-        }
-
         .input-wrapper {
             flex-grow: 1;
-            position: relative;
         }
 
         .chat-input {
@@ -250,82 +220,46 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
-        }
-
-        /* MENÚ CONTEXTUAL DE MENSAJE */
-        .msg-menu {
-            position: fixed;
-            background-color: #1a0b2e;
-            border: 1px solid #3d1c63;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: none;
-            z-index: 1000;
-            overflow: hidden;
-        }
-
-        .menu-option {
-            padding: 12px 20px;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #fff;
-        }
-
-        .menu-option:hover {
-            background-color: #3d1c63;
-        }
-
-        .menu-option.delete {
-            color: #ff0055;
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body>
 
-    <div class="chat-header">
-        <button class="btn-back" onclick="window.location.href='chats.html'">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <img id="headerAvatar" class="header-avatar" src="https://via.placeholder.com/150" alt="">
-        <div class="header-user-info">
-            <span id="headerName" class="user-name">---</span>
-            <span id="headerStatus" class="user-status offline"><i class="fa-solid fa-circle"></i> desconectado</span>
-        </div>
-    </div>
-
-    <div class="messages-container" id="msgContainer"></div>
-
-    <div class="chat-input-area">
-        <div class="reply-preview-bar" id="replyBar">
-            <span id="replyText">Respondiendo a...</span>
-            <i class="fa-solid fa-xmark" id="btnCancelReply"></i>
-        </div>
-
-        <div class="input-row">
-            <button class="btn-media-trigger" id="btnMedia" title="Enviar enlace multimedia">
-                <i class="fa-solid fa-paperclip"></i>
+    <div class="app-chat-wrapper">
+        
+        <div class="chat-header">
+            <button class="btn-back" onclick="window.location.href='chats.html'">
+                <i class="fa-solid fa-chevron-left"></i>
             </button>
-            <div class="input-wrapper">
-                <input type="text" id="inputMsg" class="chat-input" placeholder="Escribe un mensaje..." autocomplete="off">
+            <div class="header-avatar-container">
+                <img id="headerAvatar" class="header-avatar" src="https://via.placeholder.com/150" alt="Avatar">
             </div>
-            <button class="btn-send" id="btnSend">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
+            <div class="header-user-info">
+                <span id="headerName" class="user-name">---</span>
+                <span id="headerStatus" class="user-status offline"><i class="fa-solid fa-circle"></i> desconectado</span>
+            </div>
         </div>
-    </div>
 
-    <div class="msg-menu" id="msgMenu">
-        <div class="menu-option" id="optReply"><i class="fa-solid fa-reply"></i> Responder</div>
-        <div class="menu-option delete" id="optDelete"><i class="fa-solid fa-trash-can"></i> Eliminar para todos</div>
+        <div class="messages-container" id="msgContainer"></div>
+
+        <div class="chat-input-area">
+            <div class="input-row">
+                <div class="input-wrapper">
+                    <input type="text" id="inputMsg" class="chat-input" placeholder="Escribe un mensaje..." autocomplete="off">
+                </div>
+                <button class="btn-send" id="btnSend">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, push, set, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
@@ -344,24 +278,10 @@
         const targetUserId = localStorage.getItem('selected_user_id');
         let currentUid = null;
         let chatId = null;
-        
-        let selectedMsgId = null;
-        let selectedMsgText = "";
-        let activeReplyId = null;
-
-        const soundSend = new Audio("https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav");
-        const soundRec = new Audio("https://assets.mixkit.co/active_storage/sfx/866/866-84.wav");
-        soundSend.volume = 0.4;
-        soundRec.volume = 0.4;
 
         const msgContainer = document.getElementById('msgContainer');
         const inputMsg = document.getElementById('inputMsg');
         const btnSend = document.getElementById('btnSend');
-        const btnMedia = document.getElementById('btnMedia');
-        const replyBar = document.getElementById('replyBar');
-        const replyText = document.getElementById('replyText');
-        const btnCancelReply = document.getElementById('btnCancelReply');
-        const msgMenu = document.getElementById('msgMenu');
 
         onAuthStateChanged(auth, (user) => {
             if (!user || !targetUserId) {
@@ -371,8 +291,6 @@
                 chatId = currentUid < targetUserId ? `${currentUid}_${targetUserId}` : `${targetUserId}_${currentUid}`;
                 cargarDatosCabecera();
                 escucharMensajes();
-                
-                // Limpiar marcador de no leído al entrar a la sala
                 update(ref(db, `chats/${chatId}/lastInfo`), { unreadTarget: "" });
             }
         });
@@ -394,23 +312,13 @@
             });
         }
 
-        function checkEsMedia(url) {
-            if (typeof url !== 'string') return null;
-            const limpia = url.split('?')[0].toLowerCase();
-            if (limpia.match(/\.(jpeg|jpg|gif|png|webp)/) != null) return 'img';
-            if (limpia.match(/\.(mp4|webm|ogg|mov)/) != null) return 'video';
-            return null;
-        }
-
         function escucharMensajes() {
-            let primerCarga = true;
             onValue(ref(db, `chats/${chatId}/messages`), (snap) => {
                 msgContainer.innerHTML = '';
                 const mData = snap.val();
 
                 if (!mData) {
-                    msgContainer.innerHTML = `<div style="text-align:center; color:#796699; margin-top:20px;">Dí hola... sin timidez 💬</div>`;
-                    primerCarga = false;
+                    msgContainer.innerHTML = `<div style="text-align:center; color:#796699; margin-top:20px;">Dí hola... 💬</div>`;
                     return;
                 }
 
@@ -421,43 +329,16 @@
 
                     const bubble = document.createElement('div');
                     bubble.className = 'msg-bubble';
-                    
-                    let replyHTML = "";
-                    if (m.replyToText) {
-                        replyHTML = `<div class="reply-box-in-bubble"><i class="fa-solid fa-reply"></i> ${m.replyToText}</div>`;
-                    }
-
-                    const tipoMedia = checkEsMedia(m.text);
-                    let cuerpoMensaje = `<span class="text-content">${m.text}</span>`;
-                    
-                    if (tipoMedia === 'img') {
-                        cuerpoMensaje = `<img class="msg-media" src="${m.text}" alt="Imagen">`;
-                    } else if (tipoMedia === 'video') {
-                        cuerpoMensaje = `<video class="msg-media" src="${m.text}" controls></video>`;
-                    }
 
                     const hora = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    bubble.innerHTML = `${replyHTML}${cuerpoMensaje}<span class="msg-time">${hora}</span>`;
-
-                    bubble.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        abrirMenuMensaje(e, mId, m.text, m.sender);
-                    });
+                    bubble.innerHTML = `<span>${m.text}</span><span class="msg-time">${hora}</span>`;
 
                     row.appendChild(bubble);
                     msgContainer.appendChild(row);
                 }
 
+                // Autoscroll inmediato al recibir o cargar mensajes
                 msgContainer.scrollTop = msgContainer.scrollHeight;
-
-                if (!primerCarga) {
-                    const keys = Object.keys(mData);
-                    const ultimoMsg = mData[keys[keys.length - 1]];
-                    if (ultimoMsg.sender !== currentUid) {
-                        soundRec.play().catch(e => console.log(e));
-                    }
-                }
-                primerCarga = false;
             });
         }
 
@@ -468,69 +349,22 @@
             const msgRef = ref(db, `chats/${chatId}/messages`);
             const nuevoMsgRef = push(msgRef);
 
-            const paqueteMsg = {
+            set(nuevoMsgRef, {
                 sender: currentUid,
                 text: texto,
                 timestamp: Date.now()
-            };
-
-            if (activeReplyId) {
-                paqueteMsg.replyToId = activeReplyId;
-                paqueteMsg.replyToText = selectedMsgText;
-            }
-
-            set(nuevoMsgRef, paqueteMsg).then(() => {
+            }).then(() => {
                 set(ref(db, `chats/${chatId}/lastInfo`), {
                     text: texto,
                     timestamp: Date.now(),
                     unreadTarget: targetUserId
                 });
-
                 inputMsg.value = '';
-                soundSend.play().catch(e => console.log(e));
-                cancelarRespuesta();
             });
         }
 
         btnSend.addEventListener('click', enviarMensaje);
         inputMsg.addEventListener('keypress', (e) => { if (e.key === 'Enter') enviarMensaje(); });
-
-        btnMedia.addEventListener('click', () => {
-            const url = prompt("Pega el enlace directo (.jpg, .png, .mp4) de tu foto o video:");
-            if (url && url.trim()) {
-                inputMsg.value = url.trim();
-                enviarMensaje();
-            }
-        });
-
-        function abrirMenuMensaje(e, mId, texto, sender) {
-            selectedMsgId = mId;
-            selectedMsgText = texto;
-            const optDelete = document.getElementById('optDelete');
-            optDelete.style.display = (sender === currentUid) ? 'flex' : 'none';
-
-            msgMenu.style.top = `${e.clientY}px`;
-            msgMenu.style.left = `${Math.min(e.clientX, window.innerWidth - 160)}px`;
-            msgMenu.style.display = 'block';
-        }
-
-        document.addEventListener('click', () => { msgMenu.style.display = 'none'; });
-
-        document.getElementById('optReply').addEventListener('click', () => {
-            activeReplyId = selectedMsgId;
-            replyText.innerText = `Respondiendo a: "${selectedMsgText}"`;
-            replyBar.style.display = 'flex';
-            inputMsg.focus();
-        });
-
-        function cancelarRespuesta() { activeReplyId = null; replyBar.style.display = 'none'; }
-        btnCancelReply.addEventListener('click', cancelarRespuesta);
-
-        document.getElementById('optDelete').addEventListener('click', () => {
-            if (confirm("¿Quieres eliminar este mensaje para todos?")) {
-                remove(ref(db, `chats/${chatId}/messages/${selectedMsgId}`));
-            }
-        });
     </script>
 </body>
 </html>
