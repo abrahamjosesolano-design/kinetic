@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetic - Detalle del Perfil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Urbanist', sans-serif;
+        }
+
+        body {
+            background-color: #0d0616;
+            color: #ffffff;
+            min-height: 100vh;
+            padding-bottom: 30px;
+        }
+
+        /* BOTÓN VOLVER ARRIBA */
+        .header-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+
+        .btn-back {
+            background: rgba(18, 9, 31, 0.7);
+            border: 1px solid #25123e;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 18px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* FOTO PRINCIPAL GIGANTE */
+        .profile-hero {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: #1a0b2e;
+        }
+
+        .profile-hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, #0d0616 0%, rgba(13, 6, 22, 0) 100%);
+            padding: 30px 20px 10px 20px;
+        }
+
+        .main-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-name {
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .badge-online {
+            width: 12px;
+            height: 12px;
+            background-color: #00ff66;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff66;
+            display: none;
+        }
+
+        .profile-distance {
+            color: #00f2ff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* CONTENIDO DEL PERFIL */
+        .profile-content {
+            padding: 20px;
+        }
+
+        .bio-section {
+            background: rgba(37, 18, 62, 0.2);
+            border: 1px solid #25123e;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            font-size: 15px;
+            line-height: 1.5;
+            color: #e2daf0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ff00ff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ÁLBUM MULTIMEDIA (REJILLA DE FOTOS ADICIONALES) */
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .album-item {
+            aspect-ratio: 1 / 1;
+            background-color: #1a0b2e;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #25123e;
+            cursor: pointer;
+        }
+
+        .album-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* BOTÓN DE ACCIÓN FLOTANTE / FIJO ABAJO */
+        .action-container {
+            padding: 0 20px;
+            margin-top: 10px;
+        }
+
+        .btn-chat {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #8a2be2, #ff00ff);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(255, 0, 255, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .btn-chat:active {
+            transform: scale(0.98);
+        }
+
+        .error-msg {
+            text-align: center;
+            padding: 50px 20px;
+            color: #a094b8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-nav">
+        <div class="btn-back" onclick="window.location.href='radar.html'">
+            <i class="fa-solid fa-arrow-left"></i>
+        </div>
+    </div>
+
+    <div id="profileView" style="display: none;">
+        <div class="profile-hero">
+            <img id="mainPhoto" src="" alt="Foto de perfil">
+            <div class="hero-overlay">
+                <div class="main-info">
+                    <span class="profile-name" id="profileName">---</span>
+                    <div class="badge-online" id="statusBadge"></div>
+                </div>
+                <div class="profile-distance" id="profileDistance">Calculando distancia...</div>
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <div class="section-title"><i class="fa-solid fa-user-tag"></i> Sobre mí</div>
+            <div class="bio-section" id="profileBio">Sin descripción disponible.</div>
+
+            <div class="section-title"><i class="fa-solid fa-images"></i> Álbum de Fotos</div>
+            <div class="album-grid" id="albumGrid"></div>
+
+            <div class="action-container">
+                <button class="btn-chat" id="btnOpenChat">
+                    <i class="fa-solid fa-comment-dots"></i> ENVIAR MENSAJE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingView" class="error-msg">Cargando perfil seleccionado...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+            authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+            projectId: "kinetic-app-67ae5",
+            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+            messagingSenderId: "825570718975",
+            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const targetUserId = localStorage.getItem('selected_user_id');
+
+        // Candado de seguridad
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            } else {
+                if (!targetUserId) {
+                    window.location.href = "radar.html";
+                } else {
+                    cargarDatosPerfil(user.uid);
+                }
+            }
+        });
+
+        // Función Haversine repetida para calcular de nuevo la distancia exacta desde la perspectiva actual
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function formatDistancia(km) {
+            if (km < 1) return `${Math.round(km * 1000)} m`;
+            return `${km.toFixed(1)} km`;
+        }
+
+        function cargarDatosPerfil(myUid) {
+            // 1. Obtener la ubicación del usuario actual primero
+            onValue(ref(db, `users/${myUid}`), (mySnap) => {
+                const me = mySnap.val() || {};
+
+                // 2. Obtener los datos del usuario objetivo
+                onValue(ref(db, `users/${targetUserId}`), (targetSnap) => {
+                    const target = targetSnap.val();
+                    
+                    if (!target) {
+                        document.getElementById('loadingView').innerText = "El usuario ya no existe.";
+                        return;
+                    }
+
+                    // Ocultar pantalla de carga y mostrar contenedor de perfil
+                    document.getElementById('loadingView').style.display = 'none';
+                    document.getElementById('profileView').style.display = 'block';
+
+                    // Llenar datos básicos
+                    document.getElementById('profileName').innerText = `${target.nombre || 'Anónimo'}, ${target.edad || ''}`;
+                    document.getElementById('profileBio').innerText = target.bio || 'Sin descripción disponible por el momento.';
+                    
+                    if (target.online) {
+                        document.getElementById('statusBadge').style.display = 'block';
+                    } else {
+                        document.getElementById('statusBadge').style.display = 'none';
+                    }
+
+                    // Calcular distancia real en vivo
+                    if (me.lat && me.lng && target.lat && target.lng) {
+                        const km = calcularDistancia(me.lat, me.lng, target.lat, target.lng);
+                        document.getElementById('profileDistance').innerText = `A ${formatDistancia(km)} de ti`;
+                    } else {
+                        document.getElementById('profileDistance').innerText = "Ubicación no disponible";
+                    }
+
+                    // Cargar Álbum Multimedia
+                    const albumGrid = document.getElementById('albumGrid');
+                    albumGrid.innerHTML = '';
+
+                    const fotos = target.album || [];
+                    
+                    // Si tiene fotos, la primera va al Hero principal, las demás a la rejilla inferior
+                    if (fotos.length > 0) {
+                        document.getElementById('mainPhoto').src = fotos[0];
+                        
+                        fotos.forEach((fotoUrl, index) => {
+                            const box = document.createElement('div');
+                            box.className = 'album-item';
+                            box.innerHTML = `<img src="${fotoUrl}" alt="Foto ${index + 1}">`;
+                            
+                            // Al tocar una miniatura, se convierte en la foto principal arriba
+                            box.addEventListener('click', () => {
+                                document.getElementById('mainPhoto').src = fotoUrl;
+                            });
+                            albumGrid.appendChild(box);
+                        });
+                    } else {
+                        // Foto por defecto si no tiene álbum
+                        document.getElementById('mainPhoto').src = 'https://via.placeholder.com/400/1a0b2e/fff?text=Kinetic';
+                    }
+
+                    // Configurar el botón de chat
+                    document.getElementById('btnOpenChat').onclick = () => {
+                        // Lógica para saltar a la pantalla de chat directo
+                        window.location.href = 'chat-interno.html';
+                    };
+                });
+            });
+        }
+    </script>
+</body>
+</html>
