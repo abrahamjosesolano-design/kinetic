@@ -3,192 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Radar</title>
+    <title>Kinetic - Mosaico</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Urbanist', sans-serif;
-        }
-
-        body {
-            background-color: #0d0616;
-            color: #ffffff;
-            min-height: 100vh;
-            padding-top: 70px;
-            padding-bottom: 80px;
-        }
-
-        /* BARRA SUPERIOR */
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background-color: #12091f;
-            border-bottom: 1px solid #25123e;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(90deg, #00f2ff, #ff00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-        }
-
-        /* MOSAICO / GRID */
-        .radar-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 3px;
-            padding: 3px;
-        }
-
-        .grid-item {
-            position: relative;
-            aspect-ratio: 1 / 1;
-            background-color: #12091f;
-            overflow: hidden;
-            cursor: pointer;
-            border: 1px solid rgba(61, 28, 99, 0.3);
-        }
-
-        .grid-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .grid-item:hover img {
-            transform: scale(1.05);
-        }
-
-        /* CAPA NEÓN INFERIOR */
-        .item-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 25px 8px 6px 8px;
-            background: linear-gradient(transparent, rgba(13, 6, 22, 0.95));
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            pointer-events: none;
-        }
-
-        .info-left {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            overflow: hidden;
-            width: 70%;
-        }
-
-        .info-name {
-            font-size: 13px;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-        }
-
-        .info-distance {
-            font-size: 10px;
-            color: #00f2ff;
-            font-weight: 600;
-            text-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
-        }
-
-        /* INDICADOR ONLINE */
-        .online-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #00ff66;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #00ff66;
-            margin-bottom: 3px;
-            flex-shrink: 0;
-        }
-
-        /* MENSAJES DE ESTADO */
-        .status-msg {
-            text-align: center;
-            padding: 50px 20px;
-            color: #a094b8;
-            font-size: 15px;
-        }
-
-        .status-msg i {
-            font-size: 35px;
-            color: #ff00ff;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        /* BARRA DE NAVEGACIÓN UNIFICADA */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 65px;
-            background-color: #12091f;
-            border-top: 1px solid #25123e;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #796699;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 600;
-            gap: 4px;
-            cursor: pointer;
-            flex: 1;
-            padding: 10px 0;
-        }
-
-        .nav-item.active {
-            color: #00f2ff;
-        }
-
-        .nav-item i {
-            font-size: 20px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
+        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; padding-top: 70px; padding-bottom: 80px; display: flex; justify-content: center; }
+        .top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background-color: #12091f; border-bottom: 1px solid #25123e; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 100; }
+        .bar-title { font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #00f2ff, #ff00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .radar-container { width: 100%; max-width: 600px; padding: 10px; }
+        .mosaic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .mosaic-card { position: relative; aspect-ratio: 1 / 1; background-color: #12091f; border-radius: 16px; overflow: hidden; border: 1px solid rgba(61, 28, 99, 0.3); cursor: pointer; }
+        .mosaic-card img { width: 100%; height: 100%; object-fit: cover; }
+        .card-info { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 10px 10px 10px; background: linear-gradient(transparent, rgba(13, 6, 22, 0.95)); display: flex; flex-direction: column; gap: 2px; }
+        .info-name { font-size: 15px; font-weight: 700; color: #fff; }
+        .info-meta { font-size: 12px; color: #00f2ff; font-weight: 600; }
+        .empty-msg { text-align: center; padding: 50px 20px; color: #796699; font-size: 16px; }
+        
+        /* NAV BAR */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #12091f; border-top: 1px solid #25123e; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #796699; text-decoration: none; font-size: 11px; font-weight: 600; gap: 4px; cursor: pointer; flex: 1; padding: 10px 0; }
+        .nav-item.active { color: #00f2ff; }
+        .nav-item i { font-size: 20px; transition: all 0.3s ease; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div class="logo">KINETIC</div>
+        <div class="bar-title">Kinetic</div>
     </div>
 
-    <div id="radarContainer">
-        <div class="status-msg" id="radarState"><i class="fa-solid fa-satellite-dish fa-spin"></i>Calculando tu posición neón...</div>
-        <div class="radar-grid" id="radarGrid"></div>
+    <div class="radar-container">
+        <div class="mosaic-grid" id="gridMosaico">
+            <div class="empty-msg">Buscando usuarios cerca...</div>
+        </div>
     </div>
 
     <div class="nav-bar">
@@ -213,7 +64,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
@@ -229,138 +80,81 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        let userLocation = null;
-        let misDatos = {};
-        const radarGrid = document.getElementById('radarGrid');
-        const radarState = document.getElementById('radarState');
+        const grid = document.getElementById('gridMosaico');
 
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "index.html";
             } else {
-                initGeolocalizacion(user.uid);
+                cargarMosaico(user.uid);
+                activarNotificacionesGlobales(user.uid);
             }
         });
 
-        function initGeolocalizacion(uid) {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition((position) => {
-                    userLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    ejecutarActualizacionPosicion(uid);
-                }, (error) => {
-                    console.warn("GPS fallido, usando ubicación de respaldo (Maracaibo).");
-                    userLocation = { lat: 10.6447, lng: -71.6106 };
-                    ejecutarActualizacionPosicion(uid);
-                }, { enableHighAccuracy: true, timeout: 5000 });
-            } else {
-                userLocation = { lat: 10.6447, lng: -71.6106 };
-                ejecutarActualizacionPosicion(uid);
-            }
-        }
-
-        function ejecutarActualizacionPosicion(uid) {
-            update(ref(db, `users/${uid}`), {
-                lat: userLocation.lat,
-                lng: userLocation.lng,
-                online: true,
-                lastActive: Date.now()
-            });
-            obtenerDatosUsuarioActual(uid);
-        }
-
-        function obtenerDatosUsuarioActual(uid) {
-            onValue(ref(db, `users/${uid}`), (snapshot) => {
-                misDatos = snapshot.val() || {};
-                escucharTodosLosUsuarios();
-            }, { onlyOnce: true });
-        }
-
-        // Fórmula matemática Haversine para calcular distancias esféricas reales
-        function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
-        function escucharTodosLosUsuarios() {
+        function cargarMosaico(miUid) {
             onValue(ref(db, 'users'), (snapshot) => {
-                radarGrid.innerHTML = '';
-                const usuarios = snapshot.val();
-                let listaFiltrada = [];
-
-                if (!usuarios) {
-                    radarState.innerHTML = "No hay perfiles neón en el área.";
+                const users = snapshot.val();
+                if (!users) {
+                    grid.innerHTML = `<div class="empty-msg">No hay más usuarios registrados.</div>`;
                     return;
                 }
 
-                for (let uid in usuarios) {
-                    if (uid === auth.currentUser.uid) continue; // Saltarme a mí mismo
+                grid.innerHTML = '';
+                let cont = 0;
 
-                    const u = usuarios[uid];
-                    if (!u.lat || !u.lng) continue; // Saltar usuarios sin coordenadas
+                for (let uId in users) {
+                    if (uId === miUid) continue;
+                    const u = users[uId];
+                    cont++;
 
-                    // Filtros dinámicos mutuos
-                    const miGenero = misDatos.genero || 'Todos';
-                    const loQueBusco = misDatos.busca || 'Todos';
-                    const suGenero = u.genero || 'Todos';
-                    const loQueBuscaSuya = u.busca || 'Todos';
-
-                    const yoLoAcepto = (loQueBusco === 'Todos' || loQueBusco === suGenero);
-                    const elMeAcepta = (loQueBuscaSuya === 'Todos' || loQueBuscaSuya === miGenero);
-
-                    if (yoLoAcepto && elMeAcepta) {
-                        const dist = calcularDistanciaKm(userLocation.lat, userLocation.lng, u.lat, u.lng);
-                        listaFiltrada.push({ uid: uid, info: u, distancia: dist });
-                    }
-                }
-
-                if (listaFiltrada.length === 0) {
-                    radarState.style.display = 'block';
-                    radarState.innerHTML = `<i class="fa-solid fa-circle-user"></i>No hay perfiles compatibles cerca.<br>Revisa los filtros en "Mi Perfil".`;
-                    return;
-                }
-
-                radarState.style.display = 'none';
-                
-                // Ordenar del más cercano al más lejano
-                listaFiltrada.sort((a, b) => a.distancia - b.distancia);
-
-                listaFiltrada.forEach(p => {
-                    const item = document.createElement('div');
-                    item.className = 'grid-item';
-
-                    const fotoUrl = (p.info.album && p.info.album.length > 0) ? p.info.album[0] : 'https://via.placeholder.com/150';
+                    const foto = (u.album && u.album.length > 0) ? u.album[0] : 'https://via.placeholder.com/300?text=Kinetic';
                     
-                    let visualDistancia = p.distancia < 1 
-                        ? `${Math.round(p.distancia * 1000)} m` 
-                        : `${p.distancia.toFixed(1)} km`;
-
-                    item.innerHTML = `
-                        <img src="${fotoUrl}" alt="${p.info.nombre}">
-                        <div class="item-info">
-                            <div class="info-left">
-                                <span class="info-name">${p.info.nombre || 'Anónimo'}</span>
-                                <span class="info-distance">${visualDistancia}</span>
-                            </div>
-                            ${p.info.online ? '<div class="online-dot"></div>' : ''}
+                    const card = document.createElement('div');
+                    card.className = 'mosaic-card';
+                    card.innerHTML = `
+                        <img src="${foto}">
+                        <div class="card-info">
+                            <span class="info-name">${u.nombre || 'Usuario Kinetic'}${u.edad ? ', ' + u.edad : ''}</span>
+                            <span class="info-meta">${u.genero || 'Definir'}</span>
                         </div>
                     `;
 
-                    item.addEventListener('click', () => {
-                        localStorage.setItem('selected_user_id', p.uid);
+                    card.onclick = () => {
+                        localStorage.setItem('selected_user_id', uId);
                         window.location.href = 'perfil-detalle.html';
-                    });
+                    };
 
-                    radarGrid.appendChild(item);
-                });
+                    grid.appendChild(card);
+                }
+
+                if (cont === 0) {
+                    grid.innerHTML = `<div class="empty-msg">No hay otros usuarios disponibles.</div>`;
+                }
+            });
+        }
+
+        function activarNotificacionesGlobales(miUid) {
+            onValue(ref(db, 'chats'), (snapshot) => {
+                const listaChats = snapshot.val();
+                let alertarMensajeNuevo = false;
+
+                for (let idChat in listaChats) {
+                    if (idChat.includes(miUid) && listaChats[idChat].lastInfo?.unreadTarget === miUid) {
+                        alertarMensajeNuevo = true;
+                        break;
+                    }
+                }
+
+                const iconoMensajeria = document.querySelector('.nav-item i.fa-comment');
+                if (iconoMensajeria) {
+                    if (alertarMensajeNuevo) {
+                        iconoMensajeria.style.color = '#ff00ff';
+                        iconoMensajeria.style.filter = 'drop-shadow(0 0 8px #ff00ff)';
+                    } else {
+                        iconoMensajeria.style.color = '';
+                        iconoMensajeria.style.filter = '';
+                    }
+                }
             });
         }
     </script>
