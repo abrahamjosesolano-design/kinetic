@@ -33,14 +33,13 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ---------- HEADER ---------- */
         .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 1rem;
             background: var(--card-bg);
-            border-bottom: 1px solid rgba(255, 0, 255, 0.3);
+            border-bottom: 1px solid rgba(255,0,255,0.3);
             position: sticky;
             top: 0;
             z-index: 10;
@@ -52,10 +51,9 @@
             font-weight: 700;
             color: var(--neon);
             text-shadow: 0 0 8px var(--neon);
-            letter-spacing: 1px;
         }
         .back-btn {
-            background: rgba(255, 0, 255, 0.2);
+            background: rgba(255,0,255,0.2);
             border: none;
             color: var(--text);
             font-size: 1.4rem;
@@ -67,9 +65,8 @@
             justify-content: center;
             transition: background 0.3s;
         }
-        .back-btn:active { background: rgba(255, 0, 255, 0.5); }
+        .back-btn:active { background: rgba(255,0,255,0.5); }
 
-        /* ---------- LISTA DE CHATS ---------- */
         .chat-list {
             flex: 1;
             overflow-y: auto;
@@ -77,16 +74,10 @@
             scrollbar-width: thin;
             scrollbar-color: var(--neon) var(--bg);
         }
-        .chat-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .chat-list::-webkit-scrollbar-track {
-            background: var(--bg);
-        }
-        .chat-list::-webkit-scrollbar-thumb {
-            background: var(--neon);
-            border-radius: 2px;
-        }
+        .chat-list::-webkit-scrollbar { width: 4px; }
+        .chat-list::-webkit-scrollbar-track { background: var(--bg); }
+        .chat-list::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 2px; }
+
         .chat-row {
             display: flex;
             align-items: center;
@@ -98,7 +89,7 @@
             cursor: pointer;
             transition: background 0.2s, transform 0.2s;
             position: relative;
-            border: 1px solid rgba(255, 0, 255, 0.15);
+            border: 1px solid rgba(255,0,255,0.15);
         }
         .chat-row:active {
             background: #1e1030;
@@ -111,7 +102,7 @@
             overflow: hidden;
             flex-shrink: 0;
             border: 2px solid var(--neon);
-            box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+            box-shadow: 0 0 8px rgba(255,0,255,0.4);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -155,10 +146,8 @@
             border-radius: 50%;
             background: var(--neon);
             box-shadow: 0 0 12px var(--neon);
-            flex-shrink: 0;
         }
 
-        /* ---------- BARRA DE NAVEGACIÓN INFERIOR ---------- */
         .bottom-nav {
             display: flex;
             justify-content: space-around;
@@ -185,9 +174,7 @@
             color: var(--neon);
             text-shadow: 0 0 6px var(--neon);
         }
-        .nav-item i {
-            font-size: 1.4rem;
-        }
+        .nav-item i { font-size: 1.4rem; }
         .badge-counter {
             position: absolute;
             top: -6px;
@@ -207,7 +194,6 @@
             line-height: 1;
         }
 
-        /* ---------- ESTADOS VACÍOS ---------- */
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
@@ -219,54 +205,41 @@
             margin-bottom: 1rem;
             text-shadow: 0 0 12px var(--neon);
         }
-        .empty-state h3 {
-            margin: 0.5rem 0;
-            color: var(--text);
-        }
+        .empty-state h3 { margin: 0.5rem 0; color: var(--text); }
     </style>
 </head>
 <body>
-
-    <!-- HEADER -->
     <div class="header">
         <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i></button>
         <h2>Mensajes</h2>
         <div style="width:40px;"></div>
     </div>
 
-    <!-- LISTA DE CHATS -->
     <div class="chat-list" id="chatListContainer">
         <p style="text-align:center; padding:2rem; color:var(--text-secondary);">Cargando conversaciones...</p>
     </div>
 
-    <!-- BARRA DE NAVEGACIÓN INFERIOR -->
     <div class="bottom-nav">
         <div class="nav-item" onclick="window.location.href='index.html'">
-            <i class="fas fa-satellite"></i>
-            <span>Radar</span>
+            <i class="fas fa-satellite"></i><span>Radar</span>
         </div>
         <div class="nav-item" onclick="window.location.href='myProfile.html'">
-            <i class="fas fa-user"></i>
-            <span>Perfil</span>
+            <i class="fas fa-user"></i><span>Perfil</span>
         </div>
         <div class="nav-item active" id="navChats">
-            <i class="fas fa-comment"></i>
-            <span>Chats</span>
+            <i class="fas fa-comment"></i><span>Chats</span>
             <span class="badge-counter" id="globalBadge" style="display:none;">0</span>
         </div>
         <div class="nav-item" onclick="window.location.href='settings.html'">
-            <i class="fas fa-cog"></i>
-            <span>Ajustes</span>
+            <i class="fas fa-cog"></i><span>Ajustes</span>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-        // Configuración OBLIGATORIA
         const firebaseConfig = {
             apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
             authDomain: "kinetic-app-67ae5.firebaseapp.com",
@@ -283,18 +256,15 @@
 
         const globalBadge = document.getElementById('globalBadge');
         const chatListContainer = document.getElementById('chatListContainer');
-        const defaultAvatarSVG = `<svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;background:#12091f;border-radius:50%;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>`;
+        const defaultAvatarSVG = `<svg viewBox="0 0 24 24" fill="none" style="width:50px;height:50px;stroke:#ff00ff;stroke-width:1.5;background:#12091f;border-radius:50%;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>`;
 
-        // Verificar autenticación
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'index.html';
                 return;
             }
-
             const miUid = user.uid;
             const chatsRef = ref(db, 'chats');
-
             onValue(chatsRef, async (snapshot) => {
                 chatListContainer.innerHTML = '';
                 let totalUnread = 0;
@@ -328,7 +298,6 @@
                     const isUnread = (unreadTarget === miUid);
                     if (isUnread) totalUnread++;
 
-                    // Obtener perfil del otro usuario
                     const promise = get(ref(db, 'users/' + targetUid)).then(userSnap => {
                         let targetName = 'Usuario de Kinetic';
                         let targetPhoto = null;
@@ -344,28 +313,17 @@
                             }
                         }
 
-                        let avatarHTML = '';
-                        if (targetPhoto) {
-                            avatarHTML = `<img src="${targetPhoto}" alt="${targetName}" onerror="this.style.display='none';this.parentElement.innerHTML='${defaultAvatarSVG.replace(/'/g, "\\'")}';">`;
-                        } else {
-                            avatarHTML = defaultAvatarSVG;
-                        }
+                        let avatarHTML = targetPhoto ? 
+                            `<img src="${targetPhoto}" alt="${targetName}" onerror="this.style.display='none';this.parentElement.innerHTML='${defaultAvatarSVG.replace(/'/g, "\\'")}';">` :
+                            defaultAvatarSVG;
 
-                        return {
-                            targetUid,
-                            targetName,
-                            avatarHTML,
-                            online: targetOnline,
-                            lastMessage,
-                            isUnread
-                        };
+                        return { targetUid, targetName, avatarHTML, online: targetOnline, lastMessage, isUnread };
                     });
-
                     processPromises.push(promise);
                 }
 
                 const results = await Promise.all(processPromises);
-                results.sort((a, b) => b.lastMessage.localeCompare(a.lastMessage)); // Orden simple
+                results.sort((a, b) => b.lastMessage.localeCompare(a.lastMessage));
 
                 if (results.length === 0) {
                     chatListContainer.innerHTML = `
@@ -379,10 +337,7 @@
                         <div class="chat-row" data-target="${row.targetUid}">
                             <div class="avatar-container">${row.avatarHTML}</div>
                             <div class="chat-info">
-                                <div class="chat-name">
-                                    ${row.targetName}
-                                    ${row.online ? '<span class="online-dot"></span>' : ''}
-                                </div>
+                                <div class="chat-name">${row.targetName} ${row.online ? '<span class="online-dot"></span>' : ''}</div>
                                 <div class="last-message">${row.lastMessage}</div>
                             </div>
                             ${row.isUnread ? '<span class="badge-new-msg"></span>' : ''}
@@ -392,12 +347,11 @@
                     document.querySelectorAll('.chat-row').forEach(row => {
                         row.addEventListener('click', function() {
                             const target = this.getAttribute('data-target');
-                            window.location.href = 'chat.html?id=' + target;
+                            window.location.href = 'chat-interno.html?id=' + target;
                         });
                     });
                 }
 
-                // Actualizar contador global
                 if (totalUnread > 0) {
                     globalBadge.textContent = totalUnread > 99 ? '99+' : totalUnread;
                     globalBadge.style.display = 'flex';
