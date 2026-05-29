@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetic - Conversación</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Urbanist', sans-serif;
+        }
+
+        body {
+            background-color: #0d0616;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* CABECERA DEL CHAT */
+        .chat-header {
+            height: 70px;
+            background-color: #12091f;
+            border-bottom: 1px solid #25123e;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .btn-back {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px;
+            margin-right: 5px;
+        }
+
+        .header-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ff00ff;
+            margin-right: 12px;
+        }
+
+        .header-user-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .user-name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: #00ff66;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 2px;
+        }
+
+        .user-status.offline {
+            color: #a094b8;
+        }
+
+        /* ÁREA DE MENSAJES */
+        .messages-container {
+            flex-grow: 1;
+            padding: 20px 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: radial-gradient(circle at top right, rgba(138, 43, 226, 0.05), transparent);
+        }
+
+        /* BURBUJAS DE MENSAJE */
+        .msg-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .msg-row.me { justify-content: flex-end; }
+        .msg-row.them { justify-content: flex-start; }
+
+        .msg-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .msg-bubble:active {
+            transform: scale(0.97);
+        }
+
+        .msg-row.me .msg-bubble {
+            background: linear-gradient(135deg, #8a2be2, #ff00ff);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .msg-row.them .msg-bubble {
+            background-color: #1a0b2e;
+            color: #e2daf0;
+            border-bottom-left-radius: 5px;
+            border: 1px solid #25123e;
+        }
+
+        .msg-time {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: right;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .msg-row.them .msg-time {
+            color: #796699;
+        }
+
+        /* RENDERIZADO MULTIMEDIA */
+        .msg-media {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* ESTRUCTURA DE RESPUESTA EN BURBUJA */
+        .reply-box-in-bubble {
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 3px solid #00f2ff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #00f2ff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* BARRA INFERIOR DE ENTRADA */
+        .chat-input-area {
+            background-color: #12091f;
+            border-top: 1px solid #25123e;
+            padding: 10px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* INDICADOR DE MENSAJE QUE ESTÁS RESPONDIENDO */
+        .reply-preview-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(61, 28, 99, 0.3);
+            border-left: 3px solid #ff00ff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .reply-preview-bar span {
+            color: #ff00ff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 85%;
+        }
+
+        .reply-preview-bar i {
+            color: #a094b8;
+            cursor: pointer;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-media-trigger {
+            background: transparent;
+            border: none;
+            color: #00f2ff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .input-wrapper {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 14px 20px;
+            background-color: #0d0616;
+            border: 1px solid #3d1c63;
+            border-radius: 25px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #ff00ff;
+        }
+
+        .btn-send {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff00ff, #8a2be2);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+
+        /* MENÚ CONTEXTUAL DE MENSAJE (BORRAR/RESPONDER) */
+        .msg-menu {
+            position: fixed;
+            background-color: #1a0b2e;
+            border: 1px solid #3d1c63;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .menu-option {
+            padding: 12px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+        }
+
+        .menu-option:hover {
+            background-color: #3d1c63;
+        }
+
+        .menu-option.delete {
+            color: #ff0055;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-header">
+        <button class="btn-back" onclick="window.location.href='radar.html'">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <img id="headerAvatar" class="header-avatar" src="https://via.placeholder.com/150" alt="">
+        <div class="header-user-info">
+            <span id="headerName" class="user-name">---</span>
+            <span id="headerStatus" class="user-status offline"><i class="fa-solid fa-circle"></i> desconectado</span>
+        </div>
+    </div>
+
+    <div class="messages-container" id="msgContainer"></div>
+
+    <div class="chat-input-area">
+        <div class="reply-preview-bar" id="replyBar">
+            <span id="replyText">Respondiendo a...</span>
+            <i class="fa-solid fa-xmark" id="btnCancelReply"></i>
+        </div>
+
+        <div class="input-row">
+            <button class="btn-media-trigger" id="btnMedia" title="Enviar enlace multimedia">
+                <i class="fa-solid fa-paperclip"></i>
+            </button>
+            <div class="input-wrapper">
+                <input type="text" id="inputMsg" class="chat-input" placeholder="Escribe un mensaje o pega URL de foto/video..." autocomplete="off">
+            </div>
+            <button class="btn-send" id="btnSend">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="msg-menu" id="msgMenu">
+        <div class="menu-option" id="optReply"><i class="fa-solid fa-reply"></i> Responder</div>
+        <div class="menu-option delete" id="optDelete"><i class="fa-solid fa-trash-can"></i> Eliminar para todos</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+            authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+            projectId: "kinetic-app-67ae5",
+            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+            messagingSenderId: "825570718975",
+            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const targetUserId = localStorage.getItem('selected_user_id');
+        let currentUid = null;
+        let chatId = null;
+        
+        let selectedMsgId = null;
+        let selectedMsgText = "";
+        let activeReplyId = null;
+
+        // Efectos de sonido nativos (URLs estables CDN de sonidos limpios)
+        const soundSend = new Audio("https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav");
+        const soundRec = new Audio("https://assets.mixkit.co/active_storage/sfx/866/866-84.wav");
+        soundSend.volume = 0.4;
+        soundRec.volume = 0.4;
+
+        const msgContainer = document.getElementById('msgContainer');
+        const inputMsg = document.getElementById('inputMsg');
+        const btnSend = document.getElementById('btnSend');
+        const btnMedia = document.getElementById('btnMedia');
+        
+        const replyBar = document.getElementById('replyBar');
+        const replyText = document.getElementById('replyText');
+        const btnCancelReply = document.getElementById('btnCancelReply');
+        const msgMenu = document.getElementById('msgMenu');
+
+        // Candado
+        onAuthStateChanged(auth, (user) => {
+            if (!user || !targetUserId) {
+                window.location.href = "index.html";
+            } else {
+                currentUid = user.uid;
+                // Generar ID único combinado alfabéticamente (id1_id2) para evitar duplicación de salas
+                chatId = currentUid < targetUserId ? `${currentUid}_${targetUserId}` : `${targetUserId}_${currentUid}`;
+                cargarDatosCabecera();
+                escucharMensajes();
+            }
+        });
+
+        function cargarDatosCabecera() {
+            onValue(ref(db, `users/${targetUserId}`), (snap) => {
+                const data = snap.val() || {};
+                document.getElementById('headerName').innerText = data.nombre || "Anónimo";
+                document.getElementById('headerAvatar').src = (data.album && data.album.length > 0) ? data.album[0] : 'https://via.placeholder.com/150';
+                
+                const statusStr = document.getElementById('headerStatus');
+                if (data.online) {
+                    statusStr.className = "user-status";
+                    statusStr.innerHTML = `<i class="fa-solid fa-circle"></i> en línea`;
+                } else {
+                    statusStr.className = "user-status offline";
+                    statusStr.innerHTML = `<i class="fa-solid fa-circle"></i> desconectado`;
+                }
+            });
+        }
+
+        // Detectar si una cadena de texto es una URL de imagen o video
+        function checkEsMedia(url) {
+            if (typeof url !== 'string') return null;
+            const limpia = url.split('?')[0].toLowerCase();
+            if (limpia.match(/\.(jpeg|jpg|gif|png|webp)/) != null) return 'img';
+            if (limpia.match(/\.(mp4|webm|ogg|mov)/) != null) return 'video';
+            return null;
+        }
+
+        function escucharMensajes() {
+            let primerCarga = true;
+            onValue(ref(db, `chats/${chatId}/messages`), (snap) => {
+                msgContainer.innerHTML = '';
+                const mData = snap.val();
+
+                if (!mData) {
+                    msgContainer.innerHTML = `<div style="text-align:center; color:#796699; margin-top:20px; font-size:14px;">Dí hola... sin timidez 💬</div>`;
+                    primerCarga = false;
+                    return;
+                }
+
+                for (let mId in mData) {
+                    const m = mData[mId];
+                    const row = document.createElement('div');
+                    row.className = m.sender === currentUid ? 'msg-row me' : 'msg-row them';
+
+                    const bubble = document.createElement('div');
+                    bubble.className = 'msg-bubble';
+                    
+                    // Lógica si es una respuesta fijada
+                    let replyHTML = "";
+                    if (m.replyToText) {
+                        replyHTML = `<div class="reply-box-in-bubble"><i class="fa-solid fa-reply"></i> ${m.replyToText}</div>`;
+                    }
+
+                    // Evaluar si el texto es un enlace multimedia
+                    const tipoMedia = checkEsMedia(m.text);
+                    let cuerpoMensaje = `<span class="text-content">${m.text}</span>`;
+                    
+                    if (tipoMedia === 'img') {
+                        cuerpoMensaje = `<img class="msg-media" src="${m.text}" alt="Imagen enviada">`;
+                    } else if (tipoMedia === 'video') {
+                        cuerpoMensaje = `<video class="msg-media" src="${m.text}" controls></video>`;
+                    }
+
+                    const hora = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    bubble.innerHTML = `${replyHTML}${cuerpoMensaje}<span class="msg-time">${hora}</span>`;
+
+                    // Guardar ID en el elemento para interactuar con el menú de opciones al hacer clic
+                    bubble.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        abrirMenuMensaje(e, mId, m.text, m.sender);
+                    });
+
+                    row.appendChild(bubble);
+                    msgContainer.appendChild(row);
+                }
+
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+
+                // Solo suena el audio de recepción si NO es la carga inicial de mensajes viejos
+                if (!primerCarga) {
+                    // Obtener el último mensaje enviado para verificar el sender
+                    const keys = Object.keys(mData);
+                    const ultimoMsg = mData[keys[keys.length - 1]];
+                    if (ultimoMsg.sender !== currentUid) {
+                        soundRec.play().catch(e => console.log("Permiso audio requerido"));
+                    }
+                }
+                primerCarga = false;
+            });
+        }
+
+        // Función para enviar mensaje
+        function enviarMensaje() {
+            const texto = inputMsg.value.trim();
+            if (!texto) return;
+
+            const msgRef = ref(db, `chats/${chatId}/messages`);
+            const nuevoMsgRef = push(msgRef);
+
+            const paqueteMsg = {
+                sender: currentUid,
+                text: texto,
+                timestamp: Date.now()
+            };
+
+            // Si hay una respuesta activa, añadirla al paquete del mensaje
+            if (activeReplyId) {
+                paqueteMsg.replyToId = activeReplyId;
+                paqueteMsg.replyToText = selectedMsgText;
+            }
+
+            set(nuevoMsgRef, paqueteMsg).then(() => {
+                inputMsg.value = '';
+                soundSend.play().catch(e => console.log("Permiso audio requerido"));
+                cancelarRespuesta();
+            });
+        }
+
+        btnSend.addEventListener('click', enviarMensaje);
+        inputMsg.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') enviarMensaje();
+        });
+
+        // Botón clip multimedia flotante (Agrega un prompt sencillo para facilitar el envío de URLs)
+        btnMedia.addEventListener('click', () => {
+            const url = prompt("Pega el enlace directo (.jpg, .png, .mp4) de tu foto o video:");
+            if (url && url.trim()) {
+                inputMsg.value = url.trim();
+                enviarMensaje();
+            }
+        });
+
+        /* --- SISTEMA DE MENÚ CONTEXTUAL (BORRAR Y RESPONDER) --- */
+        function abrirMenuMensaje(e, mId, texto, sender) {
+            selectedMsgId = mId;
+            selectedMsgText = texto;
+
+            // Mostrar u ocultar la opción de eliminar (Grindr/Telegram te permite borrar los tuyos)
+            const optDelete = document.getElementById('optDelete');
+            if (sender === currentUid) {
+                optDelete.style.display = 'flex';
+            } else {
+                optDelete.style.display = 'none'; // No puedes borrar mensajes de otros
+            }
+
+            msgMenu.style.top = `${e.clientY}px`;
+            msgMenu.style.left = `${Math.min(e.clientX, window.innerWidth - 160)}px`;
+            msgMenu.style.display = 'block';
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', () => {
+            msgMenu.style.display = 'none';
+        });
+
+        // Acción: Configurar Respuesta (Fijar arriba de la barra de texto)
+        document.getElementById('optReply').addEventListener('click', () => {
+            activeReplyId = selectedMsgId;
+            replyText.innerText = `Respondiendo a: "${selectedMsgText}"`;
+            replyBar.style.display = 'flex';
+            inputMsg.focus();
+        });
+
+        function cancelarRespuesta() {
+            activeReplyId = null;
+            replyBar.style.display = 'none';
+        }
+
+        btnCancelReply.addEventListener('click', cancelarRespuesta);
+
+        // Acción: Eliminar mensaje para ambos en tiempo real
+        document.getElementById('optDelete').addEventListener('click', () => {
+            if (confirm("¿Quieres eliminar este mensaje para todos?")) {
+                remove(ref(db, `chats/${chatId}/messages/${selectedMsgId}`));
+            }
+        });
+    </script>
+</body>
+</html>
