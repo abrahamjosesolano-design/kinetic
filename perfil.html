@@ -1,139 +1,1027 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Mi Perfil</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0616" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Kinetic · Mi Perfil</title>
 
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
-        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; padding-top: 30px; padding-bottom: 80px; display: flex; justify-content: center; }
-        .my-profile-container { width: 100%; max-width: 500px; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .avatar-frame { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #00f2ff; object-fit: cover; margin-bottom: 15px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); }
-        .my-title { font-size: 22px; font-weight: 800; margin-bottom: 25px; color: #fff; }
-        .form-box { width: 100%; background: #12091f; border: 1px solid #25123e; padding: 20px; border-radius: 16px; display: flex; flex-direction: column; gap: 15px; }
-        .info-label { font-size: 13px; color: #ff00ff; font-weight: 700; text-transform: uppercase; }
-        .info-value { font-size: 16px; color: #e2daf0; background-color: #0d0616; padding: 12px; border-radius: 10px; border: 1px solid rgba(61, 28, 99, 0.5); }
-        .btn-logout { margin-top: 25px; width: 100%; padding: 14px; background: linear-gradient(135deg, #3d1c63, #12091f); border: 1px solid #ff0055; border-radius: 12px; color: #ff0055; font-weight: 700; cursor: pointer; text-align: center; }
-        
-        /* NAV BAR */
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #12091f; border-top: 1px solid #25123e; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #796699; text-decoration: none; font-size: 11px; font-weight: 600; gap: 4px; cursor: pointer; flex: 1; padding: 10px 0; }
-        .nav-item.active { color: #00f2ff; }
-        .nav-item i { font-size: 20px; transition: all 0.3s ease; }
-    </style>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* ══════════════════════════════════════════
+       DESIGN TOKENS
+    ══════════════════════════════════════════ */
+    :root {
+      --bg:           #0d0616;
+      --bg-s:         #130920;
+      --bg-card:      #1a0f2e;
+      --bg-input:     #110820;
+      --purple:       #8a2be2;
+      --purple-hi:    #a020f0;
+      --magenta:      #ff00ff;
+      --cyan:         #00f2ff;
+      --green:        #39ff14;
+      --red:          #ff2255;
+      --text:         #ede0ff;
+      --text-2:       #a090c0;
+      --text-3:       #5c4a80;
+      --border:       rgba(138,43,226,.22);
+      --border-hi:    rgba(160,32,240,.55);
+      --nav-h:        66px;
+      --r:            14px;
+      --r-sm:         8px;
+      --grad:         linear-gradient(135deg,#8a2be2 0%,#ff00ff 100%);
+      --glow-p:       0 0 18px rgba(138,43,226,.65);
+      --glow-m:       0 0 18px rgba(255,0,255,.55);
+      --glow-c:       0 0 14px rgba(0,242,255,.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Urbanist', sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
+
+    /* ══════════════════════════════════════════
+       GRID LINES BG
+    ══════════════════════════════════════════ */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(138,43,226,.045) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.045) 40px);
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 45% at 15% 10%, rgba(138,43,226,.18) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 38% at 85% 85%, rgba(255,0,255,.12) 0%, transparent 60%);
+    }
+
+    /* ══════════════════════════════════════════
+       PAGE WRAPPER
+    ══════════════════════════════════════════ */
+    #page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-h) + 24px);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ══════════════════════════════════════════
+       HERO HEADER
+    ══════════════════════════════════════════ */
+    .hero {
+      position: relative;
+      height: 220px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #1a0f2e 0%, #0d0616 100%);
+    }
+    .hero-blur-bg {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+      filter: blur(28px) brightness(.35) saturate(1.4);
+      transform: scale(1.1);
+      transition: background-image .4s;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(13,6,22,.2) 0%, rgba(13,6,22,.85) 75%, #0d0616 100%);
+    }
+    .hero-content {
+      position: absolute;
+      bottom: 22px; left: 22px; right: 22px;
+      display: flex; align-items: flex-end; gap: 18px;
+    }
+
+    /* Avatar */
+    #myAvatar {
+      position: relative;
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    #myAvatar img {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      border: 3px solid transparent;
+      background-clip: padding-box;
+      box-shadow: 0 0 0 3px rgba(138,43,226,.7), var(--glow-p);
+      transition: box-shadow .25s;
+    }
+    #myAvatar:hover img { box-shadow: 0 0 0 3px rgba(255,0,255,.8), var(--glow-m); }
+    #myAvatar .av-ph {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 3px solid rgba(138,43,226,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      box-shadow: var(--glow-p);
+    }
+    .av-edit-badge {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 22px; height: 22px;
+      background: var(--grad);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem;
+      color: #fff;
+      box-shadow: 0 0 8px rgba(255,0,255,.7);
+      pointer-events: none;
+    }
+
+    .hero-info { flex: 1; min-width: 0; }
+    .hero-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: .06em;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 8px rgba(138,43,226,.7));
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .hero-sub {
+      font-size: .82rem; font-weight: 500;
+      color: var(--text-2); margin-top: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .online-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 6px;
+      padding: 3px 10px;
+      background: rgba(57,255,20,.1);
+      border: 1px solid rgba(57,255,20,.3);
+      border-radius: 20px;
+      font-size: .7rem; font-weight: 700;
+      color: var(--green);
+      letter-spacing: .05em;
+    }
+    .online-pill::before {
+      content: ''; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse-g 1.8s infinite;
+    }
+    @keyframes pulse-g {
+      0%,100% { box-shadow: 0 0 4px var(--green); }
+      50%      { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION WRAPPER
+    ══════════════════════════════════════════ */
+    .section {
+      margin: 20px 16px 0;
+      background: rgba(26,15,46,.65);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      animation: fadeUp .35s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .section:nth-child(2) { animation-delay: .04s; }
+    .section:nth-child(3) { animation-delay: .08s; }
+    .section:nth-child(4) { animation-delay: .12s; }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid rgba(138,43,226,.12);
+    }
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: .62rem; font-weight: 600;
+      letter-spacing: .2em;
+      color: var(--text-3);
+      text-transform: uppercase;
+    }
+    .section-body { padding: 16px 18px; }
+
+    /* ══════════════════════════════════════════
+       FORM FIELDS
+    ══════════════════════════════════════════ */
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      font-size: .72rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'Urbanist', sans-serif;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--purple-hi);
+      box-shadow: 0 0 0 3px rgba(160,32,240,.18), var(--glow-p);
+      background: rgba(17,8,32,.95);
+    }
+    .field select option { background: #1a0f2e; color: var(--text); }
+    .field textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
+
+    .field-row { display: flex; gap: 10px; }
+    .field-row .field { flex: 1; }
+
+    /* Custom select arrow */
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a2be2' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    /* ══════════════════════════════════════════
+       SAVE BUTTON
+    ══════════════════════════════════════════ */
+    .btn-save {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+      padding: 13px;
+      background: var(--grad);
+      border: none; border-radius: var(--r-sm);
+      color: #fff;
+      font-family: 'Orbitron', monospace;
+      font-size: .82rem; font-weight: 700;
+      letter-spacing: .12em;
+      cursor: pointer;
+      box-shadow: var(--glow-p);
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+      position: relative; overflow: hidden;
+      margin-top: 6px;
+    }
+    .btn-save::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.14) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .btn-save:hover { transform: translateY(-1px); box-shadow: var(--glow-m); }
+    .btn-save:active { transform: scale(.98); opacity: .9; }
+    .btn-save:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    /* ══════════════════════════════════════════
+       PHOTO ALBUM — 3 SLOTS
+    ══════════════════════════════════════════ */
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .album-slot {
+      aspect-ratio: 1;
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      background: var(--bg-input);
+      border: 1.5px dashed rgba(138,43,226,.35);
+      transition: border-color .2s, box-shadow .2s, transform .15s;
+    }
+    .album-slot:hover {
+      border-color: var(--purple-hi);
+      box-shadow: var(--glow-p);
+      transform: scale(1.02);
+    }
+    .album-slot img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .album-slot .slot-ph {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 6px;
+      color: var(--text-3);
+    }
+    .album-slot .slot-ph i { font-size: 1.4rem; }
+    .album-slot .slot-ph span { font-size: .68rem; font-weight: 600; letter-spacing: .08em; }
+
+    .album-slot .slot-overlay {
+      position: absolute; inset: 0;
+      background: rgba(13,6,22,.6);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity .2s;
+      backdrop-filter: blur(3px);
+    }
+    .album-slot:hover .slot-overlay { opacity: 1; }
+    .album-slot .slot-overlay i { font-size: 1.3rem; color: var(--magenta); }
+    .album-slot .slot-overlay span { font-size: .68rem; color: var(--text-2); font-weight: 600; }
+
+    .slot-index {
+      position: absolute; top: 5px; left: 5px;
+      background: rgba(13,6,22,.7);
+      border: 1px solid rgba(138,43,226,.35);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: .6rem; font-weight: 800;
+      color: var(--text-3);
+      letter-spacing: .05em;
+      backdrop-filter: blur(4px);
+    }
+    .slot-main-badge {
+      position: absolute; bottom: 5px; left: 5px;
+      background: var(--grad);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: .58rem; font-weight: 800;
+      color: #fff;
+      letter-spacing: .05em;
+    }
+
+    /* ══════════════════════════════════════════
+       STATS ROW
+    ══════════════════════════════════════════ */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+      padding: 16px 18px;
+    }
+    .stat-box {
+      background: rgba(13,6,22,.6);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 12px 8px;
+      text-align: center;
+    }
+    .stat-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.05rem; font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-lbl {
+      font-size: .62rem; font-weight: 600;
+      color: var(--text-3); text-transform: uppercase;
+      letter-spacing: .08em; margin-top: 3px;
+    }
+
+    /* ══════════════════════════════════════════
+       FEEDBACK TOAST
+    ══════════════════════════════════════════ */
+    #toast {
+      position: fixed; bottom: calc(var(--nav-h) + 18px); left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: rgba(19,9,32,.96);
+      border: 1px solid rgba(138,43,226,.5);
+      border-radius: var(--r-sm);
+      padding: 11px 20px;
+      font-size: .85rem; font-weight: 600;
+      color: var(--text);
+      box-shadow: var(--glow-p);
+      backdrop-filter: blur(14px);
+      z-index: 9999;
+      white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ══════════════════════════════════════════
+       BOTTOM NAV
+    ══════════════════════════════════════════ */
+    nav.bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(13,6,22,.97);
+      backdrop-filter: blur(22px);
+      border-top: 1px solid rgba(138,43,226,.2);
+      display: flex; align-items: stretch;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .nav-item {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 4px; cursor: pointer;
+      position: relative;
+      transition: opacity .2s;
+      text-decoration: none;
+    }
+    .nav-item:active { opacity: .65; }
+    .nav-item i {
+      font-size: 1.25rem;
+      color: var(--text-3);
+      transition: color .25s, filter .25s, transform .25s;
+    }
+    .nav-item span {
+      font-size: .6rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-3);
+      transition: color .25s;
+    }
+    .nav-item.active i { color: var(--purple-hi); filter: drop-shadow(0 0 5px rgba(160,32,240,.8)); transform: scale(1.15); }
+    .nav-item.active span { color: var(--purple-hi); }
+
+    /* Notification badge on nav */
+    .nav-badge {
+      position: absolute; top: 8px; left: 50%; margin-left: 2px;
+      min-width: 16px; height: 16px;
+      background: var(--magenta);
+      border: 2px solid #0d0616;
+      border-radius: 10px;
+      padding: 0 3px;
+      font-size: .58rem; font-weight: 900;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 8px rgba(255,0,255,.9);
+      animation: badgePop .3s cubic-bezier(.36,.07,.19,.97);
+    }
+    @keyframes badgePop {
+      0%   { transform: scale(0); }
+      70%  { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* Neon icon when messages pending */
+    .nav-item i.has-notif {
+      color: var(--magenta) !important;
+      filter: drop-shadow(0 0 7px rgba(255,0,255,.95)) !important;
+    }
+
+    /* ══════════════════════════════════════════
+       LOADING SHIMMER
+    ══════════════════════════════════════════ */
+    .shimmer {
+      background: linear-gradient(90deg, rgba(138,43,226,.08) 0%, rgba(138,43,226,.18) 50%, rgba(138,43,226,.08) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.6s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ══════════════════════════════════════════
+       MISC
+    ══════════════════════════════════════════ */
+    .auth-gate {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 60vh; gap: 14px;
+      color: var(--text-2); text-align: center; padding: 20px;
+    }
+    .auth-gate i { font-size: 3rem; color: var(--purple); opacity: .5; }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(138,43,226,.3), transparent);
+      margin: 0 18px;
+    }
+
+    /* Logout btn */
+    .btn-logout {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 12px;
+      background: rgba(255,34,85,.08);
+      border: 1px solid rgba(255,34,85,.25);
+      border-radius: var(--r-sm);
+      color: #ff4466; font-family: 'Urbanist', sans-serif;
+      font-size: .88rem; font-weight: 700; letter-spacing: .06em;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-logout:hover { background: rgba(255,34,85,.15); border-color: rgba(255,34,85,.5); }
+  </style>
 </head>
 <body>
 
-    <div class="my-profile-container">
-        <img id="myAvatar" class="avatar-frame" src="https://via.placeholder.com/150">
-        <h2 id="myProfileName" class="my-title">Cargando perfil...</h2>
+<!-- ══════════════════════════════════════════
+     PAGE
+══════════════════════════════════════════ -->
+<div id="page">
 
-        <div class="form-box">
-            <span class="info-label">Mi Bio</span>
-            <div id="myProfileBio" class="info-value">...</div>
-
-            <span class="info-label">Mi Edad</span>
-            <div id="myProfileAge" class="info-value">...</div>
-        </div>
-
-        <button class="btn-logout" id="btnLogoutAction">Cerrar Sesión</button>
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="hero-blur-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <!-- Avatar (slot 0) -->
+      <div id="myAvatar" title="Cambiar foto principal">
+        <div class="av-ph" id="avPh">👤</div>
+        <div class="av-edit-badge"><i class="fa-solid fa-camera"></i></div>
+      </div>
+      <div class="hero-info">
+        <div class="hero-name" id="heroName">···</div>
+        <div class="hero-sub" id="heroSub">···</div>
+        <div class="online-pill" id="onlinePill">EN LÍNEA</div>
+      </div>
     </div>
+  </div>
 
-    <div class="nav-bar">
-        <div class="nav-item" onclick="window.location.href='radar.html'">
-            <i class="fa-solid fa-border-all"></i>
-            <span>Mosaico</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='likes.html'">
-            <i class="fa-solid fa-heart"></i>
-            <span>Likes</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='chats.html'">
-            <i class="fa-solid fa-comment"></i>
-            <span>Chats</span>
-        </div>
-        <div class="nav-item active">
-            <i class="fa-solid fa-user"></i>
-            <span>Mi Perfil</span>
-        </div>
+  <!-- STATS -->
+  <div class="section" style="animation-delay:.0s">
+    <div class="stats-row" id="statsRow">
+      <div class="stat-box"><div class="stat-val shimmer" id="statAge" style="height:22px;width:70%;margin:0 auto"></div><div class="stat-lbl">Edad</div></div>
+      <div class="stat-box"><div class="stat-val shimmer" id="statGender" style="height:22px;width:70%;margin:0 auto"></div><div class="stat-lbl">Género</div></div>
+      <div class="stat-box"><div class="stat-val shimmer" id="statSeeking" style="height:22px;width:70%;margin:0 auto"></div><div class="stat-lbl">Busca</div></div>
     </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  <!-- EDIT INFO -->
+  <div class="section" style="animation-delay:.05s">
+    <div class="section-header">
+      <span class="section-title">Información de Perfil</span>
+      <i class="fa-solid fa-pen-to-square" style="color:var(--text-3);font-size:.85rem"></i>
+    </div>
+    <div class="section-body">
+      <div class="field">
+        <label>Nombre / Nickname</label>
+        <input type="text" id="fNombre" placeholder="Tu nombre..." maxlength="40" />
+      </div>
+      <div class="field">
+        <label>Biografía</label>
+        <textarea id="fBio" placeholder="Cuéntanos algo sobre ti..." maxlength="200"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Edad</label>
+          <input type="number" id="fEdad" placeholder="25" min="18" max="80" />
+        </div>
+        <div class="field">
+          <label>Género</label>
+          <select id="fGenero">
+            <option value="">Selecciona</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Busca</label>
+        <select id="fBusca">
+          <option value="">Selecciona</option>
+          <option value="Mujeres">Mujeres</option>
+          <option value="Hombres">Hombres</option>
+          <option value="Todos">Todos</option>
+        </select>
+      </div>
+      <button class="btn-save" id="btnSave" onclick="updateUserData()">
+        <i class="fa-solid fa-floppy-disk"></i> GUARDAR CAMBIOS
+      </button>
+    </div>
+  </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-            authDomain: "kinetic-app-67ae5.firebaseapp.com",
-            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-            projectId: "kinetic-app-67ae5",
-            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-            messagingSenderId: "825570718975",
-            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-        };
+  <!-- PHOTO ALBUM -->
+  <div class="section" style="animation-delay:.10s">
+    <div class="section-header">
+      <span class="section-title">Álbum de Fotos</span>
+      <span style="font-size:.7rem;color:var(--text-3)">Toca un slot para editar</span>
+    </div>
+    <div class="section-body">
+      <div class="album-grid" id="albumGrid">
+        <!-- 3 slots rendered by JS -->
+      </div>
+    </div>
+  </div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+  <!-- LOGOUT -->
+  <div class="section" style="animation-delay:.15s">
+    <div class="section-body">
+      <button class="btn-logout" id="btnLogout">
+        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+      </button>
+    </div>
+  </div>
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "index.html";
-            } else {
-                cargarMisDatos(user.uid);
-                activarNotificacionesGlobales(user.uid);
-            }
-        });
+</div><!-- /page -->
 
-        function cargarMisDatos(uid) {
-            onValue(ref(db, `users/${uid}`), (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
+<!-- TOAST -->
+<div id="toast"></div>
 
-                document.getElementById('myProfileName').innerText = data.nombre || "Usuario Kinetic";
-                document.getElementById('myProfileBio').innerText = data.bio || "No has añadido una descripción todavía.";
-                document.getElementById('myProfileAge').innerText = data.edad ? `${data.edad} años` : "No definida";
-                
-                if (data.album && data.album.length > 0) {
-                    document.getElementById('myAvatar').src = data.album[0];
-                }
-            });
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html" title="Radar">
+    <i class="fa-solid fa-location-crosshairs"></i>
+    <span>Radar</span>
+  </a>
+  <a class="nav-item" href="chats.html" title="Chats" id="navChats">
+    <i class="fa-solid fa-comment-dots" id="navChatIcon"></i>
+    <span>Chats</span>
+  </a>
+  <a class="nav-item active" href="perfil.html" title="Perfil">
+    <i class="fa-solid fa-user"></i>
+    <span>Perfil</span>
+  </a>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     FIREBASE SDK (v10 modular CDN)
+══════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getDatabase, ref, get, update, onValue, off
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+/* ─────────────────────────────────
+   FIREBASE CONFIG
+───────────────────────────────── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
+  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+  projectId:         "kinetic-app-67ae5",
+  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
+  messagingSenderId: "825570718975",
+  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth        = getAuth(firebaseApp);
+const db          = getDatabase(firebaseApp);
+
+/* ─────────────────────────────────
+   APP STATE
+───────────────────────────────── */
+let currentUser     = null;
+let currentData     = null;
+let albumState      = ['', '', ''];   // local 3-slot mirror
+let notifListener   = null;
+
+/* ─────────────────────────────────
+   TOAST HELPER
+───────────────────────────────── */
+let toastTimer = null;
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = isError ? `⚠️  ${msg}` : `✓  ${msg}`;
+  el.style.borderColor = isError ? 'rgba(255,34,85,.5)' : 'rgba(138,43,226,.5)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ─────────────────────────────────
+   INIT AUTH
+───────────────────────────────── */
+function initAuth() {
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      currentUser = user;
+      await fetchUserData();
+      listenGlobalNotifications();
+    } else {
+      // Not logged in — redirect or show message
+      document.getElementById('page').innerHTML =
+        `<div class="auth-gate"><i class="fa-solid fa-lock"></i><p>Debes iniciar sesión para ver tu perfil.</p><a href="index.html" style="color:var(--purple-hi);font-weight:700">← Ir al inicio</a></div>`;
+    }
+  });
+}
+
+/* ─────────────────────────────────
+   FETCH USER DATA (READ)
+───────────────────────────────── */
+async function fetchUserData() {
+  try {
+    const snap = await get(ref(db, `users/${currentUser.uid}`));
+    if (!snap.exists()) { showToast('No se encontraron datos de perfil.', true); return; }
+    currentData = snap.val();
+    albumState  = buildAlbumState(currentData.album);
+    populateUI(currentData);
+    renderAlbum();
+  } catch (err) {
+    showToast('Error al cargar el perfil.', true);
+    console.error('[fetchUserData]', err);
+  }
+}
+
+function buildAlbumState(rawAlbum) {
+  const arr = Array.isArray(rawAlbum) ? rawAlbum : [];
+  const result = ['', '', ''];
+  for (let i = 0; i < 3; i++) result[i] = arr[i] || '';
+  return result;
+}
+
+/* ─────────────────────────────────
+   POPULATE UI WITH DATA
+───────────────────────────────── */
+function populateUI(data) {
+  // Hero
+  setHeroName(data.nombre || data.name || '');
+  document.getElementById('heroSub').textContent =
+    [data.genero || data.gender, data.busca ? `Busca: ${data.busca}` : ''].filter(Boolean).join(' · ');
+
+  // Stats
+  setStatVal('statAge',     data.edad || data.age  || '—');
+  setStatVal('statGender',  data.genero || data.gender || '—');
+  setStatVal('statSeeking', data.busca  || data.seeking || '—');
+
+  // Form fields
+  setField('fNombre', data.nombre || data.name  || '');
+  setField('fBio',    data.bio    || '');
+  setField('fEdad',   data.edad   || data.age   || '');
+  setSelect('fGenero', data.genero || data.gender || '');
+  setSelect('fBusca',  data.busca  || data.seeking || '');
+}
+
+function setHeroName(name) {
+  document.getElementById('heroName').textContent = name || 'Sin nombre';
+}
+
+function setStatVal(id, val) {
+  const el = document.getElementById(id);
+  el.classList.remove('shimmer');
+  el.style.height = ''; el.style.width = ''; el.style.margin = '';
+  el.textContent = val;
+}
+
+function setField(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function setSelect(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  for (const opt of el.options) {
+    if (opt.value === val) { el.value = val; break; }
+  }
+}
+
+/* ─────────────────────────────────
+   UPDATE USER DATA (WRITE)
+───────────────────────────────── */
+window.updateUserData = async function() {
+  if (!currentUser) return;
+  const btn = document.getElementById('btnSave');
+
+  const nombre = document.getElementById('fNombre').value.trim();
+  const bio    = document.getElementById('fBio').value.trim();
+  const edad   = parseInt(document.getElementById('fEdad').value) || null;
+  const genero = document.getElementById('fGenero').value;
+  const busca  = document.getElementById('fBusca').value;
+
+  if (!nombre) { showToast('El nombre no puede estar vacío.', true); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+  // Clean album: filter empty strings
+  const cleanAlbum = albumState.filter(url => url.trim() !== '');
+
+  const payload = { nombre, bio, edad, genero, busca, album: cleanAlbum };
+
+  try {
+    await update(ref(db, `users/${currentUser.uid}`), payload);
+    currentData = { ...currentData, ...payload };
+    populateUI(currentData);
+    showToast('Perfil actualizado correctamente.');
+  } catch (err) {
+    showToast('Error al guardar. Intenta de nuevo.', true);
+    console.error('[updateUserData]', err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> GUARDAR CAMBIOS';
+  }
+};
+
+/* ─────────────────────────────────
+   ALBUM MANAGEMENT — 3 SLOTS
+───────────────────────────────── */
+function renderAlbum() {
+  const grid = document.getElementById('albumGrid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < 3; i++) {
+    const url    = albumState[i];
+    const slot   = document.createElement('div');
+    slot.className = 'album-slot';
+    slot.dataset.index = i;
+    slot.onclick = () => editSlot(i);
+
+    const indexBadge = `<div class="slot-index">0${i + 1}</div>`;
+    const mainBadge  = i === 0 ? `<div class="slot-main-badge">PRINCIPAL</div>` : '';
+    const overlay    = `<div class="slot-overlay"><i class="fa-solid fa-pen"></i><span>Editar</span></div>`;
+
+    if (url) {
+      slot.innerHTML = `
+        <img src="${escHtml(url)}" alt="Foto ${i+1}" onerror="this.parentElement.innerHTML=emptySlotHTML(${i})" />
+        ${indexBadge}${mainBadge}${overlay}
+      `;
+    } else {
+      slot.innerHTML = `
+        <div class="slot-ph">
+          <i class="fa-solid fa-plus"></i>
+          <span>Añadir</span>
+        </div>
+        ${indexBadge}${mainBadge}
+      `;
+    }
+    grid.appendChild(slot);
+  }
+
+  // Update avatar & hero bg from slot 0
+  syncMainPhoto(albumState[0]);
+}
+
+function editSlot(index) {
+  const current = albumState[index];
+  const newUrl  = prompt(
+    `Slot ${index + 1} — Ingresa la URL de la imagen:\n(Deja en blanco para eliminar)`,
+    current
+  );
+  if (newUrl === null) return; // cancelled
+
+  const trimmed = newUrl.trim();
+  albumState[index] = trimmed;
+
+  // If slot 0 changed, update main avatar immediately
+  if (index === 0) syncMainPhoto(trimmed);
+
+  renderAlbum();
+  autoSaveAlbum();
+}
+
+async function autoSaveAlbum() {
+  if (!currentUser) return;
+  const cleanAlbum = albumState.filter(url => url.trim() !== '');
+  try {
+    await update(ref(db, `users/${currentUser.uid}`), { album: cleanAlbum });
+    showToast('Foto actualizada.');
+  } catch (err) {
+    showToast('Error al guardar la foto.', true);
+  }
+}
+
+function syncMainPhoto(url) {
+  const avPh   = document.getElementById('avPh');
+  const heroEl = document.getElementById('myAvatar');
+  const heroBg = document.getElementById('heroBg');
+
+  // Remove any existing img inside avatar
+  const existingImg = heroEl.querySelector('img');
+  if (existingImg) existingImg.remove();
+
+  if (url) {
+    avPh.style.display = 'none';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'Avatar';
+    img.onerror = () => { img.remove(); avPh.style.display = 'flex'; };
+    heroEl.insertBefore(img, avPh);
+    heroBg.style.backgroundImage = `url('${url}')`;
+  } else {
+    avPh.style.display = 'flex';
+    heroBg.style.backgroundImage = '';
+  }
+}
+
+window.emptySlotHTML = function(i) {
+  return `<div class="slot-ph"><i class="fa-solid fa-plus"></i><span>Añadir</span></div>
+          <div class="slot-index">0${i + 1}</div>${i === 0 ? '<div class="slot-main-badge">PRINCIPAL</div>' : ''}`;
+};
+
+/* ─────────────────────────────────
+   GLOBAL NOTIFICATIONS LISTENER
+   (Recorre chats buscando unreadTarget === miUid)
+───────────────────────────────── */
+function listenGlobalNotifications() {
+  if (!currentUser) return;
+  const chatsRef = ref(db, 'chats');
+  const icon     = document.getElementById('navChatIcon');
+  const navItem  = document.getElementById('navChats');
+
+  if (notifListener) off(chatsRef);
+
+  notifListener = onValue(chatsRef, (snapshot) => {
+    let pendingCount = 0;
+
+    snapshot.forEach(chatSnap => {
+      const chatData = chatSnap.val();
+
+      // Strategy A: check lastInfo.unreadTarget field
+      if (chatData?.lastInfo?.unreadTarget === currentUser.uid) {
+        pendingCount++;
+        return; // forEach continue
+      }
+
+      // Strategy B: check participants to confirm we are in this chat,
+      // then count unread messages not sent by us that have unread: true
+      const participants = chatData?.participants || {};
+      if (!participants[currentUser.uid]) return;
+
+      const messages = chatData?.messages || {};
+      let hasUnread = false;
+      Object.values(messages).forEach(msg => {
+        if (msg.senderId !== currentUser.uid && msg.unread === true) {
+          hasUnread = true;
         }
+      });
+      if (hasUnread) pendingCount++;
+    });
 
-        function activarNotificacionesGlobales(miUid) {
-            onValue(ref(db, 'chats'), (snapshot) => {
-                const listaChats = snapshot.val();
-                let alertarMensajeNuevo = false;
+    updateNavBadge(pendingCount, icon, navItem);
+  });
+}
 
-                for (let idChat in listaChats) {
-                    if (idChat.includes(miUid) && listaChats[idChat].lastInfo?.unreadTarget === miUid) {
-                        alertarMensajeNuevo = true;
-                        break;
-                    }
-                }
+function updateNavBadge(count, iconEl, navItemEl) {
+  // Remove existing badge
+  const oldBadge = navItemEl.querySelector('.nav-badge');
+  if (oldBadge) oldBadge.remove();
 
-                const iconoMensajeria = document.querySelector('.nav-item i.fa-comment');
-                if (iconoMensajeria) {
-                    if (alertarMensajeNuevo) {
-                        iconoMensajeria.style.color = '#ff00ff';
-                        iconoMensajeria.style.filter = 'drop-shadow(0 0 8px #ff00ff)';
-                    } else {
-                        iconoMensajeria.style.color = '';
-                        iconoMensajeria.style.filter = '';
-                    }
-                }
-            });
-        }
+  if (count > 0) {
+    // Neon icon
+    iconEl.classList.add('has-notif');
+    // Create badge
+    const badge = document.createElement('div');
+    badge.className = 'nav-badge';
+    badge.textContent = count > 9 ? '9+' : count;
+    navItemEl.appendChild(badge);
+  } else {
+    iconEl.classList.remove('has-notif');
+  }
+}
 
-        document.getElementById('btnLogoutAction').addEventListener('click', () => {
-            signOut(auth).then(() => { window.location.href = "index.html"; });
-        });
-    </script>
+/* ─────────────────────────────────
+   LOGOUT
+───────────────────────────────── */
+document.getElementById('btnLogout').addEventListener('click', async () => {
+  const confirmed = confirm('¿Cerrar sesión?');
+  if (!confirmed) return;
+  try {
+    if (currentUser) {
+      await update(ref(db, `users/${currentUser.uid}`), { online: false });
+    }
+    await signOut(auth);
+    window.location.href = 'index.html';
+  } catch (err) {
+    showToast('Error al cerrar sesión.', true);
+  }
+});
+
+/* ─────────────────────────────────
+   HELPERS
+───────────────────────────────── */
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+/* ─────────────────────────────────
+   BOOT
+───────────────────────────────── */
+initAuth();
+renderAlbum(); // render empty slots immediately
+
+</script>
 </body>
 </html>
