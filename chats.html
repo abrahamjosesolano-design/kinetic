@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetic - Mensajes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Urbanist', sans-serif;
+        }
+
+        body {
+            background-color: #0d0616;
+            color: #ffffff;
+            min-height: 100vh;
+            padding-top: 70px;
+            padding-bottom: 80px;
+        }
+
+        /* BARRA SUPERIOR */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: #12091f;
+            border-bottom: 1px solid #25123e;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .bar-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        /* LISTA DE CONVERSACIONES */
+        .chats-list {
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(61, 28, 99, 0.15);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .chat-item:hover {
+            background-color: rgba(37, 18, 62, 0.2);
+        }
+
+        .avatar-container {
+            position: relative;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .chat-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #3d1c63;
+        }
+
+        .badge-online {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 13px;
+            height: 13px;
+            background-color: #00ff66;
+            border-radius: 50%;
+            border: 2px solid #0d0616;
+            box-shadow: 0 0 8px #00ff66;
+            display: none;
+        }
+
+        .chat-details {
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .chat-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-time {
+            font-size: 12px;
+            color: #796699;
+            flex-shrink: 0;
+        }
+
+        .chat-last-msg {
+            font-size: 14px;
+            color: #a094b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ESTADOS VACÍOS O CARGANDO */
+        .status-msg {
+            text-align: center;
+            padding: 50px 20px;
+            color: #a094b8;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .status-msg i {
+            font-size: 40px;
+            color: #3d1c63;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* BARRA DE NAVEGACIÓN INFERIOR */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 65px;
+            background-color: #12091f;
+            border-top: 1px solid #25123e;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #796699;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+            padding: 10px 0;
+        }
+
+        .nav-item.active {
+            color: #ff00ff;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="bar-title">Mensajes</div>
+    </div>
+
+    <div id="chatsContainer">
+        <div class="status-msg" id="statusState"><i class="fa-solid fa-spinner fa-spin"></i>Buscando tus conversaciones...</div>
+        <div class="chats-list" id="chatsList"></div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item" onclick="window.location.href='radar.html'">
+            <i class="fa-solid fa-border-all"></i>
+            <span>Mosaico</span>
+        </div>
+        <div class="nav-item active">
+            <i class="fa-solid fa-comment"></i>
+            <span>Chats</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='perfil.html'">
+            <i class="fa-solid fa-user"></i>
+            <span>Mi Perfil</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+            authDomain: "kinetic-app-67ae5.firebaseapp.com",
+            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+            projectId: "kinetic-app-67ae5",
+            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
+            messagingSenderId: "825570718975",
+            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const chatsList = document.getElementById('chatsList');
+        const statusState = document.getElementById('statusState');
+        let currentUid = null;
+
+        // Proteger ruta
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            } else {
+                currentUid = user.uid;
+                cargarBandejaEntrada();
+            }
+        });
+
+        function cargarBandejaEntrada() {
+            onValue(ref(db, 'chats'), (snapshot) => {
+                chatsList.innerHTML = '';
+                const todosLosChats = snapshot.val();
+
+                if (!todosLosChats) {
+                    statusState.style.display = 'block';
+                    statusState.innerHTML = `<i class="fa-solid fa-comments"></i>No tienes chats activos todavía.<br>¡Ve al mosaico y rompe el hielo!`;
+                    return;
+                }
+
+                let misChatsPromesas = [];
+
+                // Recorrer las salas existentes para filtrar las que me pertenecen
+                for (let cId in todosLosChats) {
+                    if (cId.includes(currentUid)) {
+                        const mensajesNodo = todosLosChats[cId].messages;
+                        if (!mensajesNodo) continue; // Si borraron todos los mensajes, saltar
+
+                        // Extraer los IDs de la sala unificada (id1_id2)
+                        const ids = cId.split('_');
+                        const targetId = ids[0] === currentUid ? ids[1] : ids[0];
+
+                        // Obtener el último mensaje cronológico
+                        const keys = Object.keys(mensajesNodo);
+                        const ultimoMsg = mensajesNodo[keys[keys.length - 1]];
+
+                        // Guardamos la info temporalmente para procesarla junto a los datos del perfil
+                        misChatsPromesas.push({
+                            targetId: targetId,
+                            lastText: ultimoMsg.text,
+                            timestamp: ultimoMsg.timestamp
+                        });
+                    }
+                }
+
+                if (misChatsPromesas.length === 0) {
+                    statusState.style.display = 'block';
+                    statusState.innerHTML = `<i class="fa-solid fa-comments"></i>No tienes chats activos todavía.<br>¡Ve al mosaico y rompe el hielo!`;
+                    return;
+                }
+
+                // Ordenar chats: el mensaje más reciente arriba
+                misChatsPromesas.sort((a, b) => b.timestamp - a.timestamp);
+                statusState.style.display = 'none';
+
+                // Renderizar cada chat trayendo la información del usuario del nodo /users/
+                misChatsPromesas.forEach(chatData => {
+                    onValue(ref(db, `users/${chatData.targetId}`), (userSnap) => {
+                        const uInfo = userSnap.val() || {};
+                        
+                        // Evitar duplicación si el elemento ya existe en el DOM por refresco en tiempo real
+                        const idExistente = document.getElementById(`item-${chatData.targetId}`);
+                        if (idExistente) idExistente.remove();
+
+                        const item = document.createElement('div');
+                        item.className = 'chat-item';
+                        item.id = `item-${chatData.targetId}`;
+
+                        const fotoUrl = (uInfo.album && uInfo.album.length > 0) ? uInfo.album[0] : 'https://via.placeholder.com/150';
+                        const horaStr = new Date(chatData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                        // Detectar si el último mensaje es un enlace multimedia para amoldar la vista previa
+                        let vistaPreviaTexto = chatData.lastText;
+                        if (typeof vistaPreviaTexto === 'string') {
+                            const limpia = vistaPreviaTexto.split('?')[0].toLowerCase();
+                            if (limpia.match(/\.(jpeg|jpg|gif|png|webp)/) != null) {
+                                vistaPreviaTexto = "📷 Foto enviada";
+                            } else if (limpia.match(/\.(mp4|webm|ogg|mov)/) != null) {
+                                vistaPreviaTexto = "🎥 Video enviado";
+                            }
+                        }
+
+                        item.innerHTML = `
+                            <div class="avatar-container">
+                                <img src="${fotoUrl}" class="chat-avatar" alt="${uInfo.nombre}">
+                                <div class="badge-online" id="online-${chatData.targetId}"></div>
+                            </div>
+                            <div class="chat-details">
+                                <div class="chat-meta">
+                                    <span class="chat-name">${uInfo.nombre || "Anónimo"}</span>
+                                    <span class="chat-time">${horaStr}</span>
+                                </div>
+                                <div class="chat-last-msg">${vistaPreviaTexto}</div>
+                            </div>
+                        `;
+
+                        // Activar punto verde online dinámicamente
+                        const badge = item.querySelector(`#online-${chatData.targetId}`);
+                        if (uInfo.online) {
+                            badge.style.display = 'block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+
+                        // Al tocar el chat, reconfigurar la variable global de destino y abrir la conversación
+                        item.addEventListener('click', () => {
+                            localStorage.setItem('selected_user_id', chatData.targetId);
+                            window.location.href = 'chat-interno.html';
+                        });
+
+                        chatsList.appendChild(item);
+                    });
+                });
+            });
+        }
+    </script>
+</body>
+</html>
