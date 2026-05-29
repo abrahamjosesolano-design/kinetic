@@ -10,164 +10,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Urbanist', sans-serif;
-        }
-
-        body {
-            background-color: #0d0616;
-            color: #ffffff;
-            min-height: 100vh;
-            padding-top: 70px;
-            padding-bottom: 80px;
-        }
-
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background-color: #12091f;
-            border-bottom: 1px solid #25123e;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 100;
-        }
-
-        .bar-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: #ff0055;
-            letter-spacing: 0.5px;
-        }
-
-        .likes-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding: 15px;
-        }
-
-        .like-card {
-            background: #12091f;
-            border: 1px solid #25123e;
-            border-radius: 15px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .like-img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-        }
-
-        .like-info {
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .like-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .btn-msg {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            background: linear-gradient(90deg, #ff0055, #8a2be2);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-            transition: opacity 0.2s;
-        }
-
-        .btn-msg:active {
-            opacity: 0.8;
-        }
-
-        .status-msg {
-            text-align: center;
-            padding: 60px 20px;
-            color: #a094b8;
-            font-size: 15px;
-            line-height: 1.5;
-        }
-
-        .status-msg i {
-            font-size: 45px;
-            color: #25123e;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        /* NAVBAR DE 4 BOTONES */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 65px;
-            background-color: #12091f;
-            border-top: 1px solid #25123e;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #796699;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 600;
-            gap: 4px;
-            cursor: pointer;
-            flex: 1;
-            padding: 10px 0;
-        }
-
-        .nav-item.active {
-            color: #ff0055;
-        }
-
-        .nav-item i {
-            font-size: 20px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
+        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; padding-top: 70px; padding-bottom: 80px; display: flex; justify-content: center; }
+        .top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background-color: #12091f; border-bottom: 1px solid #25123e; display: flex; align-items: center; padding: 0 20px; z-index: 100; }
+        .bar-title { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #ff0055, #ff00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .likes-container { width: 100%; max-width: 600px; padding: 15px; }
+        .likes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .like-card { position: relative; aspect-ratio: 1 / 1; background-color: #12091f; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 0, 85, 0.2); cursor: pointer; }
+        .like-card img { width: 100%; height: 100%; object-fit: cover; }
+        .like-card-info { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 10px 10px 10px; background: linear-gradient(transparent, rgba(13, 6, 22, 0.95)); }
+        .like-name { font-size: 15px; font-weight: 700; color: #fff; }
+        .empty-msg { text-align: center; padding: 60px 20px; color: #796699; font-size: 16px; }
+        
+        /* NAV BAR */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #12091f; border-top: 1px solid #25123e; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #796699; text-decoration: none; font-size: 11px; font-weight: 600; gap: 4px; cursor: pointer; flex: 1; padding: 10px 0; }
+        .nav-item.active { color: #00f2ff; }
+        .nav-item i { font-size: 20px; transition: all 0.3s ease; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div class="bar-title"><i class="fa-solid fa-heart-pulse"></i> Les Gustas</div>
+        <div class="bar-title">Te dieron Like</div>
     </div>
 
-    <div id="likesContainer">
-        <div class="status-msg" id="likesState"><i class="fa-solid fa-heart-crack"></i>Aún nadie te ha dado Like.<br>¡Mejora tu foto de perfil para llamar la atención! 😉</div>
-        <div class="likes-grid" id="likesGrid"></div>
+    <div class="likes-container">
+        <div class="likes-grid" id="gridLikes">
+            <div class="empty-msg">Cargando interacciones...</div>
+        </div>
     </div>
 
     <div class="nav-bar">
@@ -208,47 +79,73 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        const container = document.getElementById('gridLikes');
+
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "index.html";
             } else {
-                escucharLikesAdmiradores(user.uid);
+                cargarLikesRecibidos(user.uid);
+                activarNotificacionesGlobales(user.uid);
             }
         });
 
-        function escucharLikesAdmiradores(myUid) {
-            onValue(ref(db, `likes/${myUid}`), (snap) => {
-                const grid = document.getElementById('likesGrid');
-                const stateText = document.getElementById('likesState');
-                grid.innerHTML = '';
-                
-                const data = snap.val();
-                if (!data) {
-                    stateText.style.display = 'block';
+        function cargarLikesRecibidos(miUid) {
+            onValue(ref(db, `recibidos/${miUid}`), (snapshot) => {
+                const recibidos = snapshot.val();
+                if (!recibidos) {
+                    container.innerHTML = `<div class="empty-msg">Aún no tienes likes acumulados. ¡Sigue interactuando!</div>`;
                     return;
                 }
+
+                container.innerHTML = '';
                 
-                stateText.style.display = 'none';
-                
-                for (let fanId in data) {
-                    const card = document.createElement('div');
-                    card.className = 'like-card';
-                    const foto = data[fanId].foto || 'https://via.placeholder.com/150';
-                    
-                    card.innerHTML = `
-                        <img src="${foto}" class="like-img">
-                        <div class="like-info">
-                            <span class="like-name">${data[fanId].nombre}</span>
-                            <button class="btn-msg"><i class="fa-solid fa-message"></i> Chatear</button>
-                        </div>
-                    `;
-                    
-                    card.querySelector('.btn-msg').onclick = () => {
-                        localStorage.setItem('selected_user_id', fanId);
-                        window.location.href = 'chat-interno.html';
-                    };
-                    
-                    grid.appendChild(card);
+                for (let fanId in recibidos) {
+                    onValue(ref(db, `users/${fanId}`), (uSnap) => {
+                        const uData = uSnap.val() || {};
+                        const foto = (uData.album && uData.album.length > 0) ? uData.album[0] : 'https://via.placeholder.com/300';
+                        
+                        const card = document.createElement('div');
+                        card.className = 'like-card';
+                        card.innerHTML = `
+                            <img src="${foto}">
+                            <div class="like-card-info">
+                                <span class="like-name">${uData.nombre || 'Kinetic User'}</span>
+                            </div>
+                        `;
+
+                        card.onclick = () => {
+                            localStorage.setItem('selected_user_id', fanId);
+                            window.location.href = 'perfil-detalle.html';
+                        };
+
+                        container.appendChild(card);
+                    }, { onlyOnce: true });
+                }
+            });
+        }
+
+        function activarNotificacionesGlobales(miUid) {
+            onValue(ref(db, 'chats'), (snapshot) => {
+                const listaChats = snapshot.val();
+                let alertarMensajeNuevo = false;
+
+                for (let idChat in listaChats) {
+                    if (idChat.includes(miUid) && listaChats[idChat].lastInfo?.unreadTarget === miUid) {
+                        alertarMensajeNuevo = true;
+                        break;
+                    }
+                }
+
+                const iconoMensajeria = document.querySelector('.nav-item i.fa-comment');
+                if (iconoMensajeria) {
+                    if (alertarMensajeNuevo) {
+                        iconoMensajeria.style.color = '#ff00ff';
+                        iconoMensajeria.style.filter = 'drop-shadow(0 0 8px #ff00ff)';
+                    } else {
+                        iconoMensajeria.style.color = '';
+                        iconoMensajeria.style.filter = '';
+                    }
                 }
             });
         }
