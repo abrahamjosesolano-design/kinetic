@@ -1,154 +1,892 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Mis Likes</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0616" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Kinetic · Likes</title>
 
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
-        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; padding-top: 70px; padding-bottom: 80px; display: flex; justify-content: center; }
-        .top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background-color: #12091f; border-bottom: 1px solid #25123e; display: flex; align-items: center; padding: 0 20px; z-index: 100; }
-        .bar-title { font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #ff0055, #ff00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .likes-container { width: 100%; max-width: 600px; padding: 15px; }
-        .likes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .like-card { position: relative; aspect-ratio: 1 / 1; background-color: #12091f; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 0, 85, 0.2); cursor: pointer; }
-        .like-card img { width: 100%; height: 100%; object-fit: cover; }
-        .like-card-info { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 10px 10px 10px; background: linear-gradient(transparent, rgba(13, 6, 22, 0.95)); }
-        .like-name { font-size: 15px; font-weight: 700; color: #fff; }
-        .empty-msg { text-align: center; padding: 60px 20px; color: #796699; font-size: 16px; }
-        
-        /* NAV BAR */
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background-color: #12091f; border-top: 1px solid #25123e; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #796699; text-decoration: none; font-size: 11px; font-weight: 600; gap: 4px; cursor: pointer; flex: 1; padding: 10px 0; }
-        .nav-item.active { color: #00f2ff; }
-        .nav-item i { font-size: 20px; transition: all 0.3s ease; }
-    </style>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* ══════════════════════════════════════════
+       DESIGN TOKENS
+    ══════════════════════════════════════════ */
+    :root {
+      --bg:           #0d0616;
+      --bg-s:         #130920;
+      --bg-card:      #160c28;
+      --bg-card-hi:   #1e1035;
+      --purple:       #8a2be2;
+      --purple-hi:    #a020f0;
+      --magenta:      #ff00ff;
+      --fuchsia:      #ff0055;
+      --cyan:         #00f2ff;
+      --green:        #39ff14;
+      --text:         #ede0ff;
+      --text-2:       #a090c0;
+      --text-3:       #5c4a80;
+      --border:       rgba(138,43,226,.2);
+      --nav-h:        66px;
+      --r:            12px;
+      --r-sm:         8px;
+      --grad:         linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
+      --grad-fuchsia: linear-gradient(135deg, #ff0055 0%, #ff00ff 100%);
+      --glow-p:       0 0 18px rgba(138,43,226,.6);
+      --glow-m:       0 0 18px rgba(255,0,255,.55);
+      --glow-f:       0 0 14px rgba(255,0,85,.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Urbanist', sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
+
+    /* ── GRID LINES ATMOSPHERE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.04) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.04) 40px);
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 65% 42% at 10% 5%,  rgba(138,43,226,.17) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 35% at 90% 90%, rgba(255,0,85,.11)   0%, transparent 60%),
+        radial-gradient(ellipse 40% 28% at 70% 15%, rgba(0,242,255,.07)  0%, transparent 55%);
+    }
+
+    /* ══════════════════════════════════════════
+       PAGE WRAPPER
+    ══════════════════════════════════════════ */
+    #page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-h) + 24px);
+    }
+
+    /* ══════════════════════════════════════════
+       TOP BAR
+    ══════════════════════════════════════════ */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px;
+      background: rgba(13,6,22,.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,0,85,.15);
+    }
+    .topbar-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.2rem; font-weight: 900;
+      letter-spacing: .18em;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 8px rgba(138,43,226,.7));
+    }
+    .topbar-title {
+      font-family: 'Orbitron', monospace;
+      font-size: .62rem; font-weight: 600;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .topbar-count {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px;
+      background: rgba(255,0,85,.1);
+      border: 1px solid rgba(255,0,85,.25);
+      border-radius: 20px;
+      font-family: 'Orbitron', monospace;
+      font-size: .68rem; font-weight: 700;
+      color: var(--fuchsia);
+      letter-spacing: .06em;
+    }
+    .topbar-count i { font-size: .75rem; }
+
+    /* ══════════════════════════════════════════
+       SECTION HEADER
+    ══════════════════════════════════════════ */
+    .section-label {
+      display: flex; align-items: center; gap: 10px;
+      padding: 18px 18px 12px;
+    }
+    .section-label::before {
+      content: ''; flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,0,85,.4));
+    }
+    .section-label::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,0,85,.4), transparent);
+    }
+    .section-label span {
+      font-family: 'Orbitron', monospace;
+      font-size: .58rem; font-weight: 700;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--fuchsia);
+      white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════════════
+       LIKES GRID
+    ══════════════════════════════════════════ */
+    #likesGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      padding: 0 10px;
+    }
+    @media (min-width: 480px)  { #likesGrid { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 720px)  { #likesGrid { grid-template-columns: repeat(5, 1fr); } }
+    @media (min-width: 960px)  { #likesGrid { grid-template-columns: repeat(6, 1fr); } }
+
+    /* ── CARD ── */
+    .like-card {
+      position: relative;
+      aspect-ratio: 3/4;
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,0,85,.12);
+      transition: transform .18s, border-color .2s, box-shadow .2s;
+      animation: cardIn .3s ease both;
+    }
+    .like-card:hover {
+      transform: scale(1.03) translateY(-2px);
+      border-color: rgba(255,0,85,.5);
+      box-shadow: 0 6px 24px rgba(255,0,85,.22), var(--glow-f);
+      z-index: 2;
+    }
+    .like-card:active { transform: scale(.97); }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: scale(.88) translateY(10px); }
+      to   { opacity: 1; transform: scale(1)   translateY(0); }
+    }
+
+    .card-photo {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .card-photo-ph {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem;
+      background: linear-gradient(160deg, #1e1035 0%, #0d0616 100%);
+    }
+
+    /* Gradient overlay */
+    .card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top,
+        rgba(0,0,0,.85) 0%,
+        rgba(0,0,0,.25) 45%,
+        transparent    100%);
+    }
+
+    /* Heart glow badge */
+    .card-heart {
+      position: absolute; top: 6px; right: 6px;
+      width: 26px; height: 26px;
+      background: rgba(255,0,85,.2);
+      border: 1px solid rgba(255,0,85,.5);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem;
+      box-shadow: 0 0 10px rgba(255,0,85,.5);
+      animation: heartBeat 2.4s ease-in-out infinite;
+    }
+    @keyframes heartBeat {
+      0%,100% { transform: scale(1);    box-shadow: 0 0 8px rgba(255,0,85,.5); }
+      40%     { transform: scale(1.18); box-shadow: 0 0 18px rgba(255,0,85,.9); }
+    }
+
+    /* Online dot */
+    .card-online {
+      position: absolute; top: 6px; left: 6px;
+      width: 9px; height: 9px;
+      background: var(--green);
+      border-radius: 50%;
+      border: 2px solid rgba(13,6,22,.8);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    /* Info footer */
+    .card-info {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 6px 7px;
+    }
+    .card-name {
+      font-size: .78rem; font-weight: 700;
+      color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-shadow: 0 1px 5px rgba(0,0,0,.9);
+      line-height: 1.2;
+    }
+    .card-meta {
+      font-family: 'Orbitron', monospace;
+      font-size: .55rem; font-weight: 600;
+      color: rgba(255,255,255,.5);
+      margin-top: 2px;
+      letter-spacing: .04em;
+    }
+
+    /* Timestamp pill */
+    .card-ts {
+      position: absolute; bottom: 6px; right: 7px;
+      font-family: 'Orbitron', monospace;
+      font-size: .5rem; font-weight: 700;
+      color: rgba(255,0,85,.7);
+      letter-spacing: .04em;
+    }
+
+    /* ══════════════════════════════════════════
+       SKELETON LOADER
+    ══════════════════════════════════════════ */
+    .skel-card {
+      aspect-ratio: 3/4;
+      border-radius: var(--r-sm);
+      background: linear-gradient(90deg,
+        rgba(138,43,226,.06) 0%,
+        rgba(138,43,226,.13) 50%,
+        rgba(138,43,226,.06) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border: 1px solid rgba(138,43,226,.1);
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ══════════════════════════════════════════
+       EMPTY STATE
+    ══════════════════════════════════════════ */
+    #emptyState {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 70px 28px;
+      gap: 18px;
+      text-align: center;
+    }
+    .empty-icon-wrap {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(255,0,85,.08);
+      border: 1px solid rgba(255,0,85,.22);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      box-shadow: 0 0 30px rgba(255,0,85,.15);
+      animation: emptyPulse 3s ease-in-out infinite;
+    }
+    @keyframes emptyPulse {
+      0%,100% { box-shadow: 0 0 20px rgba(255,0,85,.12); }
+      50%     { box-shadow: 0 0 40px rgba(255,0,85,.28); }
+    }
+    .empty-title {
+      font-family: 'Orbitron', monospace;
+      font-size: .92rem; font-weight: 700;
+      letter-spacing: .06em;
+      color: var(--text-2);
+    }
+    .empty-sub {
+      font-size: .85rem; font-weight: 500;
+      color: var(--text-3);
+      line-height: 1.6;
+      max-width: 260px;
+    }
+    .empty-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px;
+      background: rgba(255,0,85,.1);
+      border: 1px solid rgba(255,0,85,.3);
+      border-radius: 22px;
+      font-size: .82rem; font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--fuchsia);
+      text-decoration: none;
+      transition: background .2s, box-shadow .2s;
+    }
+    .empty-cta:hover {
+      background: rgba(255,0,85,.2);
+      box-shadow: 0 0 14px rgba(255,0,85,.3);
+    }
+
+    /* ══════════════════════════════════════════
+       AUTH GATE
+    ══════════════════════════════════════════ */
+    #authGate {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 14px;
+      color: var(--text-2);
+      text-align: center;
+      padding: 20px;
+    }
+    #authGate i { font-size: 3rem; color: var(--purple); opacity: .5; }
+
+    /* ══════════════════════════════════════════
+       TOAST
+    ══════════════════════════════════════════ */
+    #toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + 16px);
+      left: 50%; transform: translateX(-50%) translateY(8px);
+      background: rgba(19,9,32,.97);
+      border: 1px solid rgba(138,43,226,.5);
+      border-radius: var(--r-sm);
+      padding: 10px 18px;
+      font-size: .84rem; font-weight: 600;
+      color: var(--text);
+      box-shadow: var(--glow-p);
+      backdrop-filter: blur(14px);
+      z-index: 9999;
+      white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ══════════════════════════════════════════
+       BOTTOM NAV
+    ══════════════════════════════════════════ */
+    nav.bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(13,6,22,.97);
+      backdrop-filter: blur(22px);
+      border-top: 1px solid rgba(138,43,226,.18);
+      display: flex; align-items: stretch;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .nav-item {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .nav-item:active { opacity: .6; }
+    .nav-item i {
+      font-size: 1.22rem;
+      color: var(--text-3);
+      transition: color .25s, filter .25s, transform .25s;
+    }
+    .nav-item span {
+      font-size: .6rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-3);
+      transition: color .25s;
+    }
+    .nav-item.active i {
+      color: var(--purple-hi);
+      filter: drop-shadow(0 0 5px rgba(160,32,240,.8));
+      transform: scale(1.15);
+    }
+    .nav-item.active span { color: var(--purple-hi); }
+
+    /* ── FUCHSIA NEON STATE (unread messages) ── */
+    .nav-item i.has-notif {
+      color: var(--magenta) !important;
+      filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.5)) !important;
+      animation: iconPulse 2s ease-in-out infinite;
+    }
+    @keyframes iconPulse {
+      0%,100% { filter: drop-shadow(0 0 6px #ff00ff); }
+      50%     { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff); }
+    }
+
+    /* ── BADGE COUNTER ── */
+    .badge-counter {
+      position: absolute;
+      top: 7px;
+      /* Center relative to the icon — offset slightly right */
+      left: calc(50% + 4px);
+      min-width: 17px; height: 17px;
+      background: var(--magenta);
+      border: 2px solid var(--bg);
+      border-radius: 10px;
+      padding: 0 3px;
+      font-family: 'Urbanist', sans-serif;
+      font-size: .58rem; font-weight: 900;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(255,0,255,.85);
+      pointer-events: none;
+      animation: badgePop .3s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes badgePop {
+      0%  { transform: scale(0); }
+      70% { transform: scale(1.2); }
+      100%{ transform: scale(1); }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="bar-title">Te dieron Like</div>
+<div id="page">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="topbar-logo">KINETIC</span>
+    <span class="topbar-title">Likes</span>
+    <div class="topbar-count" id="topbarCount" style="display:none">
+      <i class="fa-solid fa-heart"></i>
+      <span id="topbarNum">0</span>
     </div>
+  </div>
 
-    <div class="likes-container">
-        <div class="likes-grid" id="gridLikes">
-            <div class="empty-msg">Cargando interacciones...</div>
-        </div>
+  <!-- SECTION LABEL -->
+  <div class="section-label"><span>❤ Personas que te dieron like</span></div>
+
+  <!-- SKELETON PLACEHOLDERS (shown while loading) -->
+  <div id="skeletonGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:0 10px">
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+  </div>
+
+  <!-- LIKES GRID (populated by JS) -->
+  <div id="likesGrid" style="display:none"></div>
+
+  <!-- EMPTY STATE -->
+  <div id="emptyState">
+    <div class="empty-icon-wrap">💔</div>
+    <div class="empty-title">Sin likes todavía</div>
+    <div class="empty-sub">Aún no tienes likes acumulados.<br/>¡Sigue interactuando en el Radar!</div>
+    <a class="empty-cta" href="index.html">
+      <i class="fa-solid fa-location-crosshairs"></i> Ir al Radar
+    </a>
+  </div>
+
+  <!-- AUTH GATE -->
+  <div id="authGate">
+    <i class="fa-solid fa-lock"></i>
+    <p>Debes iniciar sesión para ver tus likes.</p>
+    <a href="index.html" style="color:var(--purple-hi);font-weight:700;text-decoration:none">← Ir al inicio</a>
+  </div>
+
+</div><!-- /page -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <i class="fa-solid fa-location-crosshairs"></i>
+    <span>Radar</span>
+  </a>
+  <a class="nav-item" href="chats.html" id="navChats">
+    <i class="fa-solid fa-comment-dots" id="navChatIcon"></i>
+    <span>Chats</span>
+  </a>
+  <a class="nav-item active" href="likes.html">
+    <i class="fa-solid fa-heart"></i>
+    <span>Likes</span>
+  </a>
+  <a class="nav-item" href="perfil.html">
+    <i class="fa-solid fa-user"></i>
+    <span>Perfil</span>
+  </a>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     FIREBASE SDK v10 modular CDN
+══════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase, ref, get, onValue, off, query, orderByChild }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+/* ─────────────────────────────────
+   CONFIG
+───────────────────────────────── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
+  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+  projectId:         "kinetic-app-67ae5",
+  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
+  messagingSenderId: "825570718975",
+  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth        = getAuth(firebaseApp);
+const db          = getDatabase(firebaseApp);
+
+/* ─────────────────────────────────
+   STATE
+───────────────────────────────── */
+let currentUser     = null;
+let likesUnsub      = null;   // unsubscribe handle for recibidos listener
+let notifUnsub      = null;   // unsubscribe handle for chats listener
+let renderVersion   = 0;      // used to discard stale async batches
+
+/* ─────────────────────────────────
+   TOAST
+───────────────────────────────── */
+let _toastTimer = null;
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = isError ? `⚠  ${msg}` : `✓  ${msg}`;
+  el.style.borderColor = isError ? 'rgba(255,34,85,.55)' : 'rgba(138,43,226,.55)';
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ─────────────────────────────────
+   AUTH GATE
+───────────────────────────────── */
+function initAuth() {
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUser = user;
+      hideSkeleton();          // keep skeleton until real data arrives
+      startLikesListener();
+      startNotifListener();
+    } else {
+      hideSkeleton();
+      document.getElementById('authGate').style.display = 'flex';
+    }
+  });
+}
+
+/* ─────────────────────────────────
+   HIDE SKELETON
+───────────────────────────────── */
+function hideSkeleton() {
+  const sk = document.getElementById('skeletonGrid');
+  if (sk) sk.style.display = 'none';
+}
+
+/* ─────────────────────────────────
+   LIKES REAL-TIME LISTENER
+   Node: recibidos/{miUid}
+   Schema assumed:
+     recibidos/{miUid}/{fanUid} = { ts: <timestamp> }
+───────────────────────────────── */
+function startLikesListener() {
+  if (likesUnsub) off(ref(db, `recibidos/${currentUser.uid}`));
+
+  const likesRef = ref(db, `recibidos/${currentUser.uid}`);
+
+  likesUnsub = onValue(likesRef, async snapshot => {
+    // Bump version so any in-flight previous render is discarded
+    const version = ++renderVersion;
+
+    hideSkeleton();
+
+    if (!snapshot.exists()) {
+      showEmptyState();
+      return;
+    }
+
+    // Collect { fanUid, ts } entries
+    const entries = [];
+    snapshot.forEach(child => {
+      const val = child.val();
+      entries.push({
+        fanUid: child.key,
+        ts: (typeof val === 'object' && val !== null && val.ts) ? val.ts : (typeof val === 'number' ? val : 0)
+      });
+    });
+
+    // Sort newest first
+    entries.sort((a, b) => b.ts - a.ts);
+
+    // Update topbar count immediately
+    updateTopbarCount(entries.length);
+
+    // Fetch all user profiles concurrently — no sequential blocking
+    let profiles;
+    try {
+      profiles = await fetchProfilesBatch(entries.map(e => e.fanUid));
+    } catch (err) {
+      showToast('Error al cargar perfiles.', true);
+      console.error('[fetchProfilesBatch]', err);
+      return;
+    }
+
+    // Guard: discard if a newer render has started
+    if (version !== renderVersion) return;
+
+    // Merge ts back in
+    const cards = entries.map(e => ({
+      ...profiles[e.fanUid],
+      uid: e.fanUid,
+      ts:  e.ts
+    }));
+
+    renderGrid(cards);
+  }, err => {
+    hideSkeleton();
+    showToast('Error al escuchar likes.', true);
+    console.error('[likesListener]', err);
+  });
+}
+
+/* ─────────────────────────────────
+   BATCH PROFILE FETCH
+   Returns a map: { uid: profileData }
+   Uses Promise.allSettled so one
+   missing user never blocks others.
+───────────────────────────────── */
+async function fetchProfilesBatch(uids) {
+  const results = await Promise.allSettled(
+    uids.map(uid => get(ref(db, `users/${uid}`)))
+  );
+
+  const map = {};
+  results.forEach((result, i) => {
+    const uid = uids[i];
+    if (result.status === 'fulfilled' && result.value.exists()) {
+      map[uid] = result.value.val();
+    } else {
+      // Fallback so the card still renders with minimal info
+      map[uid] = { uid, nombre: 'Usuario', name: 'Usuario', album: [], photos: [] };
+    }
+  });
+  return map;
+}
+
+/* ─────────────────────────────────
+   RENDER GRID
+───────────────────────────────── */
+function renderGrid(cards) {
+  const grid = document.getElementById('likesGrid');
+  const empty = document.getElementById('emptyState');
+
+  if (!cards || cards.length === 0) {
+    grid.style.display = 'none';
+    empty.style.display = 'flex';
+    return;
+  }
+
+  empty.style.display  = 'none';
+  grid.style.display   = 'grid';
+  grid.innerHTML       = '';
+
+  cards.forEach((card, idx) => {
+    const el = buildCard(card, idx);
+    grid.appendChild(el);
+  });
+}
+
+/* ─────────────────────────────────
+   BUILD SINGLE CARD
+───────────────────────────────── */
+function buildCard(data, idx) {
+  const uid    = data.uid;
+  const name   = data.nombre || data.name || 'Desconocido';
+  const age    = data.edad   || data.age  || '';
+  const online = data.online === true;
+  const gender = data.genero || data.gender || '';
+
+  // Photo: check both 'album' (perfil.html convention) and 'photos' (index.html convention)
+  const photoUrl = getFirstPhoto(data);
+
+  const card = document.createElement('div');
+  card.className = 'like-card';
+  card.style.animationDelay = `${Math.min(idx * 0.04, 0.6)}s`;
+
+  const photoHTML = photoUrl
+    ? `<img class="card-photo" src="${escHtml(photoUrl)}" alt="${escHtml(name)}"
+           loading="lazy"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+       <div class="card-photo-ph" style="display:none">👤</div>`
+    : `<div class="card-photo-ph">👤</div>`;
+
+  const onlineHTML = online
+    ? `<div class="card-online" title="En línea"></div>` : '';
+
+  const metaLine = [age ? `${age} años` : '', gender].filter(Boolean).join(' · ');
+
+  card.innerHTML = `
+    ${photoHTML}
+    <div class="card-overlay"></div>
+    ${onlineHTML}
+    <div class="card-heart">❤</div>
+    <div class="card-info">
+      <div class="card-name">${escHtml(name)}</div>
+      ${metaLine ? `<div class="card-meta">${escHtml(metaLine)}</div>` : ''}
     </div>
+    ${data.ts ? `<div class="card-ts">${formatRelTime(data.ts)}</div>` : ''}
+  `;
 
-    <div class="nav-bar">
-        <div class="nav-item" onclick="window.location.href='radar.html'">
-            <i class="fa-solid fa-border-all"></i>
-            <span>Mosaico</span>
-        </div>
-        <div class="nav-item active">
-            <i class="fa-solid fa-heart"></i>
-            <span>Likes</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='chats.html'">
-            <i class="fa-solid fa-comment"></i>
-            <span>Chats</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='perfil.html'">
-            <i class="fa-solid fa-user"></i>
-            <span>Mi Perfil</span>
-        </div>
-    </div>
+  card.addEventListener('click', () => openProfile(uid));
+  return card;
+}
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+/* ─────────────────────────────────
+   OPEN PROFILE  →  perfil-detalle.html
+───────────────────────────────── */
+function openProfile(uid) {
+  try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
+  window.location.href = 'perfil-detalle.html';
+}
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-            authDomain: "kinetic-app-67ae5.firebaseapp.com",
-            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-            projectId: "kinetic-app-67ae5",
-            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-            messagingSenderId: "825570718975",
-            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-        };
+/* ─────────────────────────────────
+   EMPTY STATE
+───────────────────────────────── */
+function showEmptyState() {
+  document.getElementById('likesGrid').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'flex';
+  updateTopbarCount(0);
+}
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+/* ─────────────────────────────────
+   TOPBAR COUNT
+───────────────────────────────── */
+function updateTopbarCount(n) {
+  const wrap = document.getElementById('topbarCount');
+  const num  = document.getElementById('topbarNum');
+  if (n > 0) {
+    num.textContent = n;
+    wrap.style.display = 'flex';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
 
-        const container = document.getElementById('gridLikes');
+/* ─────────────────────────────────
+   GLOBAL NOTIFICATIONS — chats node
+   Strategy A: chats/{id}.lastInfo.unreadTarget === miUid
+   Strategy B: messages with unread===true & senderId !== miUid
+───────────────────────────────── */
+function startNotifListener() {
+  if (!currentUser) return;
+  const chatsRef  = ref(db, 'chats');
+  const iconEl    = document.getElementById('navChatIcon');
+  const navItem   = document.getElementById('navChats');
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "index.html";
-            } else {
-                cargarLikesRecibidos(user.uid);
-                activarNotificacionesGlobales(user.uid);
-            }
-        });
+  if (notifUnsub) off(chatsRef);
 
-        function cargarLikesRecibidos(miUid) {
-            onValue(ref(db, `recibidos/${miUid}`), (snapshot) => {
-                const recibidos = snapshot.val();
-                if (!recibidos) {
-                    container.innerHTML = `<div class="empty-msg">Aún no tienes likes acumulados. ¡Sigue interactuando!</div>`;
-                    return;
-                }
+  notifUnsub = onValue(chatsRef, snapshot => {
+    let pending = 0;
 
-                container.innerHTML = '';
-                
-                for (let fanId in recibidos) {
-                    onValue(ref(db, `users/${fanId}`), (uSnap) => {
-                        const uData = uSnap.val() || {};
-                        const foto = (uData.album && uData.album.length > 0) ? uData.album[0] : 'https://via.placeholder.com/300';
-                        
-                        const card = document.createElement('div');
-                        card.className = 'like-card';
-                        card.innerHTML = `
-                            <img src="${foto}">
-                            <div class="like-card-info">
-                                <span class="like-name">${uData.nombre || 'Kinetic User'}</span>
-                            </div>
-                        `;
+    snapshot.forEach(chatSnap => {
+      const chat = chatSnap.val();
+      if (!chat) return;
 
-                        card.onclick = () => {
-                            localStorage.setItem('selected_user_id', fanId);
-                            window.location.href = 'perfil-detalle.html';
-                        };
+      // Strategy A — fast path
+      if (chat.lastInfo?.unreadTarget === currentUser.uid) {
+        pending++;
+        return;
+      }
 
-                        container.appendChild(card);
-                    }, { onlyOnce: true });
-                }
-            });
+      // Strategy B — scan participants + messages
+      const parts = chat.participants || {};
+      if (!parts[currentUser.uid]) return;
+
+      const msgs = chat.messages || {};
+      let hasUnread = false;
+      Object.values(msgs).forEach(m => {
+        if (m?.senderId !== currentUser.uid && m?.unread === true) {
+          hasUnread = true;
         }
+      });
+      if (hasUnread) pending++;
+    });
 
-        function activarNotificacionesGlobales(miUid) {
-            onValue(ref(db, 'chats'), (snapshot) => {
-                const listaChats = snapshot.val();
-                let alertarMensajeNuevo = false;
+    updateNavBadge(pending, iconEl, navItem);
+  });
+}
 
-                for (let idChat in listaChats) {
-                    if (idChat.includes(miUid) && listaChats[idChat].lastInfo?.unreadTarget === miUid) {
-                        alertarMensajeNuevo = true;
-                        break;
-                    }
-                }
+/* ─────────────────────────────────
+   UPDATE NAV BADGE
+───────────────────────────────── */
+function updateNavBadge(count, iconEl, navItemEl) {
+  // Remove stale badge
+  navItemEl.querySelectorAll('.badge-counter').forEach(b => b.remove());
 
-                const iconoMensajeria = document.querySelector('.nav-item i.fa-comment');
-                if (iconoMensajeria) {
-                    if (alertarMensajeNuevo) {
-                        iconoMensajeria.style.color = '#ff00ff';
-                        iconoMensajeria.style.filter = 'drop-shadow(0 0 8px #ff00ff)';
-                    } else {
-                        iconoMensajeria.style.color = '';
-                        iconoMensajeria.style.filter = '';
-                    }
-                }
-            });
-        }
-    </script>
+  if (count > 0) {
+    iconEl.classList.add('has-notif');
+    const badge = document.createElement('div');
+    badge.className  = 'badge-counter';
+    badge.textContent = count > 9 ? '9+' : String(count);
+    navItemEl.appendChild(badge);
+  } else {
+    iconEl.classList.remove('has-notif');
+  }
+}
+
+/* ─────────────────────────────────
+   HELPERS
+───────────────────────────────── */
+function getFirstPhoto(data) {
+  if (Array.isArray(data.album) && data.album.length > 0) {
+    return data.album.find(u => u && u.trim()) || '';
+  }
+  if (Array.isArray(data.photos) && data.photos.length > 0) {
+    return data.photos.find(u => u && u.trim()) || '';
+  }
+  return '';
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;')
+    .replace(/'/g,  '&#39;');
+}
+
+function formatRelTime(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - ts;
+  if (diff < 60_000)        return 'ahora';
+  if (diff < 3_600_000)     return `${Math.floor(diff / 60_000)}m`;
+  if (diff < 86_400_000)    return `${Math.floor(diff / 3_600_000)}h`;
+  if (diff < 604_800_000)   return `${Math.floor(diff / 86_400_000)}d`;
+  return new Date(ts).toLocaleDateString('es', { day: '2-digit', month: '2-digit' });
+}
+
+/* ─────────────────────────────────
+   BOOT
+───────────────────────────────── */
+initAuth();
+</script>
 </body>
 </html>
