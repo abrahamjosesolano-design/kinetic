@@ -593,8 +593,10 @@ const defaultAvatar = `<svg viewBox="0 0 24 24" fill="none"
 ──────────────────────────────────── */
 let me           = null;
 let allUsers     = {};        
+let myGivenLikes = {}; // Almacena los IDs a los que les di like
 let activeFilter = 'all';
 let usersUnsub   = null;
+let likesUnsub   = null;
 let chatsUnsub   = null;
 
 /* ────────────────────────────────────
@@ -646,6 +648,7 @@ onAuthStateChanged(auth, user => {
   if (user) {
     me = user;
     hideSkeleton();
+    startLikesListener(); // Iniciamos primero o en paralelo
     startUsersListener();
     startChatsListener();
     wireFilters();
@@ -656,10 +659,37 @@ onAuthStateChanged(auth, user => {
 });
 
 /* ────────────────────────────────────
-    USERS LISTENER (MUDADO A RADAR_PUBLIC)
+    LIKES LISTENER (NUEVO: PERSISTENCIA)
+──────────────────────────────────── */
+function startLikesListener() {
+  // Buscaremos en cada usuario de la base si tiene un subnodo con nuestro UID
+  // Para optimizarlo simétricamente y no descargar todo el nodo global, 
+  // en una app de producción robusta se usaría una estructura cruzada.
+  // Con esta consulta, escuchamos los cambios en tiempo real del nodo general 'likes'
+  const likesRef = ref(db, 'likes');
+  if (likesUnsub) off(likesRef);
+
+  likesUnsub = onValue(likesRef, snap => {
+    myGivenLikes = {};
+    if (snap.exists()) {
+      snap.forEach(userLikeSnap => {
+        const targetUid = userLikeSnap.key;
+        // Si dentro de los likes de ese usuario está mi UID, significa que yo le di like
+        if (userLikeSnap.hasChild(me.uid)) {
+          myGivenLikes[targetUid] = true;
+        }
+      });
+    }
+    renderGrid(); // Re-renderiza al detectar cambios en tus likes dados
+  }, err => {
+    console.error('[likesListener]', err);
+  });
+}
+
+/* ────────────────────────────────────
+    USERS LISTENER 
 ──────────────────────────────────── */
 function startUsersListener() {
-  // Apuntamos al nodo público optimizado
   const usersRef = ref(db, 'radar_public');
   if (usersUnsub) off(usersRef);
 
@@ -690,6 +720,10 @@ function renderGrid() {
 
   let users = Object.values(allUsers);
 
+  // FILTRO CRUCIAL: Excluir usuarios a los que YA les diste Like de forma persistente
+  users = users.filter(u => !myGivenLikes[u.uid]);
+
+  // Filtros por categorías adicionales
   if (activeFilter === 'online') {
     users = users.filter(u => u.online === true);
   } else if (activeFilter === 'male') {
@@ -700,13 +734,15 @@ function renderGrid() {
     users = users.filter(u => (u.gender || 'other') === 'other');
   }
 
+  // Ordenar: Online primero, luego alfabético
   users.sort((a, b) => {
     if (a.online && !b.online) return -1;
     if (!a.online && b.online) return 1;
     return (a.name || '').localeCompare(b.name || '');
   });
 
-  const onlineCount = Object.values(allUsers).filter(u => u.online).length;
+  // Contador global online exclusivo de los que no les has dado Like
+  const onlineCount = users.filter(u => u.online).length;
   if (onlineCount > 0) {
     document.getElementById('liveCount').textContent = onlineCount;
     pill.style.display = 'flex';
@@ -801,6 +837,7 @@ function buildCard(data, idx) {
 
   card.appendChild(info);
 
+  // BOTÓN DE LIKE CON ANIMACIÓN EXTRAORDINARIA
   const likeBtn = document.createElement('div');
   likeBtn.className = 'card-like-btn';
   likeBtn.innerHTML = `<i class="fa-solid fa-heart"></i>`;
@@ -813,11 +850,13 @@ function buildCard(data, idx) {
         likeBtn.style.transform = 'scale(1.4)';
         likeBtn.style.backgroundColor = 'var(--magenta)';
         likeBtn.innerHTML = `<i class="fa-solid fa-heart" style="color:#fff"></i>`;
+        
         setTimeout(() => {
           card.style.opacity = '0';
           card.style.transform = 'scale(0.8) translateY(-20px)';
           setTimeout(() => {
             card.remove();
+            // Si la grilla quedó vacía tras remover la tarjeta manualmente, refrescamos el estado
             if (document.getElementById('radarGrid').children.length === 0) {
               renderGrid();
             }
