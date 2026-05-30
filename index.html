@@ -527,10 +527,10 @@ const auth = getAuth(app);
 const db   = getDatabase(app);
 
 /* ── 3. RUTA DE DESTINO TRAS AUTENTICACIÓN ──────────
-   Sin barra inicial para compatibilidad con GitHub Pages
-   (las rutas relativas funcionan correctamente en subdirectorios)
+   radar.html es la pantalla principal del radar de Kinetic.
+   Sin barra inicial — ruta relativa compatible con GitHub Pages.
 ─────────────────────────────────────────────────── */
-const HOME = "descubrir.html";
+const HOME = "radar.html";
 
 /* ── 4. PERSISTENCIA DE SESIÓN ──────────────────────
    Si el usuario ya está logueado al cargar index.html,
