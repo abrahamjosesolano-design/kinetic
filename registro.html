@@ -218,11 +218,9 @@
             setTimeout(() => errorEl.classList.remove('show'), 5000);
         }
 
-        // Desactivamos la redirección automática de onAuthStateChanged durante el registro
         let registering = false;
         onAuthStateChanged(auth, (user) => {
             if (!registering && user) {
-                // Si ya hay sesión activa, redirigimos a index.html
                 window.location.href = 'index.html';
             }
         });
@@ -231,7 +229,7 @@
             const nombre = document.getElementById('nombre').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const edad = document.getElementById('edad').value.trim();
+            const edadRaw = document.getElementById('edad').value.trim();
             const bio = document.getElementById('bio').value.trim();
 
             if (!nombre || !email || !password) {
@@ -250,21 +248,22 @@
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Crear nodo del usuario en Realtime Database
+                const edadNumero = edadRaw ? parseInt(edadRaw, 10) : null;
+
                 const userData = {
                     name: nombre,
                     email: email,
-                    age: edad || "No definida",
+                    age: edadNumero,
                     bio: bio || "¡Hola! Estoy usando Kinetic.",
-                    album: [""],
+                    album: [],
                     profilePic: "",
-                    online: false,
+                    online: true,
                     premium: false,
                     modoExpress: false,
                     lat: null,
                     lng: null,
                     interestedIn: "all",
-                    gender: "non-binary",
+                    gender: "other", 
                     dailyViews: 0,
                     lastResetDate: new Date().toISOString().split('T')[0]
                 };
@@ -273,6 +272,7 @@
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error('Error en registro:', error);
+                registering = false;
                 if (error.code === 'auth/email-already-in-use') {
                     showError('Este correo ya está registrado.');
                 } else if (error.code === 'auth/weak-password') {
@@ -280,7 +280,6 @@
                 } else {
                     showError('Error al crear la cuenta: ' + error.message);
                 }
-                registering = false;
             }
         });
     </script>
