@@ -971,19 +971,47 @@
 
     /* ─────────────────────────────────────────────────
        P) BADGE GLOBAL — mensajes sin leer en tiempo real
-          Escucha onValue en el nodo "chats" y cuenta
-          las salas donde unreadTarget === miUid.
+
+       ✅ FIX TypeError: Cannot read properties of null
+          (reading 'unreadTarget')
+       Causa: algunas salas en Firebase no tienen el
+       objeto lastInfo estructurado — el nodo puede ser
+       null, un valor primitivo, o carecer del campo.
+       Solución: validación explícita en 4 capas antes
+       de acceder a .unreadTarget:
+         1. snap.val() existe y es objeto
+         2. sala (data) existe y es objeto
+         3. sala.lastInfo existe y es objeto
+         4. sala.lastInfo.unreadTarget === miUid
     ───────────────────────────────────────────────── */
     function escucharBadgeMensajes() {
       if (!miUid) return;
 
       onValue(ref(db, "chats"), (snap) => {
-        const todos = snap.val() || {};
+        const todos = snap.val();
+
+        // Nodo chats nulo o vacío -> badge a cero de forma segura
+        if (!todos || typeof todos !== "object") {
+          msgBadge.classList.add("oculto");
+          return;
+        }
+
         let n = 0;
-        Object.entries(todos).forEach(([id, data]) => {
+
+        Object.entries(todos).forEach(([id, sala]) => {
+          // Capa 1: la sala debe pertenecer al usuario actual
           if (!id.includes(miUid)) return;
-          if (data?.lastInfo?.unreadTarget === miUid) n++;
+
+          // Capa 2: la sala debe ser un objeto real (no null, no primitivo)
+          if (!sala || typeof sala !== "object") return;
+
+          // Capa 3: lastInfo debe existir y ser un objeto real
+          if (!sala.lastInfo || typeof sala.lastInfo !== "object") return;
+
+          // Capa 4: solo ahora es seguro leer unreadTarget
+          if (sala.lastInfo.unreadTarget === miUid) n++;
         });
+
         if (n > 0) {
           msgBadge.textContent = n > 99 ? "99+" : String(n);
           msgBadge.classList.remove("oculto");
