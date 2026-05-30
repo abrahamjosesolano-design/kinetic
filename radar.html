@@ -1,688 +1,908 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Kinetic – Radar</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        :root {
-            --purple: #7B2CBF;
-            --purple-dark: #3C096C;
-            --red: #E5383B;
-            --red-light: #FF6B6B;
-            --bg: #10002B;
-            --card-bg: #1A0033;
-            --text: #FFFFFF;
-            --text-secondary: #B8B8D4;
-            --online: #2ECC71;
-            --offline: #555555;
-            --streak: #FF9F1C;
-            --shadow: 0 4px 20px rgba(123, 44, 191, 0.3);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --nav-height: 64px;
-            --header-height: 56px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0616" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Kinetic · Radar</title>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-        body {
-            font-family: 'Inter', 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            max-width: 480px;
-            margin: 0 auto;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-            position: relative;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <style>
+    /* ══════════════════════════════════════════════
+       DESIGN TOKENS
+    ══════════════════════════════════════════════ */
+    :root {
+      --bg:          #0d0616;
+      --bg-s:        #12091f;
+      --bg-card:     #12091f;
+      --bg-card-hi:  #1a0d2e;
+      --purple:      #8a2be2;
+      --purple-hi:   #a020f0;
+      --magenta:     #ff00ff;
+      --cyan:        #00ffff;
+      --green:       #39ff14;
+      --text:        #ede0ff;
+      --text-2:      #9880bc;
+      --text-3:      #52406e;
+      --border:      rgba(138,43,226,.18);
+      --border-card: rgba(255,0,255,.12);
+      --nav-h:       66px;
+      --topbar-h:    56px;
+      --r:           12px;
+      --r-sm:        8px;
+      --grad:        linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
+      --grad-card:   linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.3) 55%, transparent 100%);
+      --glow-p:      0 0 18px rgba(138,43,226,.55);
+      --glow-m:      0 0 14px rgba(255,0,255,.65);
+    }
 
-        .screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg);
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* ---------- HEADER ---------- */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.8rem 1rem;
-            background: var(--card-bg);
-            border-bottom: 1px solid rgba(123, 44, 191, 0.4);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            backdrop-filter: blur(10px);
-            min-height: var(--header-height);
-        }
-        .header h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--red-light), var(--purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .icon-btn {
-            background: rgba(123, 44, 191, 0.25);
-            border: none;
-            color: var(--text);
-            font-size: 1.3rem;
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-            backdrop-filter: blur(5px);
-            position: relative;
-        }
-        .icon-btn:active { background: rgba(123, 44, 191, 0.6); transform: scale(0.92); }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Urbanist', sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
 
-        /* ---------- NAV INFERIOR ---------- */
-        .bottom-nav {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: var(--card-bg);
-            border-top: 1px solid rgba(123,44,191,0.3);
-            height: var(--nav-height);
-            padding-bottom: calc(0.5rem + var(--safe-bottom));
-            padding-top: 0.5rem;
-            position: sticky;
-            bottom: 0;
-            z-index: 10;
-            backdrop-filter: blur(10px);
-            flex-shrink: 0;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.2rem;
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: color 0.2s, transform 0.2s;
-            position: relative;
-        }
-        .nav-item.active { color: var(--red-light); transform: translateY(-2px); }
-        .nav-icon { font-size: 1.4rem; }
-        .nav-badge {
-            position: absolute;
-            top: -4px; right: 10px;
-            background: var(--red);
-            color: white;
-            font-size: 0.6rem;
-            font-weight: 700;
-            min-width: 16px; height: 16px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 4px;
-        }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
 
-        /* ---------- FILTROS ---------- */
-        .filters {
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.7rem 1rem;
-            background: var(--card-bg);
-            overflow-x: auto;
-            white-space: nowrap;
-            align-items: center;
-            scrollbar-width: none;
-            border-bottom: 1px solid rgba(123,44,191,0.2);
-        }
-        .filters::-webkit-scrollbar { display: none; }
-        .filter-chip {
-            background: rgba(123, 44, 191, 0.2);
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 1px solid transparent;
-            flex-shrink: 0;
-        }
-        .filter-chip.active {
-            background: var(--purple);
-            border-color: var(--red-light);
-            box-shadow: 0 0 12px rgba(230,56,59,0.5);
-            font-weight: 600;
-        }
+    /* ── ATMOSPHERE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.033) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.033) 40px);
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 65% 42% at 10%  5%,  rgba(138,43,226,.16) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 34% at 88% 90%, rgba(255,0,255,.10)  0%, transparent 60%),
+        radial-gradient(ellipse 38% 26% at 65% 12%, rgba(0,255,255,.06)  0%, transparent 55%);
+    }
 
-        /* ---------- GRID PERFILES ---------- */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.7rem;
-            padding: 0.8rem;
-            flex: 1;
-            overflow-y: auto;
-            align-content: start;
-            justify-items: center;
-        }
-        .profile-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            position: relative;
-            animation: fadeInUp 0.4s ease forwards;
-            opacity: 0;
-            transition: transform 0.2s, box-shadow 0.2s;
-            max-width: 150px;
-            width: 100%;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .profile-card:active { transform: scale(0.95); box-shadow: 0 0 15px var(--purple); }
-        .profile-img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: white;
-            position: relative;
-            background-size: cover;
-            background-position: center;
-        }
-        .online-indicator {
-            position: absolute;
-            top: 8px; right: 8px;
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            border: 2px solid var(--card-bg);
-        }
-        .online-indicator.online {
-            background: var(--online);
-            box-shadow: 0 0 8px rgba(46,204,113,0.6);
-        }
-        .online-indicator.offline {
-            background: var(--offline);
-            box-shadow: none;
-        }
-        .profile-info {
-            padding: 0.4rem;
-            text-align: center;
-        }
-        .profile-name {
-            font-weight: 600;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .profile-distance {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-        }
+    /* ══════════════════════════════════════════════
+       PAGE WRAPPER
+    ══════════════════════════════════════════════ */
+    #page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      padding-bottom: calc(var(--nav-h) + 12px);
+    }
 
-        /* ---------- MAPA ---------- */
-        #mapContainer { flex: 1; width: 100%; position: relative; }
-        #map { width: 100%; height: 100%; z-index: 1; }
+    /* ══════════════════════════════════════════════
+       TOP BAR
+    ══════════════════════════════════════════════ */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      height: var(--topbar-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px;
+      background: rgba(13,6,22,.95);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
 
-        /* ---------- MODAL ---------- */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(6px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: var(--card-bg);
-            width: 90%;
-            max-width: 400px;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 12px 40px var(--purple-dark);
-            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(60px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .modal-header {
-            padding: 1.8rem 1.5rem 1rem;
-            text-align: center;
-            background: linear-gradient(135deg, var(--purple), var(--red));
-            position: relative;
-        }
-        .modal-close {
-            position: absolute;
-            top: 10px; right: 15px;
-            background: rgba(0,0,0,0.3);
-            border: none;
-            color: white;
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .modal-close:hover { background: rgba(0,0,0,0.5); }
-        .modal-avatar {
-            width: 100px; height: 100px;
-            border-radius: 50%;
-            margin: 0 auto 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            border: 3px solid rgba(255,255,255,0.4);
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .modal-body { padding: 1.5rem; text-align: center; }
-        .modal-body .bio { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; }
-        .album-title { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem; }
-        .album-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .album-item {
-            aspect-ratio: 1 / 1;
-            border-radius: 12px;
-            background-color: var(--purple-dark);
-            background-size: cover;
-            background-position: center;
-            transition: transform 0.2s;
-        }
-        .album-item:active { transform: scale(1.05); }
-        .modal-actions { display: flex; gap: 1rem; padding: 0 1.5rem 1.8rem; }
-        .btn-like {
-            flex: 1; padding: 0.9rem; border: none; border-radius: 30px;
-            font-weight: 700; background: var(--red); color: white; cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-        }
-        .btn-message {
-            flex: 1; padding: 0.9rem; border: 2px solid var(--purple); border-radius: 30px;
-            font-weight: 700; background: transparent; color: var(--text); cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-        }
-        .btn-message:hover { background: rgba(123,44,191,0.3); }
+    .topbar-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.22rem; font-weight: 900; letter-spacing: .18em;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 8px rgba(138,43,226,.75));
+    }
 
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--card-bg); color: var(--text); padding: 0.8rem 1.5rem; border-radius: 30px; font-size: 0.9rem; z-index: 300; box-shadow: 0 5px 20px rgba(0,0,0,0.6); animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards; pointer-events: none; }
-        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(30px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
-    </style>
+    .topbar-center {
+      font-family: 'Orbitron', monospace;
+      font-size: .58rem; font-weight: 700;
+      letter-spacing: .24em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* Live users pill */
+    .topbar-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px;
+      background: rgba(57,255,20,.08);
+      border: 1px solid rgba(57,255,20,.2);
+      border-radius: 20px;
+      font-family: 'Orbitron', monospace;
+      font-size: .6rem; font-weight: 700;
+      color: var(--green); letter-spacing: .06em;
+    }
+    .topbar-pill .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: livePulse 1.8s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%,100% { box-shadow: 0 0 4px var(--green); }
+      50%     { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
+    }
+
+    /* ══════════════════════════════════════════════
+       FILTER CHIPS BAR
+    ══════════════════════════════════════════════ */
+    .filter-bar {
+      display: flex; gap: 8px; align-items: center;
+      padding: 12px 14px 0;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      background: rgba(138,43,226,.1);
+      border: 1px solid rgba(138,43,226,.22);
+      border-radius: 20px;
+      font-family: 'Urbanist', sans-serif;
+      font-size: .78rem; font-weight: 700; letter-spacing: .04em;
+      color: var(--text-3); cursor: pointer; white-space: nowrap;
+      flex-shrink: 0;
+      transition: all .2s;
+      user-select: none;
+    }
+    .chip.active, .chip:hover {
+      background: rgba(138,43,226,.22);
+      border-color: var(--purple-hi);
+      color: var(--text);
+    }
+    .chip.active {
+      background: var(--grad);
+      border-color: transparent; color: #fff;
+      box-shadow: var(--glow-p);
+    }
+
+    /* ══════════════════════════════════════════════
+       SECTION DIVIDER
+    ══════════════════════════════════════════════ */
+    .section-label {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px 10px;
+    }
+    .section-label::before,
+    .section-label::after {
+      content: ''; flex: 1; height: 1px;
+    }
+    .section-label::before { background: linear-gradient(90deg, transparent, rgba(255,0,255,.28)); }
+    .section-label::after  { background: linear-gradient(90deg, rgba(255,0,255,.28), transparent); }
+    .section-label span {
+      font-family: 'Orbitron', monospace;
+      font-size: .55rem; font-weight: 700;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-3); white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════════════════
+       RADAR GRID
+    ══════════════════════════════════════════════ */
+    #radarGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding: 0 10px;
+    }
+    @media (min-width: 480px)  { #radarGrid { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 680px)  { #radarGrid { grid-template-columns: repeat(5, 1fr); } }
+    @media (min-width: 900px)  { #radarGrid { grid-template-columns: repeat(6, 1fr); } }
+    @media (min-width: 1100px) { #radarGrid { grid-template-columns: repeat(7, 1fr); } }
+
+    /* ── CARD ── */
+    .radar-card {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: var(--r);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      transition: transform .18s cubic-bezier(.25,.46,.45,.94),
+                  border-color .2s, box-shadow .2s;
+      animation: cardIn .3s ease both;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: scale(.88) translateY(10px); }
+      to   { opacity: 1; transform: scale(1)   translateY(0); }
+    }
+    .radar-card:hover {
+      transform: scale(1.04) translateY(-3px);
+      border-color: rgba(255,0,255,.45);
+      box-shadow: 0 8px 28px rgba(255,0,255,.18), var(--glow-m);
+      z-index: 2;
+    }
+    .radar-card:active { transform: scale(.97); }
+
+    /* ── PHOTO ── */
+    .card-photo {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    /* SVG / placeholder fills the card */
+    .card-avatar-ph {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(160deg, #1a0f2e 0%, #0d0616 100%);
+    }
+    .card-avatar-ph svg {
+      width: 55%; height: 55%;
+      max-width: 80px; max-height: 80px;
+    }
+
+    /* ── GRADIENT OVERLAY ── */
+    .card-grad {
+      position: absolute; inset: 0;
+      background: var(--grad-card);
+      pointer-events: none;
+    }
+
+    /* ── ONLINE DOT ── */
+    .card-online {
+      position: absolute; top: 7px; left: 7px;
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--green);
+      border: 2px solid rgba(13,6,22,.8);
+      box-shadow: 0 0 7px var(--green);
+      animation: greenPulse 2s ease-in-out infinite;
+    }
+    @keyframes greenPulse {
+      0%,100% { box-shadow: 0 0 5px var(--green); }
+      50%     { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
+    }
+
+    /* ── GENDER / INTEREST BADGE ── */
+    .card-badge {
+      position: absolute; top: 7px; right: 7px;
+      padding: 2px 8px;
+      background: rgba(13,6,22,.65);
+      border: 1px solid rgba(255,0,255,.3);
+      border-radius: 8px;
+      font-family: 'Orbitron', monospace;
+      font-size: .52rem; font-weight: 700; letter-spacing: .06em;
+      color: rgba(255,0,255,.85);
+      backdrop-filter: blur(4px);
+    }
+
+    /* ── INFO OVERLAY (bottom) ── */
+    .card-info {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 8px 8px 7px;
+      /* Text rendered above the gradient overlay */
+      z-index: 1;
+    }
+    .card-name {
+      font-size: .78rem; font-weight: 800;
+      color: #fff; line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-shadow: 0 1px 6px rgba(0,0,0,.9);
+    }
+    .card-meta {
+      font-family: 'Orbitron', monospace;
+      font-size: .5rem; font-weight: 600;
+      color: rgba(255,255,255,.5);
+      margin-top: 2px; letter-spacing: .05em;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-age-accent {
+      color: rgba(255,0,255,.75);
+    }
+
+    /* ══════════════════════════════════════════════
+       SKELETON LOADER
+    ══════════════════════════════════════════════ */
+    #skeleton {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding: 0 10px;
+    }
+    @media (min-width: 480px)  { #skeleton { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 680px)  { #skeleton { grid-template-columns: repeat(5, 1fr); } }
+
+    .skel-card {
+      aspect-ratio: 3 / 4;
+      border-radius: var(--r);
+      background: linear-gradient(90deg,
+        rgba(138,43,226,.05) 0%,
+        rgba(138,43,226,.13) 50%,
+        rgba(138,43,226,.05) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border: 1px solid rgba(138,43,226,.08);
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ══════════════════════════════════════════════
+       EMPTY / AUTH STATES
+    ══════════════════════════════════════════════ */
+    .state-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 70px 28px;
+      gap: 18px; text-align: center;
+    }
+    .state-wrap.show { display: flex; }
+
+    .state-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      background: rgba(138,43,226,.09);
+      border: 1px solid rgba(138,43,226,.22);
+      box-shadow: 0 0 24px rgba(138,43,226,.15);
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+    @keyframes iconPulse {
+      0%,100% { box-shadow: 0 0 20px rgba(138,43,226,.12); }
+      50%     { box-shadow: 0 0 40px rgba(138,43,226,.28); }
+    }
+    .state-title {
+      font-family: 'Orbitron', monospace;
+      font-size: .9rem; font-weight: 700; letter-spacing: .06em;
+      color: var(--text-2);
+    }
+    .state-sub { font-size: .84rem; color: var(--text-3); line-height: 1.6; max-width: 260px; }
+    .btn-neon {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px;
+      background: rgba(255,0,255,.1);
+      border: 1px solid rgba(255,0,255,.3);
+      border-radius: 22px;
+      font-size: .82rem; font-weight: 700; letter-spacing: .08em;
+      color: var(--magenta); text-decoration: none;
+      transition: background .2s, box-shadow .2s;
+    }
+    .btn-neon:hover { background: rgba(255,0,255,.18); box-shadow: var(--glow-m); }
+
+    /* ══════════════════════════════════════════════
+       BOTTOM NAV
+    ══════════════════════════════════════════════ */
+    nav.bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(13,6,22,.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-top: 1px solid rgba(138,43,226,.16);
+      display: flex; align-items: stretch;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+      text-decoration: none;
+      transition: opacity .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-item:active { opacity: .6; }
+
+    .nav-item i {
+      font-size: 1.22rem;
+      color: var(--text-3);
+      transition: color .25s, filter .25s, transform .25s;
+    }
+    .nav-item span {
+      font-size: .59rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-3);
+      transition: color .25s;
+    }
+
+    /* Active state */
+    .nav-item.active i {
+      color: var(--purple-hi);
+      filter: drop-shadow(0 0 5px rgba(160,32,240,.85));
+      transform: scale(1.18);
+    }
+    .nav-item.active span { color: var(--purple-hi); }
+
+    /* Fuchsia neon — unread messages */
+    .nav-item i.has-notif {
+      color: var(--magenta) !important;
+      filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45)) !important;
+      animation: navPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes navPulse {
+      0%,100% { filter: drop-shadow(0 0 6px #ff00ff); }
+      50%     { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff); }
+    }
+
+    /* Badge counter */
+    .badge-counter {
+      position: absolute;
+      top: 8px; left: calc(50% + 4px);
+      min-width: 17px; height: 17px; padding: 0 3px;
+      background: var(--magenta);
+      border: 2px solid var(--bg);
+      border-radius: 10px;
+      font-family: 'Urbanist', sans-serif;
+      font-size: .58rem; font-weight: 900; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(255,0,255,.9);
+      pointer-events: none;
+      animation: badgeIn .3s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes badgeIn {
+      from { transform: scale(0); }
+      70%  { transform: scale(1.2); }
+      to   { transform: scale(1); }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- MAIN SCREEN -->
-    <div id="mainScreen" class="screen">
-        <div class="header">
-            <h2>⚡ Kinetic</h2>
-            <div style="display:flex; gap:0.5rem;">
-                <button class="icon-btn" id="toggleViewBtn" title="Vista mapa/grid">🗺️</button>
-                <button class="icon-btn" id="chatListBtn" title="Mensajes">💬</button>
-                <button class="icon-btn" id="logoutBtn" title="Salir">🚪</button>
-            </div>
-        </div>
-        <div class="filters" id="filtersContainer">
-            <span class="filter-chip active" data-gender="all">🌐 Todos</span>
-            <span class="filter-chip" data-gender="female">👩 Mujeres</span>
-            <span class="filter-chip" data-gender="male">👨 Hombres</span>
-            <span class="filter-chip" data-filter="modoExpress">⚡ Diversión Rápida</span>
-        </div>
-        <div id="dynamicContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
-        <div class="bottom-nav">
-            <div class="nav-item active" data-screen="mainScreen"><span class="nav-icon">📡</span><span>Radar</span></div>
-            <div class="nav-item" data-screen="myProfile"><span class="nav-icon">👤</span><span>Perfil</span></div>
-            <div class="nav-item" data-screen="chats" id="navChats"><span class="nav-icon">💬</span><span>Chats</span><span class="nav-badge" id="unreadBadge" style="display:none;">0</span></div>
-            <div class="nav-item" data-screen="settings"><span class="nav-icon">⚙️</span><span>Ajustes</span></div>
-        </div>
-        <div id="limitWarning" style="display:none; background:var(--purple-dark); padding:0.5rem; text-align:center; font-size:0.8rem;">
-            Has alcanzado el límite diario. <button id="upgradeBtn" style="background:var(--red); color:white; border:none; padding:0.3rem 1rem; border-radius:12px; margin-left:0.5rem;">Hazte Premium</button>
-        </div>
+<div id="page">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="topbar-logo">KINETIC</span>
+    <span class="topbar-center">Radar</span>
+    <div class="topbar-pill" id="livePill" style="display:none">
+      <div class="live-dot"></div>
+      <span id="liveCount">0</span>
     </div>
+  </div>
 
-    <!-- MODAL PERFIL -->
-    <div id="profileModal" class="modal"><div class="modal-content" id="modalContent"></div></div>
+  <!-- FILTER CHIPS -->
+  <div class="filter-bar" id="filterBar">
+    <div class="chip active" data-filter="all">🌐 Todos</div>
+    <div class="chip" data-filter="online">🟢 En línea</div>
+    <div class="chip" data-filter="hombre">♂ Hombres</div>
+    <div class="chip" data-filter="mujer">♀ Mujeres</div>
+    <div class="chip" data-filter="otro">✦ Otro</div>
+  </div>
 
-    <!-- TOAST -->
-    <div id="toast" class="toast" style="display:none;"></div>
+  <!-- SECTION DIVIDER -->
+  <div class="section-label"><span>📡 Personas cerca de ti</span></div>
 
-    <!-- Firebase y Leaflet -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, get, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  <!-- SKELETON (visible while loading) -->
+  <div id="skeleton">
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+    <div class="skel-card"></div>
+  </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-            authDomain: "kinetic-app-67ae5.firebaseapp.com",
-            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-            projectId: "kinetic-app-67ae5",
-            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-            messagingSenderId: "825570718975",
-            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-        };
+  <!-- RADAR GRID (filled by JS) -->
+  <div id="radarGrid" style="display:none"></div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+  <!-- EMPTY STATE -->
+  <div class="state-wrap" id="emptyState">
+    <div class="state-icon">📡</div>
+    <div class="state-title">Sin resultados</div>
+    <div class="state-sub">No encontramos usuarios con este filtro. ¡Prueba otra categoría!</div>
+  </div>
 
-        let currentUser = null;
-        let userProfile = null;
-        let nearbyUsers = [];
-        let currentView = 'grid';
-        let map = null;
-        let mapMarkers = [];
-        let unreadCounts = new Map();
-        let filterGender = 'all';
-        let filterModoExpress = false;
-        const dailyLimit = 10;
+  <!-- AUTH GATE -->
+  <div class="state-wrap" id="authGate">
+    <div class="state-icon" style="background:rgba(255,0,85,.07);border-color:rgba(255,0,85,.2)">
+      <i class="fa-solid fa-lock" style="font-size:2rem;color:#ff4466"></i>
+    </div>
+    <div class="state-title">Acceso restringido</div>
+    <div class="state-sub">Debes iniciar sesión para explorar el Radar.</div>
+    <a class="btn-neon" href="index.html">← Ir al inicio</a>
+  </div>
 
-        const toast = document.getElementById('toast');
-        const limitWarning = document.getElementById('limitWarning');
-        const profileModal = document.getElementById('profileModal');
-        const modalContent = document.getElementById('modalContent');
-        const unreadBadge = document.getElementById('unreadBadge');
+</div><!-- /page -->
 
-        // SVG de respaldo para avatares
-        const defaultAvatarSVG = `<svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;background:#12091f;border-radius:50%;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>`;
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a class="nav-item active" href="radar.html">
+    <i class="fa-solid fa-location-crosshairs"></i>
+    <span>Radar</span>
+  </a>
+  <a class="nav-item" href="chats.html" id="navChats">
+    <i class="fa-solid fa-comment-dots" id="navChatIcon"></i>
+    <span>Chats</span>
+  </a>
+  <a class="nav-item" href="likes.html">
+    <i class="fa-solid fa-heart"></i>
+    <span>Likes</span>
+  </a>
+  <a class="nav-item" href="perfil.html">
+    <i class="fa-solid fa-user"></i>
+    <span>Perfil</span>
+  </a>
+</nav>
 
-        function showToast(msg) {
-            toast.textContent = msg; toast.style.display = 'block';
-            toast.style.animation = 'none'; void toast.offsetWidth;
-            toast.style.animation = 'toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards';
-            setTimeout(() => toast.style.display = 'none', 3000);
+<!-- ════════════════════════════════════════════
+     FIREBASE SDK v10 — modular CDN
+════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase, ref, onValue, off }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+/* ────────────────────────────────────
+   CONFIG
+──────────────────────────────────── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
+  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+  projectId:         "kinetic-app-67ae5",
+  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
+  messagingSenderId: "825570718975",
+  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getDatabase(app);
+
+/* ────────────────────────────────────
+   SVG FALLBACK — cyberpunk silhouette
+   Injected as innerHTML so no <img> is ever left empty/broken.
+──────────────────────────────────── */
+const defaultAvatar = `<svg viewBox="0 0 24 24" fill="none"
+  style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;
+         background:#12091f;border-radius:50%;">
+  <circle cx="12" cy="8" r="4"/>
+  <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+</svg>`;
+
+/* ────────────────────────────────────
+   STATE
+──────────────────────────────────── */
+let me           = null;
+let allUsers     = {};        // uid → profile snapshot
+let activeFilter = 'all';
+let usersUnsub   = null;
+let chatsUnsub   = null;
+
+/* ────────────────────────────────────
+   HELPERS
+──────────────────────────────────── */
+const esc = s => String(s ?? '')
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+/**
+ * Validate a photo URL: must start with http(s):// and have real content.
+ */
+function isValidUrl(raw) {
+  if (typeof raw !== 'string') return false;
+  const t = raw.trim();
+  return t.length > 12 && /^https?:\/\/.{5,}/.test(t);
+}
+
+/**
+ * Return first valid photo URL from a profile.
+ * Checks album[], photos[], and standalone foto field.
+ * Returns null when none found.
+ */
+function firstValidPhoto(data) {
+  if (!data) return null;
+  const sources = [
+    ...(Array.isArray(data.album)  ? data.album  : []),
+    ...(Array.isArray(data.photos) ? data.photos : []),
+    ...(data.foto ? [data.foto] : []),
+  ];
+  for (const u of sources) {
+    if (isValidUrl(u)) return u.trim();
+  }
+  return null;
+}
+
+/**
+ * Normalize gender string to a filter key for comparison.
+ */
+function genderKey(g) {
+  if (!g) return 'otro';
+  const l = String(g).toLowerCase();
+  if (l.includes('masc') || l.includes('hombre') || l === 'm') return 'hombre';
+  if (l.includes('fem')  || l.includes('mujer')  || l === 'f') return 'mujer';
+  return 'otro';
+}
+
+/**
+ * Short label shown in the card badge (gender abbreviation).
+ */
+function genderLabel(g) {
+  const k = genderKey(g);
+  if (k === 'hombre') return '♂';
+  if (k === 'mujer')  return '♀';
+  return '✦';
+}
+
+/* ────────────────────────────────────
+   SKELETON HIDE
+──────────────────────────────────── */
+function hideSkeleton() {
+  const sk = document.getElementById('skeleton');
+  if (sk) sk.style.display = 'none';
+}
+
+/* ────────────────────────────────────
+   AUTH
+──────────────────────────────────── */
+onAuthStateChanged(auth, user => {
+  if (user) {
+    me = user;
+    hideSkeleton();
+    startUsersListener();
+    startChatsListener();
+    wireFilters();
+  } else {
+    hideSkeleton();
+    document.getElementById('authGate').classList.add('show');
+  }
+});
+
+/* ────────────────────────────────────
+   USERS REAL-TIME LISTENER
+──────────────────────────────────── */
+function startUsersListener() {
+  const usersRef = ref(db, 'users');
+  if (usersUnsub) off(usersRef);
+
+  usersUnsub = onValue(usersRef, snap => {
+    allUsers = {};
+    if (snap.exists()) {
+      snap.forEach(child => {
+        const uid  = child.key;
+        const data = child.val();
+        if (uid === me.uid) return;    // exclude self
+        allUsers[uid] = { uid, ...data };
+      });
+    }
+    renderGrid();
+  }, err => {
+    hideSkeleton();
+    console.error('[usersListener]', err);
+  });
+}
+
+/* ────────────────────────────────────
+   RENDER RADAR GRID
+──────────────────────────────────── */
+function renderGrid() {
+  const grid  = document.getElementById('radarGrid');
+  const empty = document.getElementById('emptyState');
+  const pill  = document.getElementById('livePill');
+
+  // Apply active filter
+  let users = Object.values(allUsers);
+
+  if (activeFilter === 'online') {
+    users = users.filter(u => u.online === true);
+  } else if (activeFilter === 'hombre') {
+    users = users.filter(u => genderKey(u.genero || u.gender) === 'hombre');
+  } else if (activeFilter === 'mujer') {
+    users = users.filter(u => genderKey(u.genero || u.gender) === 'mujer');
+  } else if (activeFilter === 'otro') {
+    users = users.filter(u => genderKey(u.genero || u.gender) === 'otro');
+  }
+
+  // Sort: online first, then by name
+  users.sort((a, b) => {
+    if (a.online && !b.online) return -1;
+    if (!a.online && b.online) return 1;
+    return (a.nombre || a.name || '').localeCompare(b.nombre || b.name || '');
+  });
+
+  // Live pill
+  const onlineCount = Object.values(allUsers).filter(u => u.online).length;
+  if (onlineCount > 0) {
+    document.getElementById('liveCount').textContent = onlineCount;
+    pill.style.display = 'flex';
+  } else {
+    pill.style.display = 'none';
+  }
+
+  // No results
+  if (users.length === 0) {
+    grid.style.display  = 'none';
+    empty.classList.add('show');
+    return;
+  }
+
+  empty.classList.remove('show');
+  grid.style.display = 'grid';
+  grid.innerHTML     = '';
+
+  users.forEach((data, idx) => {
+    const card = buildCard(data, idx);
+    grid.appendChild(card);
+  });
+}
+
+/* ────────────────────────────────────
+   BUILD SINGLE CARD
+──────────────────────────────────── */
+function buildCard(data, idx) {
+  const uid      = data.uid;
+  const name     = data.nombre || data.name     || 'Desconocido';
+  const age      = data.edad   || data.age      || null;
+  const gender   = data.genero || data.gender   || null;
+  const online   = data.online === true;
+  const photoUrl = firstValidPhoto(data);
+
+  const card = document.createElement('div');
+  card.className = 'radar-card';
+  card.style.animationDelay = `${Math.min(idx * 0.035, 0.7)}s`;
+
+  /* ── Photo or SVG placeholder ── */
+  if (photoUrl) {
+    const img = document.createElement('img');
+    img.className = 'card-photo';
+    img.alt       = name;
+    img.loading   = 'lazy';
+    img.src       = photoUrl;
+    // On error: replace with SVG placeholder — never a broken icon
+    img.onerror   = () => {
+      img.remove();
+      const ph = document.createElement('div');
+      ph.className = 'card-avatar-ph';
+      ph.innerHTML = defaultAvatar;
+      card.insertBefore(ph, card.firstChild);
+    };
+    card.appendChild(img);
+  } else {
+    // No URL at all — inject SVG directly
+    const ph = document.createElement('div');
+    ph.className = 'card-avatar-ph';
+    ph.innerHTML = defaultAvatar;
+    card.appendChild(ph);
+  }
+
+  /* ── Gradient overlay ── */
+  const grad = document.createElement('div');
+  grad.className = 'card-grad';
+  card.appendChild(grad);
+
+  /* ── Online indicator ── */
+  if (online) {
+    const dot = document.createElement('div');
+    dot.className = 'card-online';
+    card.appendChild(dot);
+  }
+
+  /* ── Gender badge (top-right) ── */
+  if (gender) {
+    const badge = document.createElement('div');
+    badge.className   = 'card-badge';
+    badge.textContent = genderLabel(gender);
+    card.appendChild(badge);
+  }
+
+  /* ── Info overlay (bottom) ── */
+  const info = document.createElement('div');
+  info.className = 'card-info';
+
+  const nameEl = document.createElement('div');
+  nameEl.className   = 'card-name';
+  nameEl.textContent = name;
+  info.appendChild(nameEl);
+
+  if (age || gender) {
+    const meta = document.createElement('div');
+    meta.className = 'card-meta';
+    const parts = [];
+    if (age)    parts.push(`<span class="card-age-accent">${esc(String(age))} años</span>`);
+    if (gender) parts.push(esc(gender));
+    meta.innerHTML = parts.join(' · ');
+    info.appendChild(meta);
+  }
+
+  card.appendChild(info);
+
+  /* ── Click → save & redirect ── */
+  card.addEventListener('click', () => {
+    try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
+    window.location.href = `perfil-detalle.html?id=${encodeURIComponent(uid)}`;
+  });
+
+  return card;
+}
+
+/* ────────────────────────────────────
+   FILTER CHIPS WIRING
+──────────────────────────────────── */
+function wireFilters() {
+  document.querySelectorAll('#filterBar .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#filterBar .chip')
+        .forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter || 'all';
+      renderGrid();
+    });
+  });
+}
+
+/* ────────────────────────────────────
+   CHATS LISTENER — notification badge
+   Counts rooms where lastInfo.unreadTarget === me.uid
+   (+ fallback scan of messages[].unread)
+──────────────────────────────────── */
+function startChatsListener() {
+  const chatsRef = ref(db, 'chats');
+  if (chatsUnsub) off(chatsRef);
+
+  const iconEl  = document.getElementById('navChatIcon');
+  const navItem = document.getElementById('navChats');
+
+  chatsUnsub = onValue(chatsRef, snap => {
+    let pending = 0;
+
+    if (snap.exists()) {
+      snap.forEach(chatSnap => {
+        const chat = chatSnap.val();
+        if (!chat) return;
+
+        // Strategy A — fast path via lastInfo
+        if (chat.lastInfo?.unreadTarget === me.uid) {
+          pending++;
+          return;
         }
 
-        function getInitials(name) { return name?.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || '?'; }
-        function getAvatarColors(name) {
-            const p = [['#7B2CBF','#E5383B'],['#9D4EDD','#FF686B'],['#5A189A','#D00000'],['#3C096C','#FF4D6D'],['#7209B7','#F72585']];
-            let h = 0; for (let i=0; i<name.length; i++) h = name.charCodeAt(i) + ((h<<5)-h);
-            return p[Math.abs(h) % p.length];
-        }
+        // Strategy B — check we are a participant, then scan messages
+        const parts = chat.participants || {};
+        const inId  = chatSnap.key.split('_').includes(me.uid);
+        if (!parts[me.uid] && !inId) return;
 
-        // Autenticación
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = 'index.html'; // Redirigir al login
-                return;
-            }
-            currentUser = user;
-            const snap = await get(ref(db, 'users/' + user.uid));
-            if (snap.exists()) {
-                userProfile = snap.val();
-                userProfile.uid = user.uid;
-                await update(ref(db, 'users/' + user.uid), { online: true });
-                onDisconnect(ref(db, 'users/' + user.uid)).update({ online: false });
-                loadNearbyUsers();
-                setupChatNotifications();
-            } else {
-                window.location.href = 'setup.html';
-            }
-        });
+        const msgs = chat.messages || {};
+        const hasUnread = Object.values(msgs).some(
+          m => m?.senderId !== me.uid && m?.unread === true
+        );
+        if (hasUnread) pending++;
+      });
+    }
 
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+    updateNavBadge(pending, iconEl, navItem);
+  });
+}
 
-        // Toggle vista
-        document.getElementById('toggleViewBtn').addEventListener('click', () => {
-            currentView = currentView === 'grid' ? 'map' : 'grid';
-            document.getElementById('toggleViewBtn').textContent = currentView === 'grid' ? '🗺️' : '🔲';
-            loadNearbyUsers();
-        });
+function updateNavBadge(count, iconEl, navItemEl) {
+  // Remove stale badge
+  navItemEl.querySelectorAll('.badge-counter').forEach(b => b.remove());
 
-        // Filtros
-        document.getElementById('filtersContainer').addEventListener('click', (e) => {
-            if (!e.target.classList.contains('filter-chip')) return;
-            const chip = e.target;
-            if (chip.dataset.gender) {
-                document.querySelectorAll('.filter-chip[data-gender]').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                filterGender = chip.dataset.gender;
-            } else if (chip.dataset.filter === 'modoExpress') {
-                filterModoExpress = !filterModoExpress;
-                chip.classList.toggle('active', filterModoExpress);
-            }
-            loadNearbyUsers();
-        });
-
-        // Radar
-        async function loadNearbyUsers() {
-            if (!currentUser || !userProfile) return;
-            const snap = await get(ref(db, 'users'));
-            if (!snap.exists()) {
-                document.getElementById('dynamicContainer').innerHTML = '';
-                return;
-            }
-            const all = snap.val();
-            const me = currentUser.uid;
-            const myLat = userProfile.lat;
-            const myLng = userProfile.lng;
-
-            let users = Object.entries(all)
-                .filter(([uid]) => uid !== me)
-                .map(([uid, p]) => {
-                    let dist = null;
-                    if (myLat && myLng && p.lat && p.lng) {
-                        dist = getDistance(myLat, myLng, p.lat, p.lng);
-                    }
-                    return { uid, ...p, distance: dist };
-                })
-                .filter(u => {
-                    if (userProfile.interestedIn === 'female' && u.gender !== 'female') return false;
-                    if (userProfile.interestedIn === 'male' && u.gender !== 'male') return false;
-                    return true;
-                });
-
-            if (filterGender !== 'all') users = users.filter(u => u.gender === filterGender);
-            if (filterModoExpress) users = users.filter(u => u.modoExpress === true);
-            users.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
-            nearbyUsers = users;
-
-            const container = document.getElementById('dynamicContainer');
-            container.innerHTML = '';
-            if (currentView === 'grid') {
-                container.className = 'grid';
-                renderGrid(container);
-            } else {
-                container.className = '';
-                container.innerHTML = '<div id="map" style="flex:1;"></div>';
-                setTimeout(initMap, 200);
-            }
-        }
-
-        function renderGrid(container) {
-            container.innerHTML = nearbyUsers.map(u => {
-                const hasPhoto = u.profilePic?.startsWith('http') || (u.album?.length > 0 && u.album[0]?.startsWith('http'));
-                const photoUrl = hasPhoto ? (u.profilePic?.startsWith('http') ? u.profilePic : u.album[0]) : null;
-                const onlineClass = u.online ? 'online' : 'offline';
-                const distText = u.distance ? (u.distance < 1 ? '📍 ' + Math.round(u.distance*1000) + ' metros' : '📍 ' + u.distance.toFixed(1) + ' km') : '🌍';
-                let imgContent = '';
-                if (photoUrl) {
-                    imgContent = `<div class="profile-img" style="background-image:url(${photoUrl})">
-                        <span class="online-indicator ${onlineClass}"></span>
-                    </div>`;
-                } else {
-                    imgContent = `<div class="profile-img" style="background:linear-gradient(135deg, ${getAvatarColors(u.name)[0]}, ${getAvatarColors(u.name)[1]});">
-                        ${getInitials(u.name)}
-                        <span class="online-indicator ${onlineClass}"></span>
-                    </div>`;
-                }
-                return `<div class="profile-card" style="animation-delay:${i*0.04}s;" data-uid="${u.uid}">
-                    ${imgContent}
-                    <div class="profile-info">
-                        <div class="profile-name">${u.name}, ${u.age || '?'}</div>
-                        <div class="profile-distance">${distText}</div>
-                    </div>
-                </div>`;
-            }).join('');
-            container.querySelectorAll('.profile-card').forEach(card => {
-                card.addEventListener('click', () => openProfile(card.dataset.uid));
-            });
-        }
-
-        function initMap() {
-            if (!map) {
-                map = L.map('map').setView([0,0], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(map);
-            }
-            mapMarkers.forEach(m => map.removeLayer(m));
-            mapMarkers = [];
-            if (userProfile?.lat && userProfile?.lng) {
-                map.setView([userProfile.lat, userProfile.lng], 13);
-                const myIcon = L.divIcon({html:'<div style="background:#E5383B; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>'});
-                mapMarkers.push(L.marker([userProfile.lat, userProfile.lng], {icon:myIcon}).addTo(map).bindPopup('Yo'));
-            }
-            nearbyUsers.forEach(u => {
-                if (u.lat && u.lng) {
-                    const iconHtml = u.profilePic?.startsWith('http') ? `<img src="${u.profilePic}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : getInitials(u.name);
-                    const icon = L.divIcon({
-                        html: `<div style="background:#7B2CBF; width:30px;height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:12px;">${iconHtml}</div>`,
-                        iconSize:[34,34]
-                    });
-                    const marker = L.marker([u.lat, u.lng], {icon}).addTo(map);
-                    marker.on('click', () => openProfile(u.uid));
-                    mapMarkers.push(marker);
-                }
-            });
-        }
-
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2-lat1)*Math.PI/180;
-            const dLon = (lon2-lon1)*Math.PI/180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        // Modal perfil
-        async function openProfile(uid) {
-            if (!userProfile.premium) {
-                const can = await incrementViewCount();
-                if (!can) { limitWarning.style.display = 'block'; return; }
-            }
-            const user = nearbyUsers.find(u => u.uid === uid);
-            if (!user) return;
-            const initials = getInitials(user.name);
-            const [c1, c2] = getAvatarColors(user.name);
-            const mainPic = user.profilePic ? `<img src="${user.profilePic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerHTML='${defaultAvatarSVG.replace(/'/g, "\\'")}';">` : initials;
-            const album = user.album || [];
-            let albumHtml = '';
-            if (album.length > 0 && album.some(url => url?.startsWith('http'))) {
-                albumHtml = '<div class="album-title">📸 Álbum</div><div class="album-grid">' +
-                    album.filter(url => url?.startsWith('http')).map(url => `<div class="album-item" style="background-image:url(${url});"></div>`).join('') +
-                    '</div>';
-            }
-            modalContent.innerHTML = `
-                <div class="modal-header">
-                    <button class="modal-close" id="closeModalBtn">✕</button>
-                    <div class="modal-avatar" style="${!user.profilePic ? `background:linear-gradient(135deg, ${c1}, ${c2});` : ''}">${mainPic}</div>
-                    <h3>${user.name}, ${user.age || '?'}</h3>
-                    <p>${user.distance ? (user.distance < 1 ? '📍 ' + Math.round(user.distance*1000) + ' metros' : '📍 ' + user.distance.toFixed(1) + ' km') : '🌍'} • ${user.online ? '🟢 En línea' : '⚫ Desconectado'}</p>
-                </div>
-                <div class="modal-body">
-                    <p class="bio">${user.bio || 'Sin descripción'}</p>
-                    ${albumHtml}
-                </div>
-                <div class="modal-actions">
-                    <button class="btn-like">❤️ Me gusta</button>
-                    <button class="btn-message" id="openChatBtn">💬 Mensaje</button>
-                </div>`;
-            document.getElementById('closeModalBtn').addEventListener('click', () => profileModal.classList.remove('active'));
-            document.getElementById('openChatBtn').addEventListener('click', () => {
-                profileModal.classList.remove('active');
-                window.location.href = 'chat-interno.html?id=' + uid;
-            });
-            profileModal.classList.add('active');
-        }
-        window.closeModal = () => profileModal.classList.remove('active');
-        profileModal.addEventListener('click', e => { if (e.target === profileModal) profileModal.classList.remove('active'); });
-
-        // Límite diario
-        function getTodayString() {
-            const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        }
-        async function incrementViewCount() {
-            const uRef = ref(db, 'users/' + currentUser.uid);
-            const snap = await get(uRef);
-            if (!snap.exists()) return false;
-            const data = snap.val();
-            const today = getTodayString();
-            let views = data.dailyViews || 0;
-            if (data.lastResetDate !== today) {
-                views = 0;
-                await update(uRef, { dailyViews: 0, lastResetDate: today });
-            }
-            if (views >= dailyLimit) return false;
-            await update(uRef, { dailyViews: views + 1 });
-            userProfile.dailyViews = views + 1;
-            return true;
-        }
-        document.getElementById('upgradeBtn')?.addEventListener('click', async () => {
-            await update(ref(db, 'users/' + currentUser.uid), { premium: true });
-            userProfile.premium = true;
-            limitWarning.style.display = 'none';
-            showToast('¡Ahora eres Premium!');
-        });
-
-        // Notificaciones de chats
-        function setupChatNotifications() {
-            onValue(ref(db, 'chats'), (snap) => {
-                if (!snap.exists() || !currentUser) return;
-                const chats = snap.val();
-                unreadCounts.clear();
-                for (const chatId in chats) {
-                    if (!chatId.includes(currentUser.uid)) continue;
-                    const lastInfo = chats[chatId].lastInfo;
-                    if (lastInfo?.unreadTarget === currentUser.uid) {
-                        const partner = chatId.split('_').find(id => id !== currentUser.uid);
-                        unreadCounts.set(partner, (unreadCounts.get(partner)||0)+1);
-                    }
-                }
-                let total = 0;
-                for (const c of unreadCounts.values()) total += c;
-                if (total > 0) {
-                    unreadBadge.textContent = total > 99 ? '99+' : total;
-                    unreadBadge.style.display = 'flex';
-                } else {
-                    unreadBadge.style.display = 'none';
-                }
-            });
-        }
-
-        // Navegación inferior
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const screen = item.dataset.screen;
-                if (screen === 'myProfile') window.location.href = 'myProfile.html';
-                else if (screen === 'chats') window.location.href = 'chats.html';
-                else if (screen === 'settings') window.location.href = 'settings.html';
-            });
-        });
-    </script>
+  if (count > 0) {
+    iconEl.classList.add('has-notif');
+    const badge = document.createElement('div');
+    badge.className  = 'badge-counter';
+    badge.textContent = count > 9 ? '9+' : String(count);
+    navItemEl.appendChild(badge);
+  } else {
+    iconEl.classList.remove('has-notif');
+  }
+}
+</script>
 </body>
 </html>
