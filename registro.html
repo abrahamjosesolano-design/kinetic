@@ -250,6 +250,7 @@
 
                 const edadNumero = edadRaw ? parseInt(edadRaw, 10) : null;
 
+                // 1. Nodo privado completo
                 const userData = {
                     name: nombre,
                     email: email,
@@ -268,7 +269,22 @@
                     lastResetDate: new Date().toISOString().split('T')[0]
                 };
 
-                await set(ref(db, 'users/' + user.uid), userData);
+                // 2. Nodo público optimizado para el Radar
+                const publicRadarData = {
+                    name: nombre,
+                    age: edadNumero,
+                    gender: "other",
+                    profilePic: "",
+                    album: [],
+                    online: true
+                };
+
+                // Guardamos en ambos nodos de forma paralela y segura
+                await Promise.all([
+                    set(ref(db, 'users/' + user.uid), userData),
+                    set(ref(db, 'radar_public/' + user.uid), publicRadarData)
+                ]);
+
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error('Error en registro:', error);
