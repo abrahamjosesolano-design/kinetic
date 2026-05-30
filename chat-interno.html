@@ -336,17 +336,13 @@
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════
-       HEADER
-  ═══════════════════════════════════════ -->
   <header id="header">
     <button id="btnBack" aria-label="Volver">
       <i class="fa-solid fa-arrow-left"></i>
     </button>
 
     <div id="headerAvatar" aria-hidden="true">
-      <!-- Avatar inyectado por JS -->
-    </div>
+      </div>
 
     <div id="headerInfo">
       <div id="headerName">Cargando…</div>
@@ -354,16 +350,10 @@
     </div>
   </header>
 
-  <!-- ═══════════════════════════════════════
-       ÁREA DE MENSAJES
-  ═══════════════════════════════════════ -->
   <main id="msgArea" aria-live="polite" aria-label="Mensajes">
     <div id="spinner"></div>
   </main>
 
-  <!-- ═══════════════════════════════════════
-       BARRA DE INPUT
-  ═══════════════════════════════════════ -->
   <div id="inputBar" role="form" aria-label="Escribir mensaje">
     <textarea
       id          ="msgInput"
@@ -378,23 +368,6 @@
     </button>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       ÚNICO BLOQUE SCRIPT — Firebase v10.8.0 módulos ES
-       ─────────────────────────────────────────────────────────
-       REGLAS CUMPLIDAS:
-       ✅ UN solo <script type="module">
-       ✅ Credenciales Firebase reales (no mock)
-       ✅ let miUid = null declarado en scope global
-       ✅ miUid = user.uid dentro de onAuthStateChanged
-       ✅ chatTargetId desde URLSearchParams('id')
-       ✅ idChat generado ordenando UIDs alfabéticamente
-       ✅ onValue en chats/${idChat}/messages (tiempo real)
-       ✅ push() para enviar + update() para lastInfo
-       ✅ Limpieza de unreadTarget al entrar a la sala
-       ✅ Auto-scroll en cada mensaje nuevo
-       ✅ Burbujas: fucsia (yo) / morado oscuro (otro)
-       ✅ Fallback SVG neón para avatares rotos/vacíos
-  ═══════════════════════════════════════════════════════════ -->
   <script type="module">
 
     /* ──────────────────────────────────────────────────
@@ -423,15 +396,13 @@
       appId            : "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
     };
 
-    const app  = initializeApp(firebaseConfig);
+    const app   = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getDatabase(app);
 
 
     /* ──────────────────────────────────────────────────
        C) VARIABLES GLOBALES DEL MÓDULO
-          Declaradas en el scope raíz → accesibles desde
-          cualquier función y addEventListener.
     ────────────────────────────────────────────────── */
     let miUid       = null;   // asignado por onAuthStateChanged
     let idChat      = null;   // generado tras conocer miUid
@@ -442,12 +413,11 @@
 
     /* ──────────────────────────────────────────────────
        D) CAPTURA DE chatTargetId DESDE LA URL
-          Parámetro: chat-interno.html?id=USER_ID
     ────────────────────────────────────────────────── */
     const urlParams    = new URLSearchParams(window.location.search);
     const chatTargetId = urlParams.get("id");
 
-    // Sin ID → redirigir a la lista de chats
+    // Sin ID → redirigir de forma relativa a la lista de chats
     if (!chatTargetId || chatTargetId.trim() === "") {
       window.location.href = "chats.html";
     }
@@ -467,8 +437,6 @@
 
     /* ──────────────────────────────────────────────────
        F) SVG FALLBACK CYBERPUNK
-          Injected as DOM node — no network request,
-          never 404, never broken image border.
     ────────────────────────────────────────────────── */
     const DEFAULT_SVG = `<svg viewBox="0 0 24 24" fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -479,7 +447,6 @@
       <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
     </svg>`;
 
-    // data-URI para usar como img.src en burbujas
     const SVG_DATA_URI = "data:image/svg+xml," + encodeURIComponent(DEFAULT_SVG);
 
 
@@ -487,7 +454,6 @@
        G) HELPERS PUROS
     ────────────────────────────────────────────────── */
 
-    /** Verifica que val sea una URL http/https usable */
     function esUrl(val) {
       if (!val || typeof val !== "string" || !val.trim()) return false;
       try {
@@ -496,7 +462,6 @@
       } catch { return false; }
     }
 
-    /** Extrae la primera foto válida del usuario */
     function resolverAvatar(user) {
       if (!user) return null;
       const fromAlbum = Array.isArray(user.album) && user.album.length > 0
@@ -506,13 +471,11 @@
       return null;
     }
 
-    /** Nombre seguro con fallback */
     function resolverNombre(user) {
       const n = (user?.nombre || user?.name || user?.displayName || "").trim();
       return n || "Usuario";
     }
 
-    /** Formatea timestamp en HH:MM */
     function fmtHora(ts) {
       if (!ts) return "";
       return new Date(ts).toLocaleTimeString("es", {
@@ -520,7 +483,6 @@
       });
     }
 
-    /** Etiqueta de fecha para separadores */
     function fmtFecha(ts) {
       if (!ts) return "";
       const d   = new Date(ts);
@@ -531,31 +493,28 @@
       return d.toLocaleDateString("es", { day:"numeric", month:"short", year:"numeric" });
     }
 
-    /** Scroll al fondo del área de mensajes */
     function scrollFondo() {
       requestAnimationFrame(() => { $area.scrollTop = $area.scrollHeight; });
     }
 
 
     /* ──────────────────────────────────────────────────
-       H) LISTENERS DE UI — registrados UNA SOLA VEZ
+       H) LISTENERS DE UI
     ────────────────────────────────────────────────── */
 
-    // Botón volver
+    // Corrección de la ruta relativa limpia para el botón volver
     document.getElementById("btnBack").addEventListener("click", () => {
       window.history.length > 1
         ? window.history.back()
         : (window.location.href = "chats.html");
     });
 
-    // Auto-resize textarea + habilitar/deshabilitar btnSend
     $input.addEventListener("input", () => {
       $input.style.height = "auto";
       $input.style.height = Math.min($input.scrollHeight, 120) + "px";
       $btnSend.disabled   = $input.value.trim().length === 0 || enviando;
     });
 
-    // Enter envía (Shift+Enter = nueva línea)
     $input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -568,8 +527,6 @@
 
     /* ──────────────────────────────────────────────────
        I) AUTENTICACIÓN
-          onAuthStateChanged asigna miUid globalmente,
-          luego genera idChat y arranca todo el flujo.
     ────────────────────────────────────────────────── */
     onAuthStateChanged(auth, async (user) => {
 
@@ -578,30 +535,23 @@
         return;
       }
 
-      // ✅ Asignación global segura
       miUid = user.uid;
 
-      // No chatear consigo mismo
       if (miUid === chatTargetId) {
         window.location.href = "chats.html";
         return;
       }
 
-      // ✅ ID de sala único y consistente:
-      //    ordena los dos UIDs alfabéticamente para que ambos
-      //    usuarios siempre lean/escriban en el mismo nodo.
       idChat = miUid < chatTargetId
         ? `${miUid}_${chatTargetId}`
         : `${chatTargetId}_${miUid}`;
 
-      // Cargar perfil del destinatario y arrancar chat
       await cargarPerfilDestinatario();
       limpiarUnread();
       escucharMensajes();
 
-      // Habilitar input
       $input.disabled  = false;
-      $btnSend.disabled = true; // se habilita al escribir
+      $btnSend.disabled = true;
       $input.focus();
     });
 
@@ -622,36 +572,27 @@
       const nombre   = resolverNombre(userData);
       const photoUrl = resolverAvatar(userData);
 
-      // Actualizar título del header
       $headerName.textContent = nombre;
       $headerSt.textContent   = "Kinetic";
       document.title          = `${nombre} — Kinetic`;
 
-      // ── Pintar avatar en header ────────────────────
       $headerAv.innerHTML = "";
       if (photoUrl) {
         const img   = document.createElement("img");
         img.src     = photoUrl;
         img.alt     = nombre;
-        // onerror: reemplaza con SVG si la URL falla
         img.onerror = () => { $headerAv.innerHTML = DEFAULT_SVG; };
         $headerAv.appendChild(img);
         targetAvSrc = photoUrl;
       } else {
         $headerAv.innerHTML = DEFAULT_SVG;
-        targetAvSrc = null; // usará SVG_DATA_URI en burbujas
+        targetAvSrc = null;
       }
     }
 
 
     /* ──────────────────────────────────────────────────
        K) LIMPIAR UNREAD AL ENTRAR A LA SALA
-          Si el unreadTarget del lastInfo apunta a mí,
-          lo borrar para que desaparezca la burbuja neón.
-
-          ✅ FILTRO DE SEGURIDAD:
-          Valida que lastInfo exista y sea objeto antes
-          de leer .unreadTarget (evita TypeError).
     ────────────────────────────────────────────────── */
     function limpiarUnread() {
       if (!idChat || !miUid) return;
@@ -660,18 +601,16 @@
         if (!snap.exists()) return;
         const info = snap.val();
 
-        // Validar que info sea objeto y tenga unreadTarget
         if (!info || typeof info !== "object") return;
         if (info.unreadTarget === miUid) {
           update(ref(db, `chats/${idChat}/lastInfo`), { unreadTarget: null });
         }
-      }).catch(() => { /* silencioso — no es crítico */ });
+      }).catch(() => {});
     }
 
 
     /* ──────────────────────────────────────────────────
        L) ESCUCHAR MENSAJES EN TIEMPO REAL
-          onValue sobre chats/${idChat}/messages
     ────────────────────────────────────────────────── */
     function escucharMensajes() {
       const msgsRef = ref(db, `chats/${idChat}/messages`);
@@ -690,10 +629,8 @@
        M) RENDERIZAR MENSAJES
     ────────────────────────────────────────────────── */
     function renderizarMensajes(datos) {
-      // Quitar spinner de primera carga
       $spinner?.remove();
 
-      // ¿Estábamos al fondo antes de re-renderizar?
       const alFondo = $area.scrollHeight - $area.scrollTop - $area.clientHeight < 60;
 
       $area.innerHTML = "";
@@ -704,7 +641,6 @@
         return;
       }
 
-      // Convertir a array ordenado por timestamp
       const lista = Object.entries(datos)
         .map(([k, v]) => ({ _k: k, ...v }))
         .sort((a, b) => (a.ts || 0) - (b.ts || 0));
@@ -716,7 +652,6 @@
         const label  = fmtFecha(msg.ts);
         const esUlt  = idx === total - 1;
 
-        // ── Separador de fecha ───────────────────────
         if (label !== ultimaFecha) {
           ultimaFecha = label;
           const sep = document.createElement("div");
@@ -725,13 +660,11 @@
           $area.appendChild(sep);
         }
 
-        // ── Fila de burbuja ──────────────────────────
         const row = document.createElement("div");
         row.className = `bubble-row ${soyYo ? "yo" : "otro"}${esUlt ? "" : " no-anim"}`;
 
-        // Mini-avatar del otro (solo en mensajes recibidos)
         if (!soyYo) {
-          const av  = document.createElement("div");
+          const av   = document.createElement("div");
           av.className = "bubble-av";
           if (targetAvSrc) {
             const img   = document.createElement("img");
@@ -745,16 +678,13 @@
           row.appendChild(av);
         }
 
-        // Bloque inner
         const inner = document.createElement("div");
         inner.className = "bubble-inner";
 
-        // Texto del mensaje
         const bub = document.createElement("div");
         bub.className   = "bubble";
-        bub.textContent = msg.text || ""; // textContent → anti-XSS
+        bub.textContent = msg.text || "";
 
-        // Pie: hora + tick
         const foot = document.createElement("div");
         foot.className = "bubble-foot";
 
@@ -776,21 +706,17 @@
         $area.appendChild(row);
       });
 
-      // Auto-scroll si estábamos al fondo o es la carga inicial
       if (alFondo || total <= 20) scrollFondo();
     }
 
 
     /* ──────────────────────────────────────────────────
        N) ENVIAR MENSAJE
-          push() al nodo messages +
-          update() al nodo lastInfo con unreadTarget
     ────────────────────────────────────────────────── */
     async function enviarMensaje() {
       const texto = $input.value.trim();
       if (!texto || !idChat || !miUid || enviando) return;
 
-      // Bloquear UI inmediatamente
       enviando          = true;
       $btnSend.disabled = true;
       $input.value      = "";
@@ -808,19 +734,14 @@
       const lastInfoPayload = {
         lastText     : texto,
         timestamp    : ahora,
-        unreadTarget : chatTargetId   // avisa al receptor que tiene mensaje sin leer
+        unreadTarget : chatTargetId
       };
 
       try {
-        // Guardar mensaje en el historial
         await push(ref(db, `chats/${idChat}/messages`), msgPayload);
-
-        // Actualizar metadatos del chat (para chats.html y badges)
         await update(ref(db, `chats/${idChat}/lastInfo`), lastInfoPayload);
-
       } catch (err) {
         console.error("[Kinetic] Error al enviar mensaje:", err.message);
-        // Restaurar texto para reintentar
         $input.value = texto;
       } finally {
         enviando          = false;
@@ -830,7 +751,7 @@
 
 
     /* ──────────────────────────────────────────────────
-       O) ESTADO VACÍO / ERROR EN ÁREA DE MENSAJES
+       O) ESTADO VACÍO / ERROR
     ────────────────────────────────────────────────── */
     function mostrarEstadoVacio(icono, htmlMsg) {
       $spinner?.remove();
@@ -842,7 +763,6 @@
     }
 
   </script>
-  <!-- FIN DEL ÚNICO BLOQUE SCRIPT -->
 
 </body>
 </html>
