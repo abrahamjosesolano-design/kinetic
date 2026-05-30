@@ -243,7 +243,6 @@
       width: 100%; height: 100%;
       object-fit: cover; display: block;
     }
-    /* SVG / placeholder fills the card */
     .card-avatar-ph {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
@@ -311,7 +310,7 @@
       color: rgba(255,0,255,.75);
     }
 
-    /* ── LIKE OVERLAY CORAZÓN EXTRA ── */
+    /* ── LIKE OVERLAY ── */
     .card-like-btn {
       position: absolute;
       bottom: 8px;
@@ -446,7 +445,6 @@
       transition: color .25s;
     }
 
-    /* Active state */
     .nav-item.active i {
       color: var(--purple-hi);
       filter: drop-shadow(0 0 5px rgba(160,32,240,.85));
@@ -454,10 +452,9 @@
     }
     .nav-item.active span { color: var(--purple-hi); }
 
-    /* Fuchsia neon — unread messages */
     .nav-item i.has-notif {
       color: var(--magenta) !important;
-      filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45)) !important;
+      filter: drop-shadow(0 0 6px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45)) !important;
       animation: navPulse 2.2s ease-in-out infinite;
     }
     @keyframes navPulse {
@@ -465,7 +462,6 @@
       50%      { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff); }
     }
 
-    /* Badge counter */
     .badge-counter {
       position: absolute;
       top: 8px; left: calc(50% + 4px);
@@ -539,7 +535,9 @@
     <a class="btn-neon" href="index.html">← Ir al inicio</a>
   </div>
 
-</div><nav class="bottom-nav">
+</div>
+
+<nav class="bottom-nav">
   <a class="nav-item active" href="radar.html">
     <i class="fa-solid fa-location-crosshairs"></i>
     <span>Radar</span>
@@ -583,9 +581,6 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getDatabase(app);
 
-/* ────────────────────────────────────
-    SVG FALLBACK — cyberpunk silhouette
-──────────────────────────────────── */
 const defaultAvatar = `<svg viewBox="0 0 24 24" fill="none"
   style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;
          background:#12091f;border-radius:50%;">
@@ -597,7 +592,7 @@ const defaultAvatar = `<svg viewBox="0 0 24 24" fill="none"
     STATE
 ──────────────────────────────────── */
 let me           = null;
-let allUsers     = {};        // uid → profile snapshot
+let allUsers     = {};        
 let activeFilter = 'all';
 let usersUnsub   = null;
 let chatsUnsub   = null;
@@ -619,9 +614,7 @@ function firstValidPhoto(data) {
   if (!data) return null;
   const sources = [
     ...(data.profilePic ? [data.profilePic] : []),
-    ...(Array.isArray(data.album) ? data.album : []),
-    ...(Array.isArray(data.photos) ? data.photos : []),
-    ...(data.foto ? [data.foto] : [])
+    ...(Array.isArray(data.album) ? data.album : [])
   ];
   for (const u of sources) {
     if (isValidUrl(u)) return u.trim();
@@ -663,10 +656,11 @@ onAuthStateChanged(auth, user => {
 });
 
 /* ────────────────────────────────────
-    USERS REAL-TIME LISTENER
+    USERS LISTENER (MUDADO A RADAR_PUBLIC)
 ──────────────────────────────────── */
 function startUsersListener() {
-  const usersRef = ref(db, 'users');
+  // Apuntamos al nodo público optimizado
+  const usersRef = ref(db, 'radar_public');
   if (usersUnsub) off(usersRef);
 
   usersUnsub = onValue(usersRef, snap => {
@@ -675,7 +669,7 @@ function startUsersListener() {
       snap.forEach(child => {
         const uid  = child.key;
         const data = child.val();
-        if (uid === me.uid) return;    // Excluirse a sí mismo
+        if (uid === me.uid) return;    
         allUsers[uid] = { uid, ...data };
       });
     }
@@ -696,7 +690,6 @@ function renderGrid() {
 
   let users = Object.values(allUsers);
 
-  // Filtrado optimizado con llaves fijas
   if (activeFilter === 'online') {
     users = users.filter(u => u.online === true);
   } else if (activeFilter === 'male') {
@@ -707,7 +700,6 @@ function renderGrid() {
     users = users.filter(u => (u.gender || 'other') === 'other');
   }
 
-  // Ordenar: primero online, luego por nombre
   users.sort((a, b) => {
     if (a.online && !b.online) return -1;
     if (!a.online && b.online) return 1;
@@ -809,7 +801,6 @@ function buildCard(data, idx) {
 
   card.appendChild(info);
 
-  /* Like directo quirúrgico */
   const likeBtn = document.createElement('div');
   likeBtn.className = 'card-like-btn';
   likeBtn.innerHTML = `<i class="fa-solid fa-heart"></i>`;
