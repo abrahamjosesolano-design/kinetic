@@ -2,956 +2,731 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Kinetic — Entrar</title>
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0616" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Kinetic · Inicio</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
   <style>
-    /* ═══════════════════════════════════════════════════
+    /* ═══════════════════════════════════════
        TOKENS
-    ═══════════════════════════════════════════════════ */
+    ═══════════════════════════════════════ */
     :root {
-      --bg      : #0d0616;
-      --card    : #12091f;
-      --card2   : #1a0f2e;
-      --pink    : #ff00ff;
-      --cyan    : #00ffff;
-      --pglow   : rgba(255,0,255,.38);
-      --cglow   : rgba(0,255,255,.25);
-      --hi      : #f0e6ff;
-      --mid     : #9b84b8;
-      --lo      : #5c4a7a;
-      --br      : rgba(255,0,255,.14);
-      --br-hi   : rgba(255,0,255,.4);
-      --err     : #ff4466;
-      --ok      : #00ffaa;
-      --sb      : env(safe-area-inset-bottom, 0px);
-      --st      : env(safe-area-inset-top,    0px);
+      --bg:        #0d0616;
+      --bg-s:      #12091f;
+      --bg-card:   #160c28;
+      --bg-input:  #0e071a;
+      --purple:    #8a2be2;
+      --purple-hi: #a020f0;
+      --magenta:   #ff00ff;
+      --cyan:      #00ffff;
+      --green:     #39ff14;
+      --red-err:   #ff4466;
+      --text:      #ede0ff;
+      --text-2:    #9880bc;
+      --text-3:    #52406e;
+      --border:    rgba(138,43,226,.22);
+      --r:         14px;
+      --r-sm:      10px;
+      --grad:      linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
+      --glow-p:    0 0 20px rgba(138,43,226,.6);
+      --glow-m:    0 0 18px rgba(255,0,255,.65);
     }
 
-    /* ═══════════════════════════════════════════════════
-       RESET
-    ═══════════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      min-height          : 100%;
-      background          : var(--bg);
-      color               : var(--hi);
-      font-family         : 'Segoe UI', system-ui, sans-serif;
-      overscroll-behavior : none;
-      -webkit-tap-highlight-color: transparent;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Urbanist', sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
-    /* ═══════════════════════════════════════════════════
-       FONDO ANIMADO (partículas CSS)
-    ═══════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
+
+    /* ── GRID ATMOSPHERE ── */
     body::before {
-      content    : "";
-      position   : fixed;
-      inset      : 0;
-      background :
-        radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255,0,255,.07) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,255,255,.06) 0%, transparent 55%);
-      pointer-events: none;
-      z-index    : 0;
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.03) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.03) 40px);
+    }
+    /* ── RADIAL GLOWS ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 48% at 15%  8%,  rgba(138,43,226,.22) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 38% at 85% 90%, rgba(255,0,255,.14)  0%, transparent 60%),
+        radial-gradient(ellipse 45% 30% at 60% 14%, rgba(0,255,255,.07)  0%, transparent 55%);
     }
 
-    /* ═══════════════════════════════════════════════════
-       CONTENEDOR PRINCIPAL
-    ═══════════════════════════════════════════════════ */
-    .page {
-      position       : relative;
-      z-index        : 1;
-      min-height     : 100svh;
-      display        : flex;
-      flex-direction : column;
-      align-items    : center;
-      justify-content: center;
-      padding        : calc(var(--st) + 24px) 20px calc(var(--sb) + 24px);
+    /* ═══════════════════════════════════════
+       LOADING SCREEN
+    ═══════════════════════════════════════ */
+    #loadingScreen {
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 22px;
+      transition: opacity .4s, visibility .4s;
     }
+    #loadingScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-    /* ═══════════════════════════════════════════════════
-       LOGO / MARCA
-    ═══════════════════════════════════════════════════ */
-    .brand {
-      text-align    : center;
-      margin-bottom : 36px;
-    }
-    .brand-icon {
-      width           : 72px;
-      height          : 72px;
-      border-radius   : 22px;
-      background      : linear-gradient(135deg, #3a0066, #660033);
-      border          : 1.5px solid var(--br-hi);
-      box-shadow      : 0 0 28px var(--pglow), 0 0 56px rgba(255,0,255,.12);
-      display         : flex;
-      align-items     : center;
-      justify-content : center;
-      margin          : 0 auto 16px;
-      font-size       : 2rem;
-      color           : var(--pink);
-    }
-    .brand-name {
-      font-size     : 2.2rem;
-      font-weight   : 900;
-      letter-spacing: .15em;
-      text-transform: uppercase;
-      background    : linear-gradient(90deg, var(--pink), var(--cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .ld-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 2rem; font-weight: 900; letter-spacing: .22em;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
+      filter: drop-shadow(0 0 14px rgba(138,43,226,.9));
     }
-    .brand-tagline {
-      font-size    : .8rem;
-      color        : var(--mid);
-      letter-spacing: .06em;
-      margin-top   : 4px;
+    .ld-spinner {
+      width: 38px; height: 38px;
+      border: 3px solid rgba(138,43,226,.18);
+      border-top-color: var(--purple);
+      border-right-color: var(--magenta);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
     }
-
-    /* ═══════════════════════════════════════════════════
-       TARJETA DE FORMULARIO
-    ═══════════════════════════════════════════════════ */
-    .card {
-      width         : 100%;
-      max-width     : 420px;
-      background    : var(--card);
-      border        : 1px solid var(--br);
-      border-radius : 22px;
-      padding       : 30px 26px;
-      box-shadow    : 0 8px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(255,0,255,.05);
-    }
-
-    /* ── Tabs Login / Registro ─────────────────────── */
-    .tabs {
-      display       : flex;
-      background    : var(--card2);
-      border-radius : 12px;
-      padding       : 4px;
-      margin-bottom : 26px;
-      gap           : 4px;
-    }
-    .tab-btn {
-      flex            : 1;
-      padding         : 10px 0;
-      border-radius   : 9px;
-      background      : none;
-      border          : none;
-      font-family     : inherit;
-      font-size       : .85rem;
-      font-weight     : 700;
-      letter-spacing  : .05em;
-      color           : var(--lo);
-      cursor          : pointer;
-      transition      : background .2s, color .2s, box-shadow .2s;
-    }
-    .tab-btn.activo {
-      background : linear-gradient(135deg, rgba(255,0,255,.2), rgba(0,255,255,.12));
-      color      : var(--hi);
-      box-shadow : 0 0 12px rgba(255,0,255,.18);
-    }
-
-    /* ── Paneles ────────────────────────────────────── */
-    .panel { display: none; }
-    .panel.activo { display: block; }
-
-    /* ── Campo de formulario ────────────────────────── */
-    .field {
-      position      : relative;
-      margin-bottom : 16px;
-    }
-    .field label {
-      display       : block;
-      font-size     : .68rem;
-      font-weight   : 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color         : var(--pink);
-      margin-bottom : 6px;
-    }
-    .field-wrap {
-      position: relative;
-      display : flex;
-      align-items: center;
-    }
-    .field-wrap .ico {
-      position   : absolute;
-      left       : 14px;
-      color      : var(--lo);
-      font-size  : .9rem;
-      pointer-events: none;
-    }
-    .field-wrap input,
-    .field-wrap select {
-      width         : 100%;
-      background    : var(--card2);
-      border        : 1px solid var(--br);
-      border-radius : 12px;
-      color         : var(--hi);
-      font-family   : inherit;
-      font-size     : .9rem;
-      padding       : 12px 14px 12px 40px;
-      outline       : none;
-      appearance    : none;
-      -webkit-appearance: none;
-      transition    : border-color .2s, box-shadow .2s;
-    }
-    .field-wrap input::placeholder { color: var(--lo); }
-    .field-wrap input:focus,
-    .field-wrap select:focus {
-      border-color: var(--br-hi);
-      box-shadow  : 0 0 0 2px rgba(255,0,255,.1);
-    }
-    /* Campo de password con toggle */
-    .field-wrap .toggle-pw {
-      position   : absolute;
-      right      : 12px;
-      background : none;
-      border     : none;
-      color      : var(--lo);
-      font-size  : .9rem;
-      cursor     : pointer;
-      padding    : 4px;
-      transition : color .2s;
-    }
-    .field-wrap .toggle-pw:hover { color: var(--mid); }
-    /* Select: flecha custom */
-    .field-wrap .select-arrow {
-      position      : absolute;
-      right         : 12px;
-      color         : var(--lo);
-      font-size     : .75rem;
-      pointer-events: none;
-    }
-    .field-wrap select { cursor: pointer; }
-    .field-wrap select option { background: var(--card2); color: var(--hi); }
-
-    /* Grid para edad + género (registro) */
-    .field-grid {
-      display              : grid;
-      grid-template-columns: 1fr 1fr;
-      gap                  : 12px;
-      margin-bottom        : 0;
-    }
-    .field-grid .field { margin-bottom: 0; }
-
-    /* ── Enlace "¿Olvidaste tu contraseña?" ──────────── */
-    .link-forgot {
-      display    : block;
-      text-align : right;
-      font-size  : .75rem;
-      color      : var(--mid);
-      margin-top : -8px;
-      margin-bottom: 20px;
-      cursor     : pointer;
-      transition : color .2s;
-    }
-    .link-forgot:hover { color: var(--cyan); }
-
-    /* ── Mensaje de error / éxito ───────────────────── */
-    .msg-box {
-      border-radius : 10px;
-      padding       : 10px 14px;
-      font-size     : .82rem;
-      font-weight   : 600;
-      margin-bottom : 18px;
-      display       : none;
-      align-items   : center;
-      gap           : 8px;
-      line-height   : 1.4;
-    }
-    .msg-box.error {
-      display    : flex;
-      background : rgba(255,68,102,.12);
-      border     : 1px solid rgba(255,68,102,.35);
-      color      : var(--err);
-    }
-    .msg-box.ok {
-      display    : flex;
-      background : rgba(0,255,170,.1);
-      border     : 1px solid rgba(0,255,170,.3);
-      color      : var(--ok);
-    }
-
-    /* ── Botón principal ────────────────────────────── */
-    .btn-primary {
-      width           : 100%;
-      padding         : 14px;
-      border-radius   : 14px;
-      border          : none;
-      background      : linear-gradient(135deg, #7b00ff, #ff00cc);
-      color           : #fff;
-      font-family     : inherit;
-      font-size       : .95rem;
-      font-weight     : 800;
-      letter-spacing  : .06em;
-      cursor          : pointer;
-      box-shadow      : 0 4px 18px var(--pglow);
-      transition      : transform .16s, box-shadow .2s, opacity .2s;
-      display         : flex;
-      align-items     : center;
-      justify-content : center;
-      gap             : 8px;
-    }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px var(--pglow); }
-    .btn-primary:active { transform: scale(.97); }
-    .btn-primary:disabled {
-      opacity   : .45;
-      cursor    : not-allowed;
-      transform : none !important;
-      box-shadow: none;
-    }
-
-    /* Spinner dentro del botón */
     @keyframes spin { to { transform: rotate(360deg); } }
-    .btn-spinner {
-      width        : 18px;
-      height       : 18px;
-      border       : 2.5px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation    : spin .7s linear infinite;
-      flex-shrink  : 0;
+
+    /* ═══════════════════════════════════════
+       PAGE WRAPPER
+    ═══════════════════════════════════════ */
+    #page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 28px 20px 40px;
+      gap: 28px;
     }
 
-    /* ── Separador visual ───────────────────────────── */
-    .divider {
-      display       : flex;
-      align-items   : center;
-      gap           : 10px;
-      margin        : 22px 0 0;
-      color         : var(--lo);
-      font-size     : .72rem;
-      letter-spacing: .06em;
-    }
-    .divider::before,
-    .divider::after {
-      content    : "";
-      flex       : 1;
-      height     : 1px;
-      background : var(--br);
-    }
+    /* ═══════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════ */
+    .hero { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
-    /* ── Pie de tarjeta ─────────────────────────────── */
-    .card-footer {
-      text-align : center;
-      margin-top : 18px;
-      font-size  : .78rem;
-      color      : var(--mid);
+    .logo-ring {
+      position: relative;
+      width: 84px; height: 84px;
+      display: flex; align-items: center; justify-content: center;
     }
-    .card-footer span {
-      color      : var(--cyan);
-      cursor     : pointer;
-      font-weight: 600;
-      transition : color .2s;
+    .logo-ring::before {
+      content: '';
+      position: absolute; inset: -3px; border-radius: 50%;
+      background: conic-gradient(from 0deg, #ff00ff, #8a2be2, #00ffff, #ff00ff);
+      animation: ringRotate 3s linear infinite;
     }
-    .card-footer span:hover { color: var(--pink); }
+    .logo-ring::after {
+      content: '';
+      position: absolute; inset: 2px; border-radius: 50%;
+      background: var(--bg);
+    }
+    @keyframes ringRotate { to { transform: rotate(360deg); } }
 
-    /* ── Términos ────────────────────────────────────── */
-    .terms {
-      font-size  : .72rem;
-      color      : var(--lo);
-      text-align : center;
-      margin-top : 14px;
-      line-height: 1.5;
-    }
-    .terms a {
-      color          : var(--mid);
-      text-decoration: underline;
-      cursor         : pointer;
-    }
-
-    /* ── Overlay de carga inicial (sesión activa) ──── */
-    #splashOverlay {
-      position        : fixed;
-      inset           : 0;
-      z-index         : 999;
-      background      : var(--bg);
-      display         : flex;
-      flex-direction  : column;
-      align-items     : center;
-      justify-content : center;
-      gap             : 18px;
-      transition      : opacity .4s;
-    }
-    #splashOverlay.oculto { opacity: 0; pointer-events: none; }
-
-    .splash-logo {
-      font-size     : 2.5rem;
-      font-weight   : 900;
-      letter-spacing: .15em;
-      background    : linear-gradient(90deg, var(--pink), var(--cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .logo-icon {
+      position: relative; z-index: 2;
+      font-size: 2.2rem;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
+      filter: drop-shadow(0 0 10px rgba(255,0,255,.7));
     }
-    .splash-spin {
-      width        : 36px;
-      height       : 36px;
-      border       : 3px solid var(--br);
-      border-top-color: var(--pink);
-      border-radius: 50%;
-      animation    : spin .75s linear infinite;
+
+    .app-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 2.2rem; font-weight: 900; letter-spacing: .22em;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 12px rgba(138,43,226,.85));
+    }
+    .app-tagline {
+      font-family: 'Orbitron', monospace;
+      font-size: .58rem; font-weight: 700;
+      letter-spacing: .3em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .app-desc {
+      font-size: .85rem; font-weight: 500;
+      color: var(--text-3); text-align: center;
+      line-height: 1.65; max-width: 270px; margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════
+       AUTH BOX
+    ═══════════════════════════════════════ */
+    .auth-box {
+      width: min(440px, 100%);
+      background: rgba(22,12,40,.85);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 26px 22px 30px;
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      box-shadow:
+        0 0 60px rgba(138,43,226,.14),
+        0 0 120px rgba(255,0,255,.07),
+        inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    /* ── TABS ── */
+    .auth-tabs {
+      display: flex; gap: 4px;
+      background: rgba(0,0,0,.4);
+      border-radius: var(--r-sm);
+      padding: 4px;
+      margin-bottom: 22px;
+    }
+    .auth-tab {
+      flex: 1; padding: 10px 6px;
+      border: none; background: transparent;
+      color: var(--text-3);
+      font-family: 'Urbanist', sans-serif;
+      font-size: .88rem; font-weight: 700; letter-spacing: .04em;
+      border-radius: 8px; cursor: pointer;
+      transition: all .25s;
+      white-space: nowrap;
+    }
+    .auth-tab.active {
+      background: var(--grad); color: #fff;
+      box-shadow: var(--glow-p);
+    }
+
+    /* ── PANELS ── */
+    .auth-panel { display: none; flex-direction: column; gap: 13px; }
+    .auth-panel.active { display: flex; }
+
+    /* ── FIELDS ── */
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: .7rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .field input, .field select {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid rgba(138,43,226,.25);
+      border-radius: var(--r-sm);
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'Urbanist', sans-serif;
+      font-size: .93rem; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--purple-hi);
+      box-shadow: 0 0 0 3px rgba(138,43,226,.18);
+    }
+    .field input::placeholder { color: var(--text-3); }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a2be2' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 13px center;
+      padding-right: 36px; cursor: pointer;
+    }
+    .field select option { background: #1a0f2e; color: var(--text); }
+    .field-row { display: flex; gap: 10px; }
+    .field-row .field { flex: 1; }
+
+    /* Password wrapper */
+    .pass-wrap { position: relative; }
+    .pass-wrap input { padding-right: 46px; }
+    .pass-eye {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: transparent; border: none;
+      color: var(--text-3); font-size: .95rem; cursor: pointer;
+      transition: color .2s; padding: 4px; line-height: 1;
+    }
+    .pass-eye:hover { color: var(--text-2); }
+
+    /* ── ERROR BOX ── */
+    .auth-error {
+      display: none;
+      align-items: center; gap: 8px;
+      padding: 10px 12px;
+      background: rgba(255,34,85,.1);
+      border: 1px solid rgba(255,34,85,.3);
+      border-radius: var(--r-sm);
+      font-size: .8rem; font-weight: 600; color: var(--red-err);
+      line-height: 1.4;
+    }
+    .auth-error.show { display: flex; }
+    .auth-error i { flex-shrink: 0; font-size: .85rem; }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-auth {
+      width: 100%; padding: 13px;
+      background: var(--grad); border: none;
+      border-radius: var(--r-sm); color: #fff;
+      font-family: 'Orbitron', monospace;
+      font-size: .78rem; font-weight: 700; letter-spacing: .12em;
+      cursor: pointer;
+      box-shadow: var(--glow-p);
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      margin-top: 4px;
+    }
+    .btn-auth::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.14) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .btn-auth:hover  { transform: translateY(-1px); box-shadow: var(--glow-m); }
+    .btn-auth:active { transform: scale(.98); opacity: .9; }
+    .btn-auth:disabled { opacity: .38; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Footer note */
+    .auth-footer {
+      text-align: center; font-size: .72rem;
+      color: var(--text-3); margin-top: 14px; line-height: 1.7;
+    }
+    .auth-footer strong { color: var(--text-2); }
+
+    /* ═══════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════ */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: rgba(18,9,31,.97);
+      border: 1px solid rgba(138,43,226,.5);
+      border-radius: var(--r-sm);
+      padding: 10px 20px;
+      font-size: .84rem; font-weight: 600; color: var(--text);
+      box-shadow: var(--glow-p); backdrop-filter: blur(16px);
+      z-index: 9999; white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media (max-height: 680px) {
+      .logo-ring { width: 64px; height: 64px; }
+      .logo-icon { font-size: 1.7rem; }
+      .app-title { font-size: 1.75rem; }
+      .app-desc { display: none; }
+      #page { gap: 18px; padding-top: 18px; }
+    }
+    @media (max-width: 360px) {
+      .auth-box { padding: 20px 14px 24px; }
+      .auth-tab { font-size: .78rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════════
-       OVERLAY SPLASH (verificando sesión)
-  ═══════════════════════════════════════════════ -->
-  <div id="splashOverlay" aria-label="Verificando sesión">
-    <div class="splash-logo">KINETIC</div>
-    <div class="splash-spin"></div>
+<!-- LOADING SCREEN -->
+<div id="loadingScreen">
+  <div class="ld-logo">KINETIC</div>
+  <div class="ld-spinner"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- PAGE -->
+<div id="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="logo-ring">
+      <span class="logo-icon">⚡</span>
+    </div>
+    <h1 class="app-title">KINETIC</h1>
+    <p class="app-tagline">Connect · Explore · Ignite</p>
+    <p class="app-desc">Descubre personas cerca de ti con una energía que no puedes ignorar.</p>
   </div>
 
-  <!-- ═══════════════════════════════════════════════
-       CONTENIDO PRINCIPAL
-  ═══════════════════════════════════════════════ -->
-  <div class="page" id="mainContent" style="display:none">
+  <!-- AUTH BOX -->
+  <div class="auth-box">
 
-    <!-- MARCA -->
-    <div class="brand">
-      <div class="brand-icon">
-        <i class="fa-solid fa-bolt"></i>
-      </div>
-      <div class="brand-name">Kinetic</div>
-      <div class="brand-tagline">Conecta. Vibra. Descubre.</div>
+    <!-- TABS -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin"    onclick="switchTab('login')">Iniciar Sesión</button>
+      <button class="auth-tab"        id="tabRegister" onclick="switchTab('register')">Registrarse</button>
     </div>
 
-    <!-- TARJETA PRINCIPAL -->
-    <div class="card">
+    <!-- ══ LOGIN PANEL ══ -->
+    <div class="auth-panel active" id="panelLogin">
 
-      <!-- Tabs -->
-      <div class="tabs" role="tablist">
-        <button class="tab-btn activo" id="tabLogin"
-                role="tab" aria-selected="true" aria-controls="panelLogin">
-          Iniciar sesión
-        </button>
-        <button class="tab-btn" id="tabRegistro"
-                role="tab" aria-selected="false" aria-controls="panelRegistro">
-          Registrarse
-        </button>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="loginEmail"
+               placeholder="tu@correo.com"
+               autocomplete="email"
+               inputmode="email" />
       </div>
 
-      <!-- ── PANEL LOGIN ────────────────────────────── -->
-      <div class="panel activo" id="panelLogin" role="tabpanel">
-
-        <!-- Mensaje de error/éxito -->
-        <div class="msg-box" id="loginMsg" role="alert"></div>
-
-        <!-- Email -->
-        <div class="field">
-          <label for="loginEmail">Correo electrónico</label>
-          <div class="field-wrap">
-            <i class="fa-solid fa-envelope ico"></i>
-            <input
-              type        ="email"
-              id          ="loginEmail"
-              placeholder ="tu@correo.com"
-              autocomplete="email"
-              inputmode   ="email"
-            />
-          </div>
-        </div>
-
-        <!-- Contraseña -->
-        <div class="field">
-          <label for="loginPass">Contraseña</label>
-          <div class="field-wrap">
-            <i class="fa-solid fa-lock ico"></i>
-            <input
-              type        ="password"
-              id          ="loginPass"
-              placeholder ="••••••••"
-              autocomplete="current-password"
-            />
-            <button class="toggle-pw" type="button"
-                    data-target="loginPass" aria-label="Mostrar contraseña">
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- ¿Olvidaste tu contraseña? -->
-        <span class="link-forgot" id="linkForgot">¿Olvidaste tu contraseña?</span>
-
-        <!-- Botón -->
-        <button class="btn-primary" id="btnLogin">
-          <i class="fa-solid fa-right-to-bracket"></i>
-          Entrar
-        </button>
-
-        <!-- Pie -->
-        <div class="card-footer">
-          ¿Aún no tienes cuenta?
-          <span id="linkIrRegistro">Regístrate gratis</span>
+      <div class="field">
+        <label>Contraseña</label>
+        <div class="pass-wrap">
+          <input type="password" id="loginPass"
+                 placeholder="••••••••"
+                 autocomplete="current-password" />
+          <button type="button" class="pass-eye"
+                  onclick="togglePass('loginPass', this)"
+                  tabindex="-1" aria-label="Mostrar contraseña">
+            <i class="fa-regular fa-eye"></i>
+          </button>
         </div>
       </div>
-      <!-- FIN PANEL LOGIN -->
 
-      <!-- ── PANEL REGISTRO ─────────────────────────── -->
-      <div class="panel" id="panelRegistro" role="tabpanel">
-
-        <!-- Mensaje de error/éxito -->
-        <div class="msg-box" id="regMsg" role="alert"></div>
-
-        <!-- Nombre -->
-        <div class="field">
-          <label for="regNombre">Nombre</label>
-          <div class="field-wrap">
-            <i class="fa-solid fa-user ico"></i>
-            <input
-              type        ="text"
-              id          ="regNombre"
-              placeholder ="Tu nombre"
-              autocomplete="given-name"
-            />
-          </div>
-        </div>
-
-        <!-- Email -->
-        <div class="field">
-          <label for="regEmail">Correo electrónico</label>
-          <div class="field-wrap">
-            <i class="fa-solid fa-envelope ico"></i>
-            <input
-              type        ="email"
-              id          ="regEmail"
-              placeholder ="tu@correo.com"
-              autocomplete="email"
-              inputmode   ="email"
-            />
-          </div>
-        </div>
-
-        <!-- Contraseña -->
-        <div class="field">
-          <label for="regPass">Contraseña</label>
-          <div class="field-wrap">
-            <i class="fa-solid fa-lock ico"></i>
-            <input
-              type        ="password"
-              id          ="regPass"
-              placeholder ="Mínimo 6 caracteres"
-              autocomplete="new-password"
-            />
-            <button class="toggle-pw" type="button"
-                    data-target="regPass" aria-label="Mostrar contraseña">
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Grid: Edad + Género -->
-        <div class="field-grid" style="margin-bottom:16px">
-
-          <div class="field">
-            <label for="regEdad">Edad</label>
-            <div class="field-wrap">
-              <i class="fa-solid fa-cake-candles ico"></i>
-              <input
-                type     ="number"
-                id       ="regEdad"
-                placeholder ="18"
-                min      ="18"
-                max      ="99"
-                inputmode="numeric"
-              />
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="regGenero">Género</label>
-            <div class="field-wrap">
-              <i class="fa-solid fa-venus-mars ico"></i>
-              <select id="regGenero">
-                <option value=""   disabled selected>Elige…</option>
-                <option value="hombre">Hombre</option>
-                <option value="mujer">Mujer</option>
-                <option value="no-binario">No binario</option>
-                <option value="otro">Otro</option>
-              </select>
-              <i class="fa-solid fa-chevron-down select-arrow"></i>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Botón -->
-        <button class="btn-primary" id="btnRegistro">
-          <i class="fa-solid fa-user-plus"></i>
-          Crear cuenta
-        </button>
-
-        <!-- Términos -->
-        <p class="terms">
-          Al registrarte aceptas nuestros
-          <a>Términos de uso</a> y la <a>Política de privacidad</a>.
-        </p>
-
-        <!-- Pie -->
-        <div class="card-footer">
-          ¿Ya tienes cuenta?
-          <span id="linkIrLogin">Inicia sesión</span>
-        </div>
+      <div class="auth-error" id="loginError">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="loginErrorMsg"></span>
       </div>
-      <!-- FIN PANEL REGISTRO -->
+
+      <button class="btn-auth" id="btnLogin" onclick="handleLogin()">
+        <i class="fa-solid fa-bolt"></i> ENTRAR
+      </button>
 
     </div>
-    <!-- FIN CARD -->
 
-  </div>
-  <!-- FIN PAGE -->
+    <!-- ══ REGISTER PANEL ══ -->
+    <div class="auth-panel" id="panelRegister">
 
-  <!-- ═══════════════════════════════════════════════════════════
-       ÚNICO BLOQUE SCRIPT — Firebase v10.7.1 módulos ES
-       ─────────────────────────────────────────────────────────
-       REGLAS CUMPLIDAS:
-       ✅ UN solo <script type="module"> al final del body
-       ✅ Credenciales Firebase reales (sin mocks)
-       ✅ onAuthStateChanged redirige si ya hay sesión activa
-       ✅ createUserWithEmailAndPassword + set() en users/${uid}
-       ✅ signInWithEmailAndPassword + redirección
-       ✅ Manejo de errores Firebase con mensajes en español
-  ═══════════════════════════════════════════════════════════ -->
-  <script type="module">
+      <div class="field-row">
+        <div class="field">
+          <label>Nombre / Nick</label>
+          <input type="text" id="regNombre"
+                 placeholder="Tu nombre"
+                 maxlength="40"
+                 autocomplete="nickname" />
+        </div>
+        <div class="field">
+          <label>Edad</label>
+          <input type="number" id="regEdad"
+                 placeholder="25"
+                 min="18" max="80"
+                 inputmode="numeric" />
+        </div>
+      </div>
 
-    /* ──────────────────────────────────────────────────
-       A) IMPORTS — Firebase v10.7.1 (según spec)
-    ────────────────────────────────────────────────── */
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      <div class="field">
+        <label>Género</label>
+        <select id="regGenero">
+          <option value="">Selecciona tu género</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Femenino">Femenino</option>
+          <option value="No binario">No binario</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
 
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      onAuthStateChanged,
-      sendPasswordResetEmail
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      <div class="field">
+        <label>Busca</label>
+        <select id="regBusca">
+          <option value="">¿A quién buscas?</option>
+          <option value="Hombres">Hombres</option>
+          <option value="Mujeres">Mujeres</option>
+          <option value="Todos">Todos</option>
+        </select>
+      </div>
 
-    import { getDatabase, ref, set }
-      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="regEmail"
+               placeholder="tu@correo.com"
+               autocomplete="email"
+               inputmode="email" />
+      </div>
 
+      <div class="field">
+        <label>Contraseña</label>
+        <div class="pass-wrap">
+          <input type="password" id="regPass"
+                 placeholder="Mínimo 6 caracteres"
+                 autocomplete="new-password"
+                 minlength="6" />
+          <button type="button" class="pass-eye"
+                  onclick="togglePass('regPass', this)"
+                  tabindex="-1" aria-label="Mostrar contraseña">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
 
-    /* ──────────────────────────────────────────────────
-       B) CONFIGURACIÓN FIREBASE — credenciales reales
-    ────────────────────────────────────────────────── */
-    const firebaseConfig = {
-      apiKey           : "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-      authDomain       : "kinetic-app-67ae5.firebaseapp.com",
-      databaseURL      : "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-      projectId        : "kinetic-app-67ae5",
-      storageBucket    : "kinetic-app-67ae5.firebasestorage.app",
-      messagingSenderId: "825570718975",
-      appId            : "1:825570818975:web:cf8d9747a9f2e4ac0908ca"
-    };
+      <div class="auth-error" id="regError">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="regErrorMsg"></span>
+      </div>
 
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getDatabase(app);
+      <button class="btn-auth" id="btnRegister" onclick="handleRegister()">
+        <i class="fa-solid fa-user-plus"></i> CREAR CUENTA
+      </button>
 
+    </div>
 
-    /* ──────────────────────────────────────────────────
-       C) CONSTANTES DE NAVEGACIÓN
-    ────────────────────────────────────────────────── */
-    const RUTA_HOME    = "descubrir.html";  // pantalla principal post-login
-    const RUTA_PERFIL  = "setup-perfil.html"; // completar perfil tras registro
+    <p class="auth-footer">
+      Al registrarte aceptas los <strong>Términos de uso</strong><br />
+      y la <strong>Política de privacidad</strong> de Kinetic.
+    </p>
 
+  </div><!-- /auth-box -->
 
-    /* ──────────────────────────────────────────────────
-       D) REFS DOM
-    ────────────────────────────────────────────────── */
-    const $splash      = document.getElementById("splashOverlay");
-    const $main        = document.getElementById("mainContent");
+</div><!-- /page -->
 
-    // Tabs
-    const $tabLogin    = document.getElementById("tabLogin");
-    const $tabRegistro = document.getElementById("tabRegistro");
-    const $panelLogin  = document.getElementById("panelLogin");
-    const $panelReg    = document.getElementById("panelRegistro");
+<!-- ═══════════════════════════════════════════════
+     ÚNICO <script type="module"> — todo el JS aquí
+═══════════════════════════════════════════════ -->
+<script type="module">
 
-    // Login
-    const $loginEmail  = document.getElementById("loginEmail");
-    const $loginPass   = document.getElementById("loginPass");
-    const $btnLogin    = document.getElementById("btnLogin");
-    const $loginMsg    = document.getElementById("loginMsg");
+/* ── 1. IMPORTACIONES CORRECTAS DESDE CDN v10.7.1 ── */
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
-    // Registro
-    const $regNombre   = document.getElementById("regNombre");
-    const $regEmail    = document.getElementById("regEmail");
-    const $regPass     = document.getElementById("regPass");
-    const $regEdad     = document.getElementById("regEdad");
-    const $regGenero   = document.getElementById("regGenero");
-    const $btnRegistro = document.getElementById("btnRegistro");
-    const $regMsg      = document.getElementById("regMsg");
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+import { getDatabase, ref, set }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    /* ──────────────────────────────────────────────────
-       E) HELPER — MENSAJES DE ERROR FIREBASE EN ESPAÑOL
-    ────────────────────────────────────────────────── */
-    function tradErr(code) {
-      const map = {
-        "auth/user-not-found"       : "No existe una cuenta con ese correo.",
-        "auth/wrong-password"       : "Contraseña incorrecta.",
-        "auth/invalid-credential"   : "Correo o contraseña incorrectos.",
-        "auth/email-already-in-use" : "Ese correo ya está registrado.",
-        "auth/weak-password"        : "La contraseña debe tener al menos 6 caracteres.",
-        "auth/invalid-email"        : "El formato del correo no es válido.",
-        "auth/too-many-requests"    : "Demasiados intentos. Espera unos minutos.",
-        "auth/network-request-failed":"Sin conexión. Revisa tu red.",
-        "auth/user-disabled"        : "Esta cuenta ha sido deshabilitada.",
-      };
-      return map[code] || "Ocurrió un error. Intenta de nuevo.";
-    }
+/* ── 2. CONFIGURACIÓN REAL DE FIREBASE ──────────────
+   Todas las propiedades presentes. authDomain correcto.
+   initializeApp recibe el objeto completo.
+─────────────────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
+  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+  projectId:         "kinetic-app-67ae5",
+  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
+  messagingSenderId: "825570718975",
+  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+};
 
-    /** Muestra un mensaje de feedback en el box indicado */
-    function mostrarMsg($box, texto, tipo /* "error" | "ok" */) {
-      $box.className   = `msg-box ${tipo}`;
-      $box.innerHTML   = `<i class="fa-solid ${tipo === "error"
-        ? "fa-circle-exclamation"
-        : "fa-circle-check"}"></i><span>${texto}</span>`;
-    }
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getDatabase(app);
 
-    /** Limpia el mensaje */
-    function limpiarMsg($box) {
-      $box.className = "msg-box";
-      $box.innerHTML = "";
-    }
+/* ── 3. RUTA DE DESTINO TRAS AUTENTICACIÓN ──────────
+   Sin barra inicial para compatibilidad con GitHub Pages
+   (las rutas relativas funcionan correctamente en subdirectorios)
+─────────────────────────────────────────────────── */
+const HOME = "descubrir.html";
 
-    /** Pone un botón en estado cargando */
-    function setLoading($btn, loading) {
-      if (loading) {
-        $btn.disabled   = true;
-        $btn.innerHTML  = `<div class="btn-spinner"></div> Espera…`;
-      } else {
-        $btn.disabled   = false;
-      }
-    }
+/* ── 4. PERSISTENCIA DE SESIÓN ──────────────────────
+   Si el usuario ya está logueado al cargar index.html,
+   se le redirige inmediatamente a HOME.
+   Si no hay sesión activa, se oculta el loading y se
+   muestra el formulario.
+─────────────────────────────────────────────────── */
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Sesión activa — redirigir sin añadir al historial
+    window.location.replace(HOME);
+  } else {
+    // Sin sesión — mostrar UI de autenticación
+    document.getElementById("loadingScreen").classList.add("hidden");
+  }
+});
 
+/* ── 5. HELPERS ─────────────────────────────────── */
 
-    /* ──────────────────────────────────────────────────
-       F) onAuthStateChanged — PERSISTENCIA DE SESIÓN
-          Si el usuario ya tiene sesión activa al entrar
-          a index.html, lo redirige directamente al home.
-          Si no hay sesión, muestra el formulario.
-    ────────────────────────────────────────────────── */
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Sesión activa → ir al home sin mostrar el form
-        window.location.replace(RUTA_HOME);
-        return;
-      }
+/** Traduce códigos de error de Firebase a mensajes en español */
+function parseFirebaseError(code) {
+  const map = {
+    "auth/email-already-in-use":
+      "Este correo ya tiene una cuenta registrada.",
+    "auth/invalid-email":
+      "El formato del correo no es válido.",
+    "auth/weak-password":
+      "La contraseña es muy débil (mínimo 6 caracteres).",
+    "auth/user-not-found":
+      "No existe una cuenta con ese correo.",
+    "auth/wrong-password":
+      "Contraseña incorrecta. Intenta de nuevo.",
+    "auth/invalid-credential":
+      "Correo o contraseña incorrectos.",
+    "auth/too-many-requests":
+      "Demasiados intentos fallidos. Espera unos minutos.",
+    "auth/network-request-failed":
+      "Sin conexión a internet. Revisa tu red.",
+    "auth/auth-domain-config-required":
+      "Error de configuración de dominio. Contacta al soporte.",
+    "auth/operation-not-allowed":
+      "Este método de inicio de sesión no está habilitado.",
+    "auth/user-disabled":
+      "Esta cuenta ha sido deshabilitada.",
+  };
+  return map[code] || `Error inesperado (${code}). Intenta de nuevo.`;
+}
 
-      // Sin sesión → ocultar splash y mostrar formulario
-      $splash.classList.add("oculto");
-      setTimeout(() => { $splash.style.display = "none"; }, 450);
-      $main.style.display = "flex";
+/** Muestra un error visible en el formulario */
+function showError(errorBoxId, msgSpanId, message) {
+  const box = document.getElementById(errorBoxId);
+  document.getElementById(msgSpanId).textContent = message;
+  box.classList.add("show");
+}
+
+/** Limpia el error visible */
+function clearError(errorBoxId) {
+  document.getElementById(errorBoxId).classList.remove("show");
+}
+
+/** Pone un botón en estado cargando / restaura su estado */
+function setButtonLoading(btnId, loading, defaultHTML) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? '<i class="fa-solid fa-spinner fa-spin"></i> Procesando…'
+    : defaultHTML;
+}
+
+/** Toast de confirmación breve */
+let _toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove("show"), 3500);
+}
+
+/* ── 6. TAB SWITCHER ─────────────────────────────── */
+window.switchTab = function (tab) {
+  const isLogin = tab === "login";
+  document.getElementById("tabLogin").classList.toggle("active", isLogin);
+  document.getElementById("tabRegister").classList.toggle("active", !isLogin);
+  document.getElementById("panelLogin").classList.toggle("active", isLogin);
+  document.getElementById("panelRegister").classList.toggle("active", !isLogin);
+  clearError("loginError");
+  clearError("regError");
+};
+
+/* ── 7. PASSWORD VISIBILITY TOGGLE ──────────────── */
+window.togglePass = function (inputId, btn) {
+  const input = document.getElementById(inputId);
+  const icon  = btn.querySelector("i");
+  const show  = input.type === "password";
+  input.type       = show ? "text" : "password";
+  icon.className   = show ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+};
+
+/* ── 8. LOGIN ────────────────────────────────────── */
+window.handleLogin = async function () {
+  clearError("loginError");
+
+  const email    = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPass").value;
+
+  // Validación cliente
+  if (!email)    { showError("loginError","loginErrorMsg","Ingresa tu correo electrónico."); return; }
+  if (!password) { showError("loginError","loginErrorMsg","Ingresa tu contraseña."); return; }
+
+  setButtonLoading("btnLogin", true, '<i class="fa-solid fa-bolt"></i> ENTRAR');
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged detecta la sesión y redirige a HOME
+  } catch (err) {
+    showError("loginError", "loginErrorMsg", parseFirebaseError(err.code));
+    setButtonLoading("btnLogin", false, '<i class="fa-solid fa-bolt"></i> ENTRAR');
+  }
+};
+
+/* ── 9. REGISTER ─────────────────────────────────── */
+window.handleRegister = async function () {
+  clearError("regError");
+
+  const nombre   = document.getElementById("regNombre").value.trim();
+  const edadRaw  = document.getElementById("regEdad").value;
+  const genero   = document.getElementById("regGenero").value;
+  const busca    = document.getElementById("regBusca").value;
+  const email    = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPass").value;
+
+  // Validación cliente — mensajes específicos por campo
+  if (!nombre)  { showError("regError","regErrorMsg","Ingresa tu nombre o nickname."); return; }
+  if (!edadRaw || parseInt(edadRaw) < 18) {
+    showError("regError","regErrorMsg","Debes tener al menos 18 años para registrarte."); return;
+  }
+  if (!genero)  { showError("regError","regErrorMsg","Selecciona tu género."); return; }
+  if (!busca)   { showError("regError","regErrorMsg","Indica a quién buscas."); return; }
+  if (!email)   { showError("regError","regErrorMsg","Ingresa tu correo electrónico."); return; }
+  if (password.length < 6) {
+    showError("regError","regErrorMsg","La contraseña debe tener al menos 6 caracteres."); return;
+  }
+
+  const edad = parseInt(edadRaw, 10);
+
+  setButtonLoading("btnRegister", true, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
+
+  try {
+    // 9a. Crear cuenta en Firebase Auth
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    const uid        = credential.user.uid;
+
+    // 9b. Guardar perfil básico en Realtime Database bajo users/${uid}
+    //     set() es atómico — si falla lanza excepción capturada abajo
+    await set(ref(db, `users/${uid}`), {
+      uid,
+      nombre,
+      edad,
+      genero,
+      busca,
+      email,
+      rol:         "user",
+      bio:         "",
+      album:       [],
+      photos:      [],
+      online:      true,
+      modoExpress: false,
+      lat:         null,
+      lng:         null,
+      createdAt:   Date.now()
     });
 
+    // 9c. Toast de bienvenida (brevísimo — la redirección llega en ms)
+    showToast(`¡Bienvenido/a, ${nombre}! Redirigiendo… 🚀`);
 
-    /* ──────────────────────────────────────────────────
-       G) NAVEGACIÓN ENTRE TABS
-    ────────────────────────────────────────────────── */
-    function activarTab(tab) {
-      if (tab === "login") {
-        $tabLogin.classList.add("activo");
-        $tabRegistro.classList.remove("activo");
-        $panelLogin.classList.add("activo");
-        $panelReg.classList.remove("activo");
-        $tabLogin.setAttribute("aria-selected", "true");
-        $tabRegistro.setAttribute("aria-selected", "false");
-        limpiarMsg($loginMsg);
-      } else {
-        $tabRegistro.classList.add("activo");
-        $tabLogin.classList.remove("activo");
-        $panelReg.classList.add("activo");
-        $panelLogin.classList.remove("activo");
-        $tabRegistro.setAttribute("aria-selected", "true");
-        $tabLogin.setAttribute("aria-selected", "false");
-        limpiarMsg($regMsg);
-      }
-    }
+    // 9d. onAuthStateChanged detecta la nueva sesión y redirige a HOME automáticamente
 
-    $tabLogin.addEventListener("click",    () => activarTab("login"));
-    $tabRegistro.addEventListener("click", () => activarTab("registro"));
+  } catch (err) {
+    // Error visible en pantalla — nunca congela el flujo
+    showError("regError", "regErrorMsg", parseFirebaseError(err.code));
+    setButtonLoading("btnRegister", false, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
+  }
+};
 
-    // Atajos desde los pies de tarjeta
-    document.getElementById("linkIrRegistro")
-      .addEventListener("click", () => activarTab("registro"));
-    document.getElementById("linkIrLogin")
-      .addEventListener("click", () => activarTab("login"));
+/* ── 10. ENTER KEY SUPPORT ───────────────────────── */
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const loginActive = document.getElementById("panelLogin").classList.contains("active");
+  if (loginActive) {
+    if (!document.getElementById("btnLogin").disabled) handleLogin();
+  } else {
+    if (!document.getElementById("btnRegister").disabled) handleRegister();
+  }
+});
 
-
-    /* ──────────────────────────────────────────────────
-       H) TOGGLE MOSTRAR/OCULTAR CONTRASEÑA
-    ────────────────────────────────────────────────── */
-    document.querySelectorAll(".toggle-pw").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const target = document.getElementById(btn.dataset.target);
-        const ico    = btn.querySelector("i");
-        if (target.type === "password") {
-          target.type     = "text";
-          ico.className   = "fa-regular fa-eye-slash";
-          btn.setAttribute("aria-label", "Ocultar contraseña");
-        } else {
-          target.type     = "password";
-          ico.className   = "fa-regular fa-eye";
-          btn.setAttribute("aria-label", "Mostrar contraseña");
-        }
-      });
-    });
-
-
-    /* ──────────────────────────────────────────────────
-       I) LOGIN — signInWithEmailAndPassword
-    ────────────────────────────────────────────────── */
-    $btnLogin.addEventListener("click", async () => {
-      limpiarMsg($loginMsg);
-
-      const email = $loginEmail.value.trim();
-      const pass  = $loginPass.value;
-
-      // Validación local
-      if (!email) {
-        mostrarMsg($loginMsg, "Ingresa tu correo electrónico.", "error");
-        $loginEmail.focus();
-        return;
-      }
-      if (!pass) {
-        mostrarMsg($loginMsg, "Ingresa tu contraseña.", "error");
-        $loginPass.focus();
-        return;
-      }
-
-      setLoading($btnLogin, true);
-
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        // onAuthStateChanged detectará el cambio y redirigirá al home
-        // (no hace falta redirigir aquí explícitamente, pero lo hacemos
-        //  por velocidad percibida)
-        window.location.href = RUTA_HOME;
-
-      } catch (err) {
-        console.error("[Kinetic/login]", err.code, err.message);
-        mostrarMsg($loginMsg, tradErr(err.code), "error");
-        setLoading($btnLogin, false);
-        $btnLogin.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Entrar`;
-      }
-    });
-
-    // Enter en los campos dispara el login
-    [$loginEmail, $loginPass].forEach((el) => {
-      el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") $btnLogin.click();
-      });
-    });
-
-
-    /* ──────────────────────────────────────────────────
-       J) REGISTRO — createUserWithEmailAndPassword + set()
-          Tras crear la cuenta:
-          1. Guarda datos básicos en users/${uid}
-          2. Redirige a setup-perfil.html (o RUTA_HOME)
-    ────────────────────────────────────────────────── */
-    $btnRegistro.addEventListener("click", async () => {
-      limpiarMsg($regMsg);
-
-      const nombre = $regNombre.value.trim();
-      const email  = $regEmail.value.trim();
-      const pass   = $regPass.value;
-      const edad   = parseInt($regEdad.value, 10);
-      const genero = $regGenero.value;
-
-      // Validaciones locales
-      if (!nombre) {
-        mostrarMsg($regMsg, "Ingresa tu nombre.", "error");
-        $regNombre.focus(); return;
-      }
-      if (!email) {
-        mostrarMsg($regMsg, "Ingresa tu correo electrónico.", "error");
-        $regEmail.focus(); return;
-      }
-      if (!pass || pass.length < 6) {
-        mostrarMsg($regMsg, "La contraseña debe tener al menos 6 caracteres.", "error");
-        $regPass.focus(); return;
-      }
-      if (!edad || edad < 18 || edad > 99) {
-        mostrarMsg($regMsg, "Debes tener al menos 18 años.", "error");
-        $regEdad.focus(); return;
-      }
-      if (!genero) {
-        mostrarMsg($regMsg, "Selecciona tu género.", "error");
-        $regGenero.focus(); return;
-      }
-
-      setLoading($btnRegistro, true);
-
-      try {
-        // 1. Crear cuenta en Firebase Auth
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        const uid  = cred.user.uid;
-
-        // 2. Guardar datos básicos en Realtime Database — users/${uid}
-        await set(ref(db, `users/${uid}`), {
-          nombre  : nombre,
-          email   : email,
-          edad    : edad,
-          genero  : genero,
-          rol     : "user",
-          album   : [],
-          bio     : "",
-          fechaReg: Date.now()
-        });
-
-        // 3. Feedback de éxito breve antes de redirigir
-        mostrarMsg($regMsg, "¡Cuenta creada! Redirigiendo…", "ok");
-        $btnRegistro.innerHTML = `<i class="fa-solid fa-check"></i> ¡Listo!`;
-
-        // 4. Redirigir a pantalla de completar perfil
-        setTimeout(() => {
-          window.location.href = RUTA_PERFIL;
-        }, 900);
-
-      } catch (err) {
-        console.error("[Kinetic/registro]", err.code, err.message);
-        mostrarMsg($regMsg, tradErr(err.code), "error");
-        setLoading($btnRegistro, false);
-        $btnRegistro.innerHTML = `<i class="fa-solid fa-user-plus"></i> Crear cuenta`;
-      }
-    });
-
-    // Enter en los campos dispara el registro
-    [$regNombre, $regEmail, $regPass, $regEdad].forEach((el) => {
-      el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") $btnRegistro.click();
-      });
-    });
-
-
-    /* ──────────────────────────────────────────────────
-       K) RECUPERAR CONTRASEÑA
-    ────────────────────────────────────────────────── */
-    document.getElementById("linkForgot").addEventListener("click", async () => {
-      const email = $loginEmail.value.trim();
-      if (!email) {
-        mostrarMsg($loginMsg, "Escribe tu correo arriba para recuperar la contraseña.", "error");
-        $loginEmail.focus();
-        return;
-      }
-      try {
-        await sendPasswordResetEmail(auth, email);
-        mostrarMsg($loginMsg,
-          "Correo de recuperación enviado. Revisa tu bandeja de entrada.", "ok");
-      } catch (err) {
-        mostrarMsg($loginMsg, tradErr(err.code), "error");
-      }
-    });
-
-  </script>
-  <!-- FIN DEL ÚNICO BLOQUE SCRIPT -->
-
+</script>
 </body>
 </html>
