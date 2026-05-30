@@ -2,1050 +2,847 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0d0616" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Kinetic · Conversación</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Kinetic — Chat</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    /* ══════════════════════════════════════════════
-       DESIGN TOKENS
-    ══════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════
+       TOKENS
+    ═══════════════════════════════════════════════════ */
     :root {
-      --bg:           #0d0616;
-      --bg-s:         #12091f;
-      --bg-bubble-rx: #1b112c;
-      --bg-input:     #110820;
-      --purple:       #8a2be2;
-      --purple-hi:    #a020f0;
-      --magenta:      #ff00ff;
-      --cyan:         #00ffff;
-      --green:        #39ff14;
-      --red:          #ff2255;
-      --text:         #ede0ff;
-      --text-2:       #9880bc;
-      --text-3:       #52406e;
-      --border:       rgba(138,43,226,.18);
-      --border-m:     rgba(255,0,255,.22);
-      --topbar-h:     60px;
-      --r:            14px;
-      --r-sm:         10px;
-      --r-xs:         7px;
-      --grad-bubble:  linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
-      --grad-logo:    linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
-      --glow-p:       0 0 18px rgba(138,43,226,.55);
-      --glow-m:       0 0 14px rgba(255,0,255,.65);
-      --glow-c:       0 0 12px rgba(0,255,255,.5);
+      --bg       : #0d0616;
+      --card     : #12091f;
+      --card2    : #1a0f2e;
+      --pink     : #ff00ff;
+      --cyan     : #00ffff;
+      --pglow    : rgba(255,0,255,.35);
+      --cglow    : rgba(0,255,255,.25);
+      --hi       : #f0e6ff;
+      --mid      : #9b84b8;
+      --lo       : #5c4a7a;
+      --br       : rgba(255,0,255,.13);
+      --br-hi    : rgba(255,0,255,.38);
+      --hh       : 62px;        /* alto del header      */
+      --ih       : 68px;        /* alto del input bar   */
+      --sb       : env(safe-area-inset-bottom, 0px);
+      --st       : env(safe-area-inset-top,    0px);
     }
 
+    /* ═══════════════════════════════════════════════════
+       RESET
+    ═══════════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html {
-      height: 100%;
-      /* Prevent iOS bounce scroll on the html level */
-      overflow: hidden;
+    html, body {
+      height              : 100%;
+      background          : var(--bg);
+      color               : var(--hi);
+      font-family         : 'Segoe UI', system-ui, sans-serif;
+      overscroll-behavior : none;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    body {
-      height: 100%;
-      width: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Urbanist', sans-serif;
-      font-size: 16px;
-      -webkit-font-smoothing: antialiased;
-      overflow: hidden;
+    /* ═══════════════════════════════════════════════════
+       HEADER FIJO
+    ═══════════════════════════════════════════════════ */
+    #header {
+      position        : fixed;
+      inset           : 0 0 auto 0;
+      height          : var(--hh);
+      padding-top     : var(--st);
+      z-index         : 200;
+      display         : flex;
+      align-items     : center;
+      gap             : 12px;
+      padding-inline  : 14px;
+      background      : rgba(13,6,22,.97);
+      backdrop-filter : blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom   : 1px solid var(--br);
     }
 
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
-
-    /* ── GRID-LINE ATMOSPHERE ── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background-image:
-        repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.032) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.032) 40px);
+    /* Botón volver */
+    #btnBack {
+      flex-shrink     : 0;
+      width           : 38px;
+      height          : 38px;
+      border-radius   : 50%;
+      background      : none;
+      border          : none;
+      color           : var(--cyan);
+      font-size       : 1.1rem;
+      cursor          : pointer;
+      display         : flex;
+      align-items     : center;
+      justify-content : center;
+      transition      : background .2s;
     }
-    body::after {
-      content: '';
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background:
-        radial-gradient(ellipse 55% 35% at 10%  5%,  rgba(138,43,226,.14) 0%, transparent 65%),
-        radial-gradient(ellipse 45% 30% at 90% 90%, rgba(255,0,255,.09)  0%, transparent 60%);
+    #btnBack:hover  { background: rgba(0,255,255,.1); }
+    #btnBack:active { background: rgba(0,255,255,.2); }
+
+    /* Avatar en header */
+    #headerAvatar {
+      flex-shrink  : 0;
+      width        : 40px;
+      height       : 40px;
+      border-radius: 50%;
+      overflow     : hidden;
+      border       : 2px solid var(--pink);
+      box-shadow   : 0 0 8px var(--pglow);
+      background   : var(--card);
+      display      : flex;
+      align-items  : center;
+      justify-content: center;
+    }
+    #headerAvatar img {
+      width      : 100%;
+      height     : 100%;
+      object-fit : cover;
+      display    : block;
+    }
+    #headerAvatar svg { width:100%; height:100%; }
+
+    /* Info nombre + estado */
+    #headerInfo {
+      flex      : 1;
+      min-width : 0;
+    }
+    #headerName {
+      font-size    : .95rem;
+      font-weight  : 700;
+      color        : var(--hi);
+      white-space  : nowrap;
+      overflow     : hidden;
+      text-overflow: ellipsis;
+      line-height  : 1.2;
+    }
+    #headerStatus {
+      font-size    : .65rem;
+      color        : var(--cyan);
+      letter-spacing: .07em;
+      text-transform: uppercase;
     }
 
-    /* ══════════════════════════════════════════════
-       FULL-HEIGHT SHELL  (fixed, z-indexed above bg)
-    ══════════════════════════════════════════════ */
-    #shell {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      display: flex;
+    /* ═══════════════════════════════════════════════════
+       ÁREA DE MENSAJES
+       Posicionada entre header e input bar
+    ═══════════════════════════════════════════════════ */
+    #msgArea {
+      position   : fixed;
+      top        : var(--hh);
+      bottom     : calc(var(--ih) + var(--sb));
+      left       : 0;
+      right      : 0;
+      overflow-y : auto;
+      overflow-x : hidden;
+      padding    : 16px 14px 10px;
+      display    : flex;
       flex-direction: column;
-      max-width: 700px;
-      margin: 0 auto;
+      gap        : 6px;
+      scroll-behavior: smooth;
     }
+    /* Scrollbar delgado */
+    #msgArea::-webkit-scrollbar       { width: 3px; }
+    #msgArea::-webkit-scrollbar-thumb { background: rgba(255,0,255,.25); border-radius: 2px; }
 
-    /* ══════════════════════════════════════════════
-       TOP BAR
-    ══════════════════════════════════════════════ */
-    .topbar {
-      height: var(--topbar-h);
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      padding: 0 14px;
-      background: rgba(13,6,22,.97);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-      position: relative;
-      z-index: 10;
+    /* ─── Estado vacío / carga ─────────────────────── */
+    .msg-state {
+      align-self : center;
+      text-align : center;
+      color      : var(--lo);
+      font-size  : .84rem;
+      padding    : 40px 24px 0;
+      line-height: 1.6;
     }
+    .msg-state i { display:block; font-size:2.2rem; margin-bottom:12px; }
 
-    /* Back button */
-    .btn-back {
-      width: 38px; height: 38px;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(138,43,226,.1);
-      border: 1px solid rgba(138,43,226,.25);
-      border-radius: var(--r-sm);
-      color: var(--text-2);
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background .18s, border-color .18s, color .18s;
-    }
-    .btn-back:hover {
-      background: rgba(138,43,226,.22);
-      border-color: var(--purple);
-      color: var(--text);
-    }
-    .btn-back:active { transform: scale(.95); }
-
-    /* Avatar wrapper in topbar */
-    #topAvatarSlot {
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      width: 42px; height: 42px;
-    }
-    #topAvatarSlot img {
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-      border: 2px solid rgba(138,43,226,.4);
-      box-shadow: 0 0 10px rgba(138,43,226,.3);
-    }
-    /* SVG placeholder rendered inline — same size constraints */
-    #topAvatarSlot svg {
-      flex-shrink: 0;
-    }
-
-    /* Online ring pulse */
-    .av-online-ring {
-      position: relative;
-    }
-    .av-online-ring::after {
-      content: '';
-      position: absolute;
-      bottom: 1px; right: 1px;
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--green);
-      border: 2px solid var(--bg);
-      box-shadow: 0 0 6px var(--green);
-      animation: ringPulse 2s ease-in-out infinite;
-    }
-    @keyframes ringPulse {
-      0%,100% { box-shadow: 0 0 4px var(--green); }
-      50%     { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
-    }
-
-    /* Topbar user info */
-    .topbar-info {
-      flex: 1;
-      min-width: 0;
-      display: flex; flex-direction: column; gap: 2px;
-    }
-    #topName {
-      font-size: .95rem; font-weight: 700;
-      color: var(--text);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    #topStatus {
-      font-family: 'Orbitron', monospace;
-      font-size: .52rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--text-3);
-      transition: color .3s;
-    }
-    #topStatus.online { color: var(--green); }
-    #topStatus.typing {
-      color: var(--cyan);
-      animation: blink .9s ease-in-out infinite alternate;
-    }
-    @keyframes blink { from { opacity: .5; } to { opacity: 1; } }
-
-    /* ══════════════════════════════════════════════
-       MESSAGE FEED
-    ══════════════════════════════════════════════ */
-    #feed {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      padding: 16px 12px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      /* ensure messages can reach very bottom on iOS */
-      scroll-padding-bottom: 8px;
-    }
-
-    /* ── DATE SEPARATOR ── */
-    .date-sep {
-      display: flex; align-items: center; gap: 10px;
-      margin: 10px 0 4px;
-      flex-shrink: 0;
-    }
-    .date-sep::before, .date-sep::after {
-      content: ''; flex: 1; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(138,43,226,.2), transparent);
-    }
-    .date-sep span {
-      font-family: 'Orbitron', monospace;
-      font-size: .5rem; font-weight: 700;
-      letter-spacing: .16em; text-transform: uppercase;
-      color: var(--text-3); white-space: nowrap;
-    }
-
-    /* ── BUBBLE ROW ── */
-    .bubble-row {
-      display: flex;
-      align-items: flex-end;
-      gap: 7px;
-      flex-shrink: 0;
-      animation: msgIn .22s cubic-bezier(.25,.46,.45,.94) both;
-    }
-    @keyframes msgIn {
-      from { opacity: 0; transform: translateY(10px) scale(.95); }
-      to   { opacity: 1; transform: translateY(0)   scale(1); }
-    }
-
-    /* Sent → right */
-    .bubble-row.sent {
-      flex-direction: row-reverse;
-    }
-
-    /* Received → left */
-    .bubble-row.recv {
-      flex-direction: row;
-    }
-
-    /* Mini avatar beside received bubbles */
-    .bubble-avatar {
-      width: 28px; height: 28px;
-      flex-shrink: 0;
-      align-self: flex-end;
-      margin-bottom: 2px;
-    }
-    .bubble-avatar img {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-      border: 1.5px solid rgba(138,43,226,.3);
-      background: var(--bg-s);
-    }
-    .bubble-avatar svg {
-      display: block;
-    }
-    /* Sent rows hide the avatar slot entirely */
-    .bubble-row.sent .bubble-avatar {
-      display: none;
-    }
-
-    /* ── BUBBLE ── */
-    .bubble {
-      max-width: min(72%, 380px);
-      padding: 9px 13px;
-      border-radius: 16px;
-      font-size: .88rem;
-      line-height: 1.52;
-      word-break: break-word;
-      position: relative;
-    }
-
-    /* Received bubble */
-    .bubble-row.recv .bubble {
-      background: var(--bg-bubble-rx);
-      border: 1px solid rgba(138,43,226,.16);
-      color: var(--text);
-      border-bottom-left-radius: 4px;
-    }
-
-    /* Sent bubble — gradient */
-    .bubble-row.sent .bubble {
-      background: var(--grad-bubble);
-      color: #fff;
-      border-bottom-right-radius: 4px;
-      box-shadow: 0 3px 16px rgba(138,43,226,.35), 0 1px 6px rgba(255,0,255,.2);
-    }
-
-    .bubble-time {
-      display: block;
-      font-family: 'Orbitron', monospace;
-      font-size: .47rem; font-weight: 700;
-      letter-spacing: .04em;
-      margin-top: 5px;
-      text-align: right;
-      opacity: .55;
-    }
-
-    /* ── EMPTY HINT ── */
-    #emptyHint {
-      flex: 1;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 14px; text-align: center; padding: 30px 24px;
-      pointer-events: none;
-    }
-    .empty-icon-wrap {
-      width: 72px; height: 72px; border-radius: 50%;
-      background: rgba(138,43,226,.1);
-      border: 1px solid rgba(138,43,226,.25);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem;
-      animation: iconGlow 3s ease-in-out infinite;
-    }
-    @keyframes iconGlow {
-      0%,100% { box-shadow: 0 0 18px rgba(138,43,226,.25); }
-      50%     { box-shadow: 0 0 36px rgba(138,43,226,.45); }
-    }
-    #emptyHint p {
-      font-size: .85rem; color: var(--text-3); line-height: 1.55;
-    }
-
-    /* ══════════════════════════════════════════════
-       INPUT BAR
-    ══════════════════════════════════════════════ */
-    .input-bar {
-      display: flex;
-      align-items: flex-end;
-      gap: 10px;
-      padding: 10px 12px;
-      padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
-      background: rgba(13,6,22,.97);
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    #msgInput {
-      flex: 1;
-      min-width: 0;
-      background: var(--bg-input);
-      border: 1px solid rgba(138,43,226,.22);
-      border-radius: 22px;
-      padding: 10px 16px;
-      color: var(--text);
-      font-family: 'Urbanist', sans-serif;
-      font-size: .9rem; line-height: 1.45;
-      outline: none;
-      resize: none;
-      overflow-y: auto;
-      max-height: 120px;
-      min-height: 44px;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    #msgInput:focus {
-      border-color: var(--purple-hi);
-      box-shadow: 0 0 0 3px rgba(138,43,226,.16), var(--glow-p);
-    }
-    #msgInput::placeholder { color: var(--text-3); }
-
-    .btn-send {
-      width: 44px; height: 44px;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--grad-bubble);
-      border: none; border-radius: 50%;
-      color: #fff; font-size: 1rem;
-      cursor: pointer;
-      box-shadow: var(--glow-p);
-      transition: transform .15s, box-shadow .15s, opacity .15s;
-    }
-    .btn-send:hover  { transform: scale(1.07); box-shadow: var(--glow-m); }
-    .btn-send:active { transform: scale(.94); opacity: .9; }
-    .btn-send:disabled {
-      opacity: .3; cursor: not-allowed;
-      transform: none; box-shadow: none;
-    }
-
-    /* ══════════════════════════════════════════════
-       LOADING OVERLAY
-    ══════════════════════════════════════════════ */
-    #loadingScreen {
-      position: fixed; inset: 0; z-index: 999;
-      background: var(--bg);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 22px;
-      transition: opacity .35s, visibility .35s;
-    }
-    #loadingScreen.hidden {
-      opacity: 0; visibility: hidden; pointer-events: none;
-    }
-    .ld-logo {
-      font-family: 'Orbitron', monospace;
-      font-size: 1.8rem; font-weight: 900; letter-spacing: .2em;
-      background: var(--grad-logo);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 12px rgba(138,43,226,.85));
-    }
-    .ld-spinner {
-      width: 36px; height: 36px;
-      border: 3px solid rgba(138,43,226,.18);
-      border-top-color:  var(--purple);
-      border-right-color: var(--magenta);
-      border-radius: 50%;
-      animation: spin .75s linear infinite;
-    }
+    /* Spinner */
     @keyframes spin { to { transform: rotate(360deg); } }
+    #spinner {
+      align-self   : center;
+      width        : 32px;
+      height       : 32px;
+      border       : 3px solid var(--br);
+      border-top-color: var(--pink);
+      border-radius: 50%;
+      animation    : spin .75s linear infinite;
+      margin-top   : 40px;
+      flex-shrink  : 0;
+    }
 
-    /* ══════════════════════════════════════════════
-       ERROR / INVALID STATE
-    ══════════════════════════════════════════════ */
-    #errorScreen {
-      display: none;
-      position: fixed; inset: 0; z-index: 998;
-      flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 22px; text-align: center;
-      padding: 32px 28px;
-      background: var(--bg);
+    /* ─── Separador de fecha ───────────────────────── */
+    .date-sep {
+      align-self    : center;
+      font-size     : .67rem;
+      color         : var(--lo);
+      background    : var(--card);
+      border        : 1px solid var(--br);
+      border-radius : 99px;
+      padding       : 3px 14px;
+      margin        : 6px 0 2px;
+      user-select   : none;
+      flex-shrink   : 0;
     }
-    #errorScreen.show { display: flex; }
 
-    .err-icon {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: rgba(255,0,85,.07);
-      border: 1px solid rgba(255,0,85,.22);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.4rem;
-      box-shadow: 0 0 30px rgba(255,0,85,.14);
+    /* ─── Burbujas ─────────────────────────────────── */
+    .bubble-row {
+      display    : flex;
+      align-items: flex-end;
+      gap        : 8px;
+      max-width  : 82%;
     }
-    .err-title {
-      font-family: 'Orbitron', monospace;
-      font-size: .95rem; font-weight: 700; letter-spacing: .06em;
-      color: var(--text-2);
-      line-height: 1.5; max-width: 280px;
+    .bubble-row.yo   { align-self: flex-end;  flex-direction: row-reverse; }
+    .bubble-row.otro { align-self: flex-start; }
+
+    /* Mini-avatar del otro */
+    .bubble-av {
+      flex-shrink  : 0;
+      width        : 26px;
+      height       : 26px;
+      border-radius: 50%;
+      overflow     : hidden;
+      border       : 1px solid var(--br);
+      background   : var(--card);
+      display      : flex;
+      align-items  : center;
+      justify-content: center;
     }
-    .err-sub {
-      font-size: .85rem; color: var(--text-3);
-      line-height: 1.6; max-width: 260px;
+    .bubble-av img { width:100%; height:100%; object-fit:cover; display:block; }
+    .bubble-av svg { width:80%; height:80%; }
+    .bubble-row.yo .bubble-av { display:none; } /* no mostrar en mis mensajes */
+
+    /* Contenedor texto + hora */
+    .bubble-inner { display:flex; flex-direction:column; gap:3px; max-width:100%; }
+
+    /* Burbuja de texto */
+    .bubble {
+      padding      : 10px 14px;
+      border-radius: 18px;
+      font-size    : .875rem;
+      line-height  : 1.55;
+      word-break   : break-word;
+      white-space  : pre-wrap;
     }
-    .btn-neon {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 12px 26px;
-      background: rgba(255,0,255,.1);
-      border: 1px solid rgba(255,0,255,.35);
+
+    /* Mis mensajes — fucsia neón */
+    .bubble-row.yo .bubble {
+      background          : linear-gradient(135deg, #7b00ff, #ff00cc);
+      border-bottom-right-radius: 4px;
+      color               : #fff;
+      box-shadow          : 0 3px 14px rgba(123,0,255,.4);
+    }
+
+    /* Mensajes del otro — morado oscuro */
+    .bubble-row.otro .bubble {
+      background          : var(--card2);
+      border-bottom-left-radius: 4px;
+      color               : var(--hi);
+      border              : 1px solid var(--br);
+    }
+
+    /* Pie de burbuja */
+    .bubble-foot {
+      display    : flex;
+      align-items: center;
+      gap        : 4px;
+      font-size  : .62rem;
+      color      : rgba(255,255,255,.38);
+      white-space: nowrap;
+    }
+    .bubble-row.yo   .bubble-foot { justify-content: flex-end; }
+    .bubble-row.otro .bubble-foot { justify-content: flex-start; color: var(--lo); }
+
+    /* Tick de estado */
+    .tick      { font-size:.7rem; }
+    .tick.read { color: var(--cyan); }
+    .tick.sent { color: rgba(255,255,255,.38); }
+
+    /* Animación de entrada */
+    @keyframes bubbleIn {
+      from { opacity:0; transform: scale(.86) translateY(8px); }
+      to   { opacity:1; transform: scale(1)   translateY(0);   }
+    }
+    .bubble-row           { animation: bubbleIn .18s ease-out both; }
+    .bubble-row.no-anim   { animation: none; }
+
+    /* ═══════════════════════════════════════════════════
+       BARRA DE INPUT FIJA
+    ═══════════════════════════════════════════════════ */
+    #inputBar {
+      position        : fixed;
+      bottom          : 0;
+      left            : 0;
+      right           : 0;
+      padding-bottom  : var(--sb);
+      min-height      : var(--ih);
+      z-index         : 200;
+      display         : flex;
+      align-items     : center;
+      gap             : 10px;
+      padding-inline  : 14px;
+      padding-top     : 12px;
+      background      : rgba(13,6,22,.97);
+      backdrop-filter : blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-top      : 1px solid var(--br);
+    }
+
+    /* Textarea auto-expand */
+    #msgInput {
+      flex         : 1;
+      min-width    : 0;
+      background   : var(--card2);
+      border       : 1px solid var(--br);
       border-radius: 22px;
-      color: var(--magenta);
-      font-family: 'Urbanist', sans-serif;
-      font-size: .88rem; font-weight: 700; letter-spacing: .08em;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background .2s, box-shadow .2s;
-      box-shadow: 0 0 0 rgba(255,0,255,0);
+      color        : var(--hi);
+      font-family  : inherit;
+      font-size    : .9rem;
+      line-height  : 1.45;
+      padding      : 10px 16px;
+      outline      : none;
+      resize       : none;
+      overflow-y   : auto;
+      max-height   : 120px;
+      transition   : border-color .2s, box-shadow .2s;
     }
-    .btn-neon:hover {
-      background: rgba(255,0,255,.18);
-      box-shadow: var(--glow-m);
+    #msgInput::placeholder { color: var(--lo); }
+    #msgInput:focus {
+      border-color: var(--br-hi);
+      box-shadow  : 0 0 0 2px rgba(255,0,255,.1);
     }
-    .btn-neon:active { transform: scale(.97); }
+
+    /* Botón enviar */
+    #btnSend {
+      flex-shrink     : 0;
+      width           : 44px;
+      height          : 44px;
+      border-radius   : 50%;
+      background      : linear-gradient(135deg, #7b00ff, #ff00cc);
+      border          : none;
+      color           : #fff;
+      font-size       : 1rem;
+      cursor          : pointer;
+      display         : flex;
+      align-items     : center;
+      justify-content : center;
+      box-shadow      : 0 0 12px var(--pglow);
+      transition      : transform .15s, box-shadow .15s, opacity .15s;
+    }
+    #btnSend:not(:disabled):hover  { transform: scale(1.1); box-shadow: 0 0 20px rgba(255,0,255,.6); }
+    #btnSend:not(:disabled):active { transform: scale(.92); }
+    #btnSend:disabled { opacity:.38; cursor:not-allowed; transform:none !important; box-shadow:none; }
   </style>
 </head>
 <body>
 
-<!-- ════════════════════════
-     LOADING SCREEN
-════════════════════════ -->
-<div id="loadingScreen">
-  <div class="ld-logo">KINETIC</div>
-  <div class="ld-spinner"></div>
-</div>
+  <!-- ═══════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════ -->
+  <header id="header">
+    <button id="btnBack" aria-label="Volver">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
 
-<!-- ════════════════════════
-     ERROR / INVALID SCREEN
-════════════════════════ -->
-<div id="errorScreen">
-  <div class="err-icon">⚡</div>
-  <div class="err-title" id="errTitle">
-    No se indicó el usuario destino
-  </div>
-  <div class="err-sub" id="errSub">
-    Vuelve a la lista de mensajes para seleccionar una conversación.
-  </div>
-  <a class="btn-neon" href="chats.html">
-    <i class="fa-solid fa-arrow-left"></i> Ir a Mensajes
-  </a>
-</div>
-
-<!-- ════════════════════════
-     CHAT SHELL
-════════════════════════ -->
-<div id="shell">
-
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <a class="btn-back" href="chats.html" title="Volver">
-      <i class="fa-solid fa-chevron-left"></i>
-    </a>
-
-    <!-- Avatar (injected by JS) -->
-    <div id="topAvatarSlot"></div>
-
-    <div class="topbar-info">
-      <div id="topName">···</div>
-      <div id="topStatus">Conectando…</div>
+    <div id="headerAvatar" aria-hidden="true">
+      <!-- Avatar inyectado por JS -->
     </div>
-  </div>
 
-  <!-- MESSAGE FEED -->
-  <div id="feed">
-    <div id="emptyHint">
-      <div class="empty-icon-wrap">💬</div>
-      <p>Sé el primero en romper el hielo.<br/>Di hola… ⚡</p>
+    <div id="headerInfo">
+      <div id="headerName">Cargando…</div>
+      <div id="headerStatus">Kinetic</div>
     </div>
-  </div>
+  </header>
 
-  <!-- INPUT BAR -->
-  <div class="input-bar">
+  <!-- ═══════════════════════════════════════
+       ÁREA DE MENSAJES
+  ═══════════════════════════════════════ -->
+  <main id="msgArea" aria-live="polite" aria-label="Mensajes">
+    <div id="spinner"></div>
+  </main>
+
+  <!-- ═══════════════════════════════════════
+       BARRA DE INPUT
+  ═══════════════════════════════════════ -->
+  <div id="inputBar" role="form" aria-label="Escribir mensaje">
     <textarea
-      id="msgInput"
-      rows="1"
-      placeholder="Escribe un mensaje…"
-      autocomplete="off"
-      autocorrect="on"
-      spellcheck="true"
+      id          ="msgInput"
+      rows        ="1"
+      maxlength   ="1000"
+      placeholder ="Escribe un mensaje…"
+      aria-label  ="Mensaje"
+      disabled
     ></textarea>
-    <button class="btn-send" id="btnSend" disabled title="Enviar">
+    <button id="btnSend" aria-label="Enviar" disabled>
       <i class="fa-solid fa-paper-plane"></i>
     </button>
   </div>
 
-</div><!-- /shell -->
+  <!-- ═══════════════════════════════════════════════════════════
+       ÚNICO BLOQUE SCRIPT — Firebase v10.8.0 módulos ES
+       ─────────────────────────────────────────────────────────
+       REGLAS CUMPLIDAS:
+       ✅ UN solo <script type="module">
+       ✅ Credenciales Firebase reales (no mock)
+       ✅ let miUid = null declarado en scope global
+       ✅ miUid = user.uid dentro de onAuthStateChanged
+       ✅ chatTargetId desde URLSearchParams('id')
+       ✅ idChat generado ordenando UIDs alfabéticamente
+       ✅ onValue en chats/${idChat}/messages (tiempo real)
+       ✅ push() para enviar + update() para lastInfo
+       ✅ Limpieza de unreadTarget al entrar a la sala
+       ✅ Auto-scroll en cada mensaje nuevo
+       ✅ Burbujas: fucsia (yo) / morado oscuro (otro)
+       ✅ Fallback SVG neón para avatares rotos/vacíos
+  ═══════════════════════════════════════════════════════════ -->
+  <script type="module">
 
-<!-- ════════════════════════════════════════════════
-     FIREBASE SDK v10 — modular CDN
-════════════════════════════════════════════════ -->
-<script type="module">
-import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {
-  getDatabase, ref, get, push,
-  update, onValue, off
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    /* ──────────────────────────────────────────────────
+       A) IMPORTS — Firebase v10.8.0
+    ────────────────────────────────────────────────── */
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
-/* ─────────────────────────────────────
-   FIREBASE CONFIG
-───────────────────────────────────── */
-const firebaseConfig = {
-  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
-  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-  projectId:         "kinetic-app-67ae5",
-  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
-  messagingSenderId: "825570718975",
-  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-};
+    import { getAuth, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getDatabase(app);
+    import { getDatabase, ref, get, push, update, onValue }
+      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-/* ─────────────────────────────────────
-   SVG PLACEHOLDER — cyberpunk silhouette
-   Used whenever a real photo is absent or broken.
-   Injected as innerHTML so no <img> tag is left empty.
-───────────────────────────────────── */
-const defaultAvatar = `<svg viewBox="0 0 24 24" fill="none"
-  style="width:45px;height:45px;stroke:#00ffff;stroke-width:1.5;
-         background:#12091f;border-radius:50%;display:block;">
-  <circle cx="12" cy="8" r="4"/>
-  <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
-</svg>`;
 
-/* Smaller variant for in-bubble avatars (28 px) */
-const smallAvatar = `<svg viewBox="0 0 24 24" fill="none"
-  style="width:28px;height:28px;stroke:#8a2be2;stroke-width:1.5;
-         background:#1a0f2e;border-radius:50%;display:block;flex-shrink:0;">
-  <circle cx="12" cy="8" r="4"/>
-  <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
-</svg>`;
-
-/* ─────────────────────────────────────
-   STATE
-───────────────────────────────────── */
-let me           = null;    // firebase auth user
-let targetUid    = null;    // other participant uid
-let chatId       = null;    // sorted uid pair: smaller_larger
-let targetData   = null;    // their profile snapshot
-let msgUnsub     = null;    // onValue unsubscribe fn
-let statusUnsub  = null;    // online-status listener
-let seenIds      = new Set(); // dedup rendered message IDs
-let lastRenderedDay = null;
-
-/* ─────────────────────────────────────
-   HELPERS
-───────────────────────────────────── */
-const esc = s => String(s ?? '')
-  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-
-function buildChatId(a, b) {
-  return [a, b].sort().join('_');
-}
-
-/**
- * Validate a photo URL strictly:
- * – must be non-empty string starting with http(s)://
- * – must have more than 10 chars after the protocol
- */
-function isValidUrl(raw) {
-  if (typeof raw !== 'string') return false;
-  const t = raw.trim();
-  return t.length > 12 && /^https?:\/\/.{5,}/.test(t);
-}
-
-/**
- * Return the first valid photo URL from a profile.
- * Checks both 'album' (perfil.html) and 'photos' (index.html).
- * Returns null if none found.
- */
-function firstValidPhoto(data) {
-  if (!data) return null;
-  const sources = [
-    ...(Array.isArray(data.album)  ? data.album  : []),
-    ...(Array.isArray(data.photos) ? data.photos : []),
-    ...(data.foto ? [data.foto] : []),
-  ];
-  for (const u of sources) {
-    if (isValidUrl(u)) return u.trim();
-  }
-  return null;
-}
-
-function formatTime(ts) {
-  if (!ts) return '';
-  return new Date(ts).toLocaleTimeString('es', {
-    hour: '2-digit', minute: '2-digit'
-  });
-}
-
-function formatDay(ts) {
-  if (!ts) return null;
-  const d   = new Date(ts);
-  const now = new Date();
-  const sameDay = (a,b) =>
-    a.getDate()     === b.getDate()   &&
-    a.getMonth()    === b.getMonth()  &&
-    a.getFullYear() === b.getFullYear();
-  if (sameDay(d, now)) return 'Hoy';
-  const yest = new Date(now); yest.setDate(now.getDate() - 1);
-  if (sameDay(d, yest)) return 'Ayer';
-  return d.toLocaleDateString('es', {
-    day: '2-digit', month: 'short', year: 'numeric'
-  });
-}
-
-/* ─────────────────────────────────────
-   UI — LOADING / ERROR
-───────────────────────────────────── */
-function hideLoading() {
-  document.getElementById('loadingScreen').classList.add('hidden');
-}
-
-function showError(title, sub) {
-  hideLoading();
-  const es = document.getElementById('errorScreen');
-  if (title) document.getElementById('errTitle').textContent = title;
-  if (sub)   document.getElementById('errSub').textContent   = sub;
-  es.classList.add('show');
-  // Hide the chat shell
-  document.getElementById('shell').style.display = 'none';
-}
-
-/* ─────────────────────────────────────
-   UI — TOP BAR
-───────────────────────────────────── */
-function renderTopBar(data) {
-  // Name
-  const name = data.nombre || data.name || 'Desconocido';
-  document.getElementById('topName').textContent = name;
-
-  // Avatar
-  const photoUrl = firstValidPhoto(data);
-  const slot     = document.getElementById('topAvatarSlot');
-  slot.innerHTML = '';
-
-  if (photoUrl) {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'position:relative;flex-shrink:0;';
-
-    const img  = document.createElement('img');
-    img.src    = photoUrl;
-    img.alt    = name;
-    img.style.cssText =
-      'width:42px;height:42px;border-radius:50%;object-fit:cover;' +
-      'display:block;border:2px solid rgba(138,43,226,.45);' +
-      'box-shadow:0 0 10px rgba(138,43,226,.3);background:#1a0f2e;';
-    // On error fall back to SVG — never leave a broken img
-    img.onerror = () => {
-      wrap.innerHTML = defaultAvatar;
+    /* ──────────────────────────────────────────────────
+       B) CONFIGURACIÓN FIREBASE — credenciales reales
+    ────────────────────────────────────────────────── */
+    const firebaseConfig = {
+      apiKey           : "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+      authDomain       : "kinetic-app-67ae5.firebaseapp.com",
+      databaseURL      : "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+      projectId        : "kinetic-app-67ae5",
+      storageBucket    : "kinetic-app-67ae5.firebasestorage.app",
+      messagingSenderId: "825570718975",
+      appId            : "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
     };
-    wrap.appendChild(img);
 
-    // Online indicator dot
-    if (data.online === true) {
-      const dot = document.createElement('div');
-      dot.className = 'av-online-ring';
-      dot.style.cssText =
-        'position:absolute;bottom:1px;right:1px;width:10px;height:10px;' +
-        'border-radius:50%;background:#39ff14;border:2px solid #0d0616;' +
-        'box-shadow:0 0 6px #39ff14;';
-      wrap.appendChild(dot);
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getDatabase(app);
+
+
+    /* ──────────────────────────────────────────────────
+       C) VARIABLES GLOBALES DEL MÓDULO
+          Declaradas en el scope raíz → accesibles desde
+          cualquier función y addEventListener.
+    ────────────────────────────────────────────────── */
+    let miUid       = null;   // asignado por onAuthStateChanged
+    let idChat      = null;   // generado tras conocer miUid
+    let targetAvSrc = null;   // URL del avatar del receptor (para burbujas)
+    let ultimaFecha = null;   // control de separadores de fecha
+    let enviando    = false;  // bandera anti-doble-envío
+
+
+    /* ──────────────────────────────────────────────────
+       D) CAPTURA DE chatTargetId DESDE LA URL
+          Parámetro: chat-interno.html?id=USER_ID
+    ────────────────────────────────────────────────── */
+    const urlParams    = new URLSearchParams(window.location.search);
+    const chatTargetId = urlParams.get("id");
+
+    // Sin ID → redirigir a la lista de chats
+    if (!chatTargetId || chatTargetId.trim() === "") {
+      window.location.href = "chats.html";
     }
-    slot.appendChild(wrap);
-  } else {
-    // No valid photo — inject SVG directly
-    slot.innerHTML = defaultAvatar;
-  }
 
-  // Status
-  setOnlineStatus(data.online === true);
-}
 
-function setOnlineStatus(online) {
-  const el = document.getElementById('topStatus');
-  if (online) {
-    el.textContent = 'En línea';
-    el.className   = 'online';
-  } else {
-    el.textContent = 'Desconectado/a';
-    el.className   = '';
-  }
-}
+    /* ──────────────────────────────────────────────────
+       E) REFS DOM
+    ────────────────────────────────────────────────── */
+    const $area       = document.getElementById("msgArea");
+    const $input      = document.getElementById("msgInput");
+    const $btnSend    = document.getElementById("btnSend");
+    const $headerAv   = document.getElementById("headerAvatar");
+    const $headerName = document.getElementById("headerName");
+    const $headerSt   = document.getElementById("headerStatus");
+    const $spinner    = document.getElementById("spinner");
 
-/* ─────────────────────────────────────
-   SCROLL TO BOTTOM
-───────────────────────────────────── */
-function scrollToBottom(smooth = false) {
-  const feed = document.getElementById('feed');
-  if (!feed) return;
-  feed.scrollTo({
-    top:      feed.scrollHeight,
-    behavior: smooth ? 'smooth' : 'instant'
-  });
-}
 
-/* ─────────────────────────────────────
-   BUILD MINI AVATAR (28px) for recv bubbles
-───────────────────────────────────── */
-function buildMiniAvatar(photoUrl, name) {
-  const wrap = document.createElement('div');
-  wrap.className = 'bubble-avatar';
+    /* ──────────────────────────────────────────────────
+       F) SVG FALLBACK CYBERPUNK
+          Injected as DOM node — no network request,
+          never 404, never broken image border.
+    ────────────────────────────────────────────────── */
+    const DEFAULT_SVG = `<svg viewBox="0 0 24 24" fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;
+             background:#12091f;border-radius:50%;
+             stroke-linecap:round;stroke-linejoin:round;">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+    </svg>`;
 
-  if (photoUrl) {
-    const img  = document.createElement('img');
-    img.src    = photoUrl;
-    img.alt    = name || '';
-    img.onerror = () => { wrap.innerHTML = smallAvatar; };
-    wrap.appendChild(img);
-  } else {
-    wrap.innerHTML = smallAvatar;
-  }
-  return wrap;
-}
+    // data-URI para usar como img.src en burbujas
+    const SVG_DATA_URI = "data:image/svg+xml," + encodeURIComponent(DEFAULT_SVG);
 
-/* ─────────────────────────────────────
-   RENDER A SINGLE BUBBLE
-───────────────────────────────────── */
-function renderBubble(msgId, data) {
-  const isMine    = data.senderId === me.uid;
-  const photoUrl  = firstValidPhoto(targetData || {});
 
-  const row = document.createElement('div');
-  row.className        = `bubble-row ${isMine ? 'sent' : 'recv'}`;
-  row.dataset.msgId    = msgId;
+    /* ──────────────────────────────────────────────────
+       G) HELPERS PUROS
+    ────────────────────────────────────────────────── */
 
-  // Mini avatar for received
-  if (!isMine) {
-    row.appendChild(buildMiniAvatar(photoUrl,
-      targetData?.nombre || targetData?.name));
-  }
+    /** Verifica que val sea una URL http/https usable */
+    function esUrl(val) {
+      if (!val || typeof val !== "string" || !val.trim()) return false;
+      try {
+        const u = new URL(val.trim());
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch { return false; }
+    }
 
-  // Bubble
-  const bub = document.createElement('div');
-  bub.className = 'bubble';
-  bub.innerHTML =
-    `${esc(data.text)}<span class="bubble-time">${formatTime(data.ts)}</span>`;
-  row.appendChild(bub);
+    /** Extrae la primera foto válida del usuario */
+    function resolverAvatar(user) {
+      if (!user) return null;
+      const fromAlbum = Array.isArray(user.album) && user.album.length > 0
+        ? user.album[0] : null;
+      if (esUrl(fromAlbum)) return fromAlbum.trim();
+      if (esUrl(user.foto)) return user.foto.trim();
+      return null;
+    }
 
-  return row;
-}
+    /** Nombre seguro con fallback */
+    function resolverNombre(user) {
+      const n = (user?.nombre || user?.name || user?.displayName || "").trim();
+      return n || "Usuario";
+    }
 
-/* ─────────────────────────────────────
-   MARK MESSAGES AS READ
-   Clears unreadTarget if it points to me.
-───────────────────────────────────── */
-async function markAsRead() {
-  if (!chatId || !me) return;
-  try {
-    // Only write if currently targeting me (avoid unnecessary writes)
-    const snap = await get(ref(db, `chats/${chatId}/lastInfo/unreadTarget`));
-    if (snap.val() === me.uid) {
-      await update(ref(db, `chats/${chatId}/lastInfo`), {
-        unreadTarget: ''
+    /** Formatea timestamp en HH:MM */
+    function fmtHora(ts) {
+      if (!ts) return "";
+      return new Date(ts).toLocaleTimeString("es", {
+        hour: "2-digit", minute: "2-digit", hour12: false
       });
     }
-  } catch (_) { /* non-critical — silently skip */ }
-}
 
-/* ─────────────────────────────────────
-   LISTEN TO MESSAGES  (real-time)
-───────────────────────────────────── */
-function listenMessages() {
-  if (msgUnsub) { off(ref(db, `chats/${chatId}/messages`)); }
-
-  const msgsRef = ref(db, `chats/${chatId}/messages`);
-  const feed    = document.getElementById('feed');
-  const hint    = document.getElementById('emptyHint');
-
-  msgUnsub = onValue(msgsRef, snap => {
-    if (!snap.exists()) {
-      if (hint) hint.style.display = 'flex';
-      return;
+    /** Etiqueta de fecha para separadores */
+    function fmtFecha(ts) {
+      if (!ts) return "";
+      const d   = new Date(ts);
+      const hoy = new Date();
+      const aye = new Date(hoy); aye.setDate(hoy.getDate() - 1);
+      if (d.toDateString() === hoy.toDateString()) return "Hoy";
+      if (d.toDateString() === aye.toDateString()) return "Ayer";
+      return d.toLocaleDateString("es", { day:"numeric", month:"short", year:"numeric" });
     }
 
-    // Remove hint once real messages arrive
-    if (hint) hint.remove();
+    /** Scroll al fondo del área de mensajes */
+    function scrollFondo() {
+      requestAnimationFrame(() => { $area.scrollTop = $area.scrollHeight; });
+    }
 
-    // Were we already at the bottom before new messages?
-    const nearBottom =
-      feed.scrollHeight - feed.clientHeight - feed.scrollTop < 80;
 
-    let hadNew = false;
+    /* ──────────────────────────────────────────────────
+       H) LISTENERS DE UI — registrados UNA SOLA VEZ
+    ────────────────────────────────────────────────── */
 
-    snap.forEach(child => {
-      const id  = child.key;
-      const val = child.val();
-      if (seenIds.has(id)) return;
-      seenIds.add(id);
-      hadNew = true;
+    // Botón volver
+    document.getElementById("btnBack").addEventListener("click", () => {
+      window.history.length > 1
+        ? window.history.back()
+        : (window.location.href = "chats.html");
+    });
 
-      // Date separator if day changed
-      const day = formatDay(val.ts);
-      if (day && day !== lastRenderedDay) {
-        lastRenderedDay = day;
-        const sep = document.createElement('div');
-        sep.className = 'date-sep';
-        sep.innerHTML = `<span>${esc(day)}</span>`;
-        feed.appendChild(sep);
+    // Auto-resize textarea + habilitar/deshabilitar btnSend
+    $input.addEventListener("input", () => {
+      $input.style.height = "auto";
+      $input.style.height = Math.min($input.scrollHeight, 120) + "px";
+      $btnSend.disabled   = $input.value.trim().length === 0 || enviando;
+    });
+
+    // Enter envía (Shift+Enter = nueva línea)
+    $input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (!$btnSend.disabled) enviarMensaje();
+      }
+    });
+
+    $btnSend.addEventListener("click", enviarMensaje);
+
+
+    /* ──────────────────────────────────────────────────
+       I) AUTENTICACIÓN
+          onAuthStateChanged asigna miUid globalmente,
+          luego genera idChat y arranca todo el flujo.
+    ────────────────────────────────────────────────── */
+    onAuthStateChanged(auth, async (user) => {
+
+      if (!user) {
+        window.location.href = "index.html";
+        return;
       }
 
-      feed.appendChild(renderBubble(id, val));
+      // ✅ Asignación global segura
+      miUid = user.uid;
+
+      // No chatear consigo mismo
+      if (miUid === chatTargetId) {
+        window.location.href = "chats.html";
+        return;
+      }
+
+      // ✅ ID de sala único y consistente:
+      //    ordena los dos UIDs alfabéticamente para que ambos
+      //    usuarios siempre lean/escriban en el mismo nodo.
+      idChat = miUid < chatTargetId
+        ? `${miUid}_${chatTargetId}`
+        : `${chatTargetId}_${miUid}`;
+
+      // Cargar perfil del destinatario y arrancar chat
+      await cargarPerfilDestinatario();
+      limpiarUnread();
+      escucharMensajes();
+
+      // Habilitar input
+      $input.disabled  = false;
+      $btnSend.disabled = true; // se habilita al escribir
+      $input.focus();
     });
 
-    if (hadNew && (nearBottom || seenIds.size <= 25)) {
-      scrollToBottom(seenIds.size > 1);
+
+    /* ──────────────────────────────────────────────────
+       J) CARGAR PERFIL DEL DESTINATARIO
+    ────────────────────────────────────────────────── */
+    async function cargarPerfilDestinatario() {
+      let userData = null;
+
+      try {
+        const snap = await get(ref(db, `users/${chatTargetId}`));
+        if (snap.exists()) userData = snap.val();
+      } catch (err) {
+        console.warn("[Kinetic] No se pudo cargar perfil destino:", err.message);
+      }
+
+      const nombre   = resolverNombre(userData);
+      const photoUrl = resolverAvatar(userData);
+
+      // Actualizar título del header
+      $headerName.textContent = nombre;
+      $headerSt.textContent   = "Kinetic";
+      document.title          = `${nombre} — Kinetic`;
+
+      // ── Pintar avatar en header ────────────────────
+      $headerAv.innerHTML = "";
+      if (photoUrl) {
+        const img   = document.createElement("img");
+        img.src     = photoUrl;
+        img.alt     = nombre;
+        // onerror: reemplaza con SVG si la URL falla
+        img.onerror = () => { $headerAv.innerHTML = DEFAULT_SVG; };
+        $headerAv.appendChild(img);
+        targetAvSrc = photoUrl;
+      } else {
+        $headerAv.innerHTML = DEFAULT_SVG;
+        targetAvSrc = null; // usará SVG_DATA_URI en burbujas
+      }
     }
 
-    // Clean up unread counter
-    markAsRead();
-  });
-}
 
-/* ─────────────────────────────────────
-   LISTEN TO TARGET'S ONLINE STATUS
-───────────────────────────────────── */
-function listenStatus() {
-  if (statusUnsub) { off(ref(db, `users/${targetUid}/online`)); }
-  statusUnsub = onValue(ref(db, `users/${targetUid}/online`), snap => {
-    setOnlineStatus(snap.val() === true);
-  });
-}
+    /* ──────────────────────────────────────────────────
+       K) LIMPIAR UNREAD AL ENTRAR A LA SALA
+          Si el unreadTarget del lastInfo apunta a mí,
+          lo borrar para que desaparezca la burbuja neón.
 
-/* ─────────────────────────────────────
-   SEND MESSAGE
-───────────────────────────────────── */
-async function sendMessage() {
-  const input = document.getElementById('msgInput');
-  const btn   = document.getElementById('btnSend');
-  const text  = input.value.trim();
-  if (!text || !chatId || !me) return;
+          ✅ FILTRO DE SEGURIDAD:
+          Valida que lastInfo exista y sea objeto antes
+          de leer .unreadTarget (evita TypeError).
+    ────────────────────────────────────────────────── */
+    function limpiarUnread() {
+      if (!idChat || !miUid) return;
 
-  // Optimistic clear
-  input.value = '';
-  autoResize(input);
-  btn.disabled = true;
+      get(ref(db, `chats/${idChat}/lastInfo`)).then((snap) => {
+        if (!snap.exists()) return;
+        const info = snap.val();
 
-  const ts  = Date.now();
-  const msg = {
-    senderId: me.uid,
-    text,
-    ts,
-    unread: true
-  };
+        // Validar que info sea objeto y tenga unreadTarget
+        if (!info || typeof info !== "object") return;
+        if (info.unreadTarget === miUid) {
+          update(ref(db, `chats/${idChat}/lastInfo`), { unreadTarget: null });
+        }
+      }).catch(() => { /* silencioso — no es crítico */ });
+    }
 
-  try {
-    // 1. Push message
-    await push(ref(db, `chats/${chatId}/messages`), msg);
 
-    // 2. Update chat metadata + trigger notification for receiver
-    await update(ref(db, `chats/${chatId}`), {
-      'participants':            { [me.uid]: true, [targetUid]: true },
-      'lastMessage':             text,
-      'lastTs':                  ts,
-      'lastInfo/text':           text,
-      'lastInfo/ts':             ts,
-      'lastInfo/senderUid':      me.uid,
-      'lastInfo/unreadTarget':   targetUid,  // receiver gets notified
-    });
+    /* ──────────────────────────────────────────────────
+       L) ESCUCHAR MENSAJES EN TIEMPO REAL
+          onValue sobre chats/${idChat}/messages
+    ────────────────────────────────────────────────── */
+    function escucharMensajes() {
+      const msgsRef = ref(db, `chats/${idChat}/messages`);
 
-    scrollToBottom(true);
-  } catch (err) {
-    // Restore text so user doesn't lose it
-    input.value = text;
-    console.error('[sendMessage]', err);
-  } finally {
-    btn.disabled = input.value.trim() === '';
-    input.focus();
-  }
-}
+      onValue(msgsRef, (snap) => {
+        const datos = snap.val();
+        renderizarMensajes(datos);
+      }, (err) => {
+        console.error("[Kinetic] Error listener mensajes:", err);
+        mostrarEstadoVacio("fa-wifi", "Error de conexión.<br>Revisa tu red.");
+      });
+    }
 
-/* ─────────────────────────────────────
-   INPUT AUTO-RESIZE
-───────────────────────────────────── */
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
 
-/* ─────────────────────────────────────
-   INPUT EVENT WIRING
-───────────────────────────────────── */
-const inputEl = document.getElementById('msgInput');
-const btnEl   = document.getElementById('btnSend');
+    /* ──────────────────────────────────────────────────
+       M) RENDERIZAR MENSAJES
+    ────────────────────────────────────────────────── */
+    function renderizarMensajes(datos) {
+      // Quitar spinner de primera carga
+      $spinner?.remove();
 
-inputEl.addEventListener('input', () => {
-  autoResize(inputEl);
-  btnEl.disabled = inputEl.value.trim() === '';
-});
+      // ¿Estábamos al fondo antes de re-renderizar?
+      const alFondo = $area.scrollHeight - $area.scrollTop - $area.clientHeight < 60;
 
-inputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    if (!btnEl.disabled) sendMessage();
-  }
-});
+      $area.innerHTML = "";
+      ultimaFecha     = null;
 
-btnEl.addEventListener('click', sendMessage);
+      if (!datos || typeof datos !== "object") {
+        mostrarEstadoVacio("fa-comment-dots", "Aún no hay mensajes.<br>¡Di hola! 👋");
+        return;
+      }
 
-/* ─────────────────────────────────────
-   EXTRACT TARGET UID FROM URL / localStorage
-   Priority:
-     1. ?id=xxx        (primary, per spec)
-     2. ?targetId=xxx  (alias)
-     3. localStorage selected_user_id
-───────────────────────────────────── */
-function resolveTargetUid() {
-  const params = new URLSearchParams(window.location.search);
-  const fromUrl = params.get('id') || params.get('targetId');
-  if (fromUrl && fromUrl.trim().length > 4) return fromUrl.trim();
-  try { return localStorage.getItem('selected_user_id') || null; } catch(_) { return null; }
-}
+      // Convertir a array ordenado por timestamp
+      const lista = Object.entries(datos)
+        .map(([k, v]) => ({ _k: k, ...v }))
+        .sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
-/* ─────────────────────────────────────
-   BOOT — AUTH → VALIDATE → FETCH → LISTEN
-───────────────────────────────────── */
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    showError(
-      'Sesión no iniciada',
-      'Inicia sesión para acceder a tus conversaciones.'
-    );
-    return;
-  }
-  me = user;
+      const total = lista.length;
 
-  // Resolve target uid
-  targetUid = resolveTargetUid();
+      lista.forEach((msg, idx) => {
+        const soyYo  = msg.senderId === miUid;
+        const label  = fmtFecha(msg.ts);
+        const esUlt  = idx === total - 1;
 
-  if (!targetUid) {
-    showError(
-      'No se indicó el usuario destino.',
-      'Vuelve a la lista de mensajes y selecciona una conversación.'
-    );
-    return;
-  }
+        // ── Separador de fecha ───────────────────────
+        if (label !== ultimaFecha) {
+          ultimaFecha = label;
+          const sep = document.createElement("div");
+          sep.className   = "date-sep";
+          sep.textContent = label;
+          $area.appendChild(sep);
+        }
 
-  // Prevent chatting with yourself
-  if (targetUid === me.uid) {
-    showError(
-      'No puedes chatear contigo mismo.',
-      'Vuelve al Radar y selecciona otro usuario.'
-    );
-    return;
-  }
+        // ── Fila de burbuja ──────────────────────────
+        const row = document.createElement("div");
+        row.className = `bubble-row ${soyYo ? "yo" : "otro"}${esUlt ? "" : " no-anim"}`;
 
-  // Build sorted chatId
-  chatId = buildChatId(me.uid, targetUid);
+        // Mini-avatar del otro (solo en mensajes recibidos)
+        if (!soyYo) {
+          const av  = document.createElement("div");
+          av.className = "bubble-av";
+          if (targetAvSrc) {
+            const img   = document.createElement("img");
+            img.src     = targetAvSrc;
+            img.alt     = "";
+            img.onerror = () => { av.innerHTML = DEFAULT_SVG; };
+            av.appendChild(img);
+          } else {
+            av.innerHTML = DEFAULT_SVG;
+          }
+          row.appendChild(av);
+        }
 
-  // Fetch target profile
-  try {
-    const snap = await get(ref(db, `users/${targetUid}`));
-    targetData = snap.exists() ? snap.val() : { uid: targetUid };
-  } catch (err) {
-    targetData = { uid: targetUid };
-    console.warn('[fetchTarget]', err);
-  }
+        // Bloque inner
+        const inner = document.createElement("div");
+        inner.className = "bubble-inner";
 
-  // Paint UI
-  renderTopBar(targetData);
-  hideLoading();
+        // Texto del mensaje
+        const bub = document.createElement("div");
+        bub.className   = "bubble";
+        bub.textContent = msg.text || ""; // textContent → anti-XSS
 
-  // Activate send button only when there's text
-  btnEl.disabled = true;
-  inputEl.focus();
+        // Pie: hora + tick
+        const foot = document.createElement("div");
+        foot.className = "bubble-foot";
 
-  // Start real-time listeners
-  listenMessages();
-  listenStatus();
-});
+        const hora = document.createElement("span");
+        hora.textContent = fmtHora(msg.ts);
+        foot.appendChild(hora);
 
-/* ─────────────────────────────────────
-   CLEANUP  — mark read when tab hides
-───────────────────────────────────── */
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden && chatId) markAsRead();
-});
-</script>
+        if (soyYo) {
+          const tick = document.createElement("span");
+          tick.className   = `tick ${msg.leido ? "read" : "sent"}`;
+          tick.textContent = msg.leido ? "✓✓" : "✓";
+          tick.title       = msg.leido ? "Leído" : "Enviado";
+          foot.appendChild(tick);
+        }
+
+        inner.appendChild(bub);
+        inner.appendChild(foot);
+        row.appendChild(inner);
+        $area.appendChild(row);
+      });
+
+      // Auto-scroll si estábamos al fondo o es la carga inicial
+      if (alFondo || total <= 20) scrollFondo();
+    }
+
+
+    /* ──────────────────────────────────────────────────
+       N) ENVIAR MENSAJE
+          push() al nodo messages +
+          update() al nodo lastInfo con unreadTarget
+    ────────────────────────────────────────────────── */
+    async function enviarMensaje() {
+      const texto = $input.value.trim();
+      if (!texto || !idChat || !miUid || enviando) return;
+
+      // Bloquear UI inmediatamente
+      enviando          = true;
+      $btnSend.disabled = true;
+      $input.value      = "";
+      $input.style.height = "auto";
+
+      const ahora = Date.now();
+
+      const msgPayload = {
+        text    : texto,
+        senderId: miUid,
+        ts      : ahora,
+        leido   : false
+      };
+
+      const lastInfoPayload = {
+        lastText     : texto,
+        timestamp    : ahora,
+        unreadTarget : chatTargetId   // avisa al receptor que tiene mensaje sin leer
+      };
+
+      try {
+        // Guardar mensaje en el historial
+        await push(ref(db, `chats/${idChat}/messages`), msgPayload);
+
+        // Actualizar metadatos del chat (para chats.html y badges)
+        await update(ref(db, `chats/${idChat}/lastInfo`), lastInfoPayload);
+
+      } catch (err) {
+        console.error("[Kinetic] Error al enviar mensaje:", err.message);
+        // Restaurar texto para reintentar
+        $input.value = texto;
+      } finally {
+        enviando          = false;
+        $btnSend.disabled = $input.value.trim().length === 0;
+      }
+    }
+
+
+    /* ──────────────────────────────────────────────────
+       O) ESTADO VACÍO / ERROR EN ÁREA DE MENSAJES
+    ────────────────────────────────────────────────── */
+    function mostrarEstadoVacio(icono, htmlMsg) {
+      $spinner?.remove();
+      $area.innerHTML = "";
+      const box = document.createElement("div");
+      box.className = "msg-state";
+      box.innerHTML = `<i class="fa-regular ${icono}"></i>${htmlMsg}`;
+      $area.appendChild(box);
+    }
+
+  </script>
+  <!-- FIN DEL ÚNICO BLOQUE SCRIPT -->
+
 </body>
 </html>
