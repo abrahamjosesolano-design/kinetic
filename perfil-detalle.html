@@ -11,7 +11,7 @@
        3. get(users/${selected_user_id}) → pinta perfil completo
        4. onValue(chats) → badge global de mensajes sin leer
        5. Botón Like  → recibidos + enviados en Firebase
-       6. Botón Chat  → chat.html?id=${selected_user_id}
+       6. Botón Chat  → chat-interno.html?id=${selected_user_id}
   ═══════════════════════════════════════════════════════════════ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -607,11 +607,11 @@
        IMPORTACIONES FIREBASE
     ────────────────────────────────────────────────── */
     import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, get, set, onValue }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 
     /* ──────────────────────────────────────────────────
@@ -911,8 +911,8 @@
 
       /* ── Botón Chat ──────────────────────────────── */
       $btnChat.addEventListener('click', () => {
-        // Redirección estándar con ?id=
-        window.location.href = 'chat.html?id=' + selectedUserId;
+        // ✅ CORRECCIÓN: apunta a chat-interno.html con ?id= (no chat.html)
+        window.location.href = `chat-interno.html?id=${selectedUserId}`;
       });
 
       /* ── Mostrar vista ───────────────────────────── */
@@ -985,29 +985,39 @@
 
     /* ──────────────────────────────────────────────────
        DAR LIKE
-       Escribe en dos nodos de forma cruzada:
-         recibidos/${selectedUserId}/${miUid}  = true  ← para likes.html del receptor
-         enviados/${miUid}/${selectedUserId}   = true  ← registro propio
+       ✅ CORRECCIÓN: usa Firebase v10.8.0 set() modular.
+       Escritura cruzada en dos nodos:
+         recibidos/${selected_user_id}/${miUid} = true
+           → aparece en likes.html del receptor
+         enviados/${miUid}/${selected_user_id}  = true
+           → registro propio del usuario logueado
     ────────────────────────────────────────────────── */
     $btnLike.addEventListener('click', async () => {
-      if (!miUid || !selectedUserId || $btnLike.disabled) return;
+      // Guardas: sin auth, sin target, o ya enviado → salir
+      if (!miUid || !selectedUserId || $btnLike.classList.contains('liked')) return;
 
+      // Deshabilitar inmediatamente para evitar doble clic
       $btnLike.disabled = true;
+      $likeText.textContent = 'Enviando…';
 
       try {
-        // Escritura en paralelo — más rápido
+        // ✅ set() modular de firebase-database v10.8.0
+        // Escritura en paralelo — más rápida que secuencial
         await Promise.all([
           set(ref(db, `recibidos/${selectedUserId}/${miUid}`), true),
           set(ref(db, `enviados/${miUid}/${selectedUserId}`),  true)
         ]);
 
+        // Éxito → cambio visual definitivo
         setLikeButtonLiked();
         showToast('💜 ¡Like enviado!');
 
       } catch (err) {
-        console.error('[Kinetic/perfil-detalle] Error al enviar like:', err);
-        $btnLike.disabled = false;
-        showToast('⚠️ Error al enviar el like. Intenta de nuevo.');
+        // Error en la escritura → restaurar botón para reintentar
+        console.error('[Kinetic/perfil-detalle] Error al enviar like:', err.message);
+        $btnLike.disabled     = false;
+        $likeText.textContent = 'Me gusta';
+        showToast('⚠️ No se pudo enviar el like. Intenta de nuevo.');
       }
     });
 
