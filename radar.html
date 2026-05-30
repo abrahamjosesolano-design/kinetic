@@ -10,7 +10,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght=300;400;500;600;700;900&family=Orbitron:wght=600;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
@@ -135,7 +135,7 @@
     }
     @keyframes livePulse {
       0%,100% { box-shadow: 0 0 4px var(--green); }
-      50%     { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
+      50%      { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
     }
 
     /* ══════════════════════════════════════════════
@@ -220,6 +220,11 @@
       animation: cardIn .3s ease both;
       -webkit-tap-highlight-color: transparent;
     }
+    @media (max-width: 480px) {
+      .radar-card {
+        aspect-ratio: 3 / 4.5;
+      }
+    }
     @keyframes cardIn {
       from { opacity: 0; transform: scale(.88) translateY(10px); }
       to   { opacity: 1; transform: scale(1)   translateY(0); }
@@ -267,7 +272,7 @@
     }
     @keyframes greenPulse {
       0%,100% { box-shadow: 0 0 5px var(--green); }
-      50%     { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
+      50%      { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
     }
 
     /* ── GENDER / INTEREST BADGE ── */
@@ -305,6 +310,33 @@
     }
     .card-age-accent {
       color: rgba(255,0,255,.75);
+    }
+
+    /* ── LIKE OVERLAY CORAZÓN EXTRA ── */
+    .card-like-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(13,6,22,0.8);
+      border: 1px solid rgba(255,0,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .card-like-btn:hover {
+      transform: scale(1.15);
+      border-color: var(--magenta);
+      box-shadow: var(--glow-m);
+    }
+    .card-like-btn i {
+      font-size: 0.75rem;
+      color: var(--magenta);
     }
 
     /* ══════════════════════════════════════════════
@@ -355,7 +387,7 @@
     }
     @keyframes iconPulse {
       0%,100% { box-shadow: 0 0 20px rgba(138,43,226,.12); }
-      50%     { box-shadow: 0 0 40px rgba(138,43,226,.28); }
+      50%      { box-shadow: 0 0 40px rgba(138,43,226,.28); }
     }
     .state-title {
       font-family: 'Orbitron', monospace;
@@ -431,7 +463,7 @@
     }
     @keyframes navPulse {
       0%,100% { filter: drop-shadow(0 0 6px #ff00ff); }
-      50%     { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff); }
+      50%      { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff); }
     }
 
     /* Badge counter */
@@ -460,7 +492,6 @@
 
 <div id="page">
 
-  <!-- TOP BAR -->
   <div class="topbar">
     <span class="topbar-logo">KINETIC</span>
     <span class="topbar-center">Radar</span>
@@ -470,7 +501,6 @@
     </div>
   </div>
 
-  <!-- FILTER CHIPS -->
   <div class="filter-bar" id="filterBar">
     <div class="chip active" data-filter="all">🌐 Todos</div>
     <div class="chip" data-filter="online">🟢 En línea</div>
@@ -479,10 +509,8 @@
     <div class="chip" data-filter="otro">✦ Otro</div>
   </div>
 
-  <!-- SECTION DIVIDER -->
   <div class="section-label"><span>📡 Personas cerca de ti</span></div>
 
-  <!-- SKELETON (visible while loading) -->
   <div id="skeleton">
     <div class="skel-card"></div>
     <div class="skel-card"></div>
@@ -495,17 +523,14 @@
     <div class="skel-card"></div>
   </div>
 
-  <!-- RADAR GRID (filled by JS) -->
   <div id="radarGrid" style="display:none"></div>
 
-  <!-- EMPTY STATE -->
   <div class="state-wrap" id="emptyState">
     <div class="state-icon">📡</div>
     <div class="state-title">Sin resultados</div>
     <div class="state-sub">No encontramos usuarios con este filtro. ¡Prueba otra categoría!</div>
   </div>
 
-  <!-- AUTH GATE -->
   <div class="state-wrap" id="authGate">
     <div class="state-icon" style="background:rgba(255,0,85,.07);border-color:rgba(255,0,85,.2)">
       <i class="fa-solid fa-lock" style="font-size:2rem;color:#ff4466"></i>
@@ -515,10 +540,7 @@
     <a class="btn-neon" href="index.html">← Ir al inicio</a>
   </div>
 
-</div><!-- /page -->
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
+</div><nav class="bottom-nav">
   <a class="nav-item active" href="radar.html">
     <i class="fa-solid fa-location-crosshairs"></i>
     <span>Radar</span>
@@ -537,15 +559,12 @@
   </a>
 </nav>
 
-<!-- ════════════════════════════════════════════
-     FIREBASE SDK v10 — modular CDN
-════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, onValue, off }
+import { getDatabase, ref, onValue, off, set }
   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 /* ────────────────────────────────────
@@ -822,7 +841,41 @@ function buildCard(data, idx) {
 
   card.appendChild(info);
 
-  /* ── Click → save & redirect ── */
+  /* ── Botón de Corazón Quirúrgico (Like directo desde el Radar) ── */
+  const likeBtn = document.createElement('div');
+  likeBtn.className = 'card-like-btn';
+  likeBtn.innerHTML = `<i class="fa-solid fa-heart"></i>`;
+  likeBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Evita que se abra el perfil al tocar el corazón
+    if (!me) return;
+    
+    // Inyección quirúrgica: Guarda el Like en la Realtime Database
+    set(ref(db, `likes/${uid}/${me.uid}`), true)
+      .then(() => {
+        // Efecto visual de feedback rápido al dar like
+        likeBtn.style.transform = 'scale(1.4)';
+        likeBtn.style.backgroundColor = 'var(--magenta)';
+        likeBtn.innerHTML = `<i class="fa-solid fa-heart" style="color:#fff"></i>`;
+        setTimeout(() => {
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.8) translateY(-20px)';
+          setTimeout(() => {
+            card.remove();
+            // Si la grilla se vació del todo, refrescar para mostrar empty state
+            if (document.getElementById('radarGrid').children.length === 0) {
+              renderGrid();
+            }
+          }, 200);
+        }, 300);
+      })
+      .catch(err => {
+        console.error("Error al registrar Like:", err);
+        alert("Error al dar like: " + err.message);
+      });
+  });
+  card.appendChild(likeBtn);
+
+  /* ── Click en el resto de la tarjeta → guarda & redirige al detalle ── */
   card.addEventListener('click', () => {
     try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
     window.location.href = `perfil-detalle.html?id=${encodeURIComponent(uid)}`;
