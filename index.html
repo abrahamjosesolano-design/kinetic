@@ -3,248 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Iniciar Sesión</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    <title>Kinetic - Redireccionando...</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Urbanist', sans-serif;
-        }
-
+        /* Estética Cyberpunk de carga mientras redirige */
         body {
             background-color: #0d0616;
-            color: #ffffff;
+            color: #ff00ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
-
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            padding: 30px;
-        }
-
-        .logo-k {
-            font-size: 90px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff00ff, #8a2be2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            display: inline-block;
-        }
-
-        h1 {
-            font-size: 36px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: #a094b8;
-            font-size: 16px;
-            margin-bottom: 40px;
-        }
-
-        .input-group {
-            position: relative;
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #12091f;
+            border-top: 3px solid #ff00ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 15px #ff00ff;
             margin-bottom: 20px;
         }
-
-        .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #ff00ff;
-            font-size: 18px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-
-        input {
-            width: 100%;
-            padding: 16px 16px 16px 50px;
-            background-color: rgba(61, 28, 99, 0.2);
-            border: 2px solid #3d1c63;
-            border-radius: 30px;
-            color: #fff;
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            border-color: #ff00ff;
-            box-shadow: 0 0 12px rgba(255, 0, 255, 0.4);
-            background-color: rgba(61, 28, 99, 0.4);
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(90deg, #8a2be2, #ff00ff);
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(255, 0, 255, 0.3);
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .divider {
-            color: #a094b8;
-            margin: 25px 0;
-            font-size: 14px;
-        }
-
-        .btn-secondary {
-            width: 100%;
-            padding: 16px;
-            background: transparent;
-            border: 2px solid #8a2be2;
-            border-radius: 30px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(138, 43, 226, 0.2);
-            box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
-        }
-
-        /* Toast de error */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #ff0055;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            display: none;
-            z-index: 1000;
+        h2 {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px #ff00ff;
         }
     </style>
+    <script>
+        // Redirección inmediata y limpia hacia el Radar de la app
+        window.location.replace("radar.html");
+    </script>
 </head>
 <body>
-
-    <div class="login-container">
-        <div class="logo-k">K</div>
-        <h1>Kinetic</h1>
-        <p class="subtitle">Encuentra personas como nunca antes</p>
-
-        <form id="loginForm">
-            <div class="input-group">
-                <i class="fa-solid fa-envelope"></i>
-                <input type="email" id="email" placeholder="Correo electrónico" required>
-            </div>
-            <div class="input-group">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="password" placeholder="Contraseña" required>
-            </div>
-            <button type="submit" id="btnLogin" class="btn-primary">INICIAR SESIÓN</button>
-        </form>
-
-        <div class="divider">o</div>
-
-        <button class="btn-secondary" onclick="window.location.href='registro.html'">CREAR CUENTA GRATIS</button>
-    </div>
-
-    <div id="errorToast" class="toast">---</div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // Tus credenciales exactas
-        const firebaseConfig = {
-            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-            authDomain: "kinetic-app-67ae5.firebaseapp.com",
-            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-            projectId: "kinetic-app-67ae5",
-            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-            messagingSenderId: "825570718975",
-            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-        };
-
-        // Inicializar
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        const loginForm = document.getElementById('loginForm');
-        const btnLogin = document.getElementById('btnLogin');
-        const errorToast = document.getElementById('errorToast');
-
-        function showToast(msj) {
-            errorToast.innerText = msj;
-            errorToast.style.display = 'block';
-            setTimeout(() => { errorToast.style.display = 'none'; }, 3500);
-        }
-
-        // Si el usuario ya está logueado, mandarlo directo al radar
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = "radar.html";
-            }
-        });
-
-        // Evento de Login
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-
-            btnLogin.disabled = true;
-            btnLogin.innerText = "CARGANDO...";
-
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // El listener onAuthStateChanged se encargará de redireccionar
-                })
-                .catch((error) => {
-                    btnLogin.disabled = false;
-                    btnLogin.innerText = "INICIAR SESIÓN";
-                    
-                    console.error("Error de login:", error.code);
-                    if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-                        showToast("Correo o contraseña incorrectos.");
-                    } else if (error.code === 'auth/invalid-email') {
-                        showToast("El formato del correo no es válido.");
-                    } else {
-                        showToast("Error al conectar. Inténtalo de nuevo.");
-                    }
-                });
-        });
-    </script>
+    <div class="loader"></div>
+    <h2>Iniciando Kinetic...</h2>
 </body>
 </html>
