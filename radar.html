@@ -292,7 +292,6 @@
     .card-info {
       position: absolute; bottom: 0; left: 0; right: 0;
       padding: 8px 8px 7px;
-      /* Text rendered above the gradient overlay */
       z-index: 1;
     }
     .card-name {
@@ -504,9 +503,9 @@
   <div class="filter-bar" id="filterBar">
     <div class="chip active" data-filter="all">🌐 Todos</div>
     <div class="chip" data-filter="online">🟢 En línea</div>
-    <div class="chip" data-filter="hombre">♂ Hombres</div>
-    <div class="chip" data-filter="mujer">♀ Mujeres</div>
-    <div class="chip" data-filter="otro">✦ Otro</div>
+    <div class="chip" data-filter="male">♂ Hombres</div>
+    <div class="chip" data-filter="female">♀ Mujeres</div>
+    <div class="chip" data-filter="other">✦ Otro</div>
   </div>
 
   <div class="section-label"><span>📡 Personas cerca de ti</span></div>
@@ -561,14 +560,14 @@
 
 <script type="module">
 import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getDatabase, ref, onValue, off, set }
-  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
 /* ────────────────────────────────────
-   CONFIG
+    CONFIG
 ──────────────────────────────────── */
 const firebaseConfig = {
   apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
@@ -585,8 +584,7 @@ const auth = getAuth(app);
 const db   = getDatabase(app);
 
 /* ────────────────────────────────────
-   SVG FALLBACK — cyberpunk silhouette
-   Injected as innerHTML so no <img> is ever left empty/broken.
+    SVG FALLBACK — cyberpunk silhouette
 ──────────────────────────────────── */
 const defaultAvatar = `<svg viewBox="0 0 24 24" fill="none"
   style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;
@@ -596,7 +594,7 @@ const defaultAvatar = `<svg viewBox="0 0 24 24" fill="none"
 </svg>`;
 
 /* ────────────────────────────────────
-   STATE
+    STATE
 ──────────────────────────────────── */
 let me           = null;
 let allUsers     = {};        // uid → profile snapshot
@@ -605,32 +603,25 @@ let usersUnsub   = null;
 let chatsUnsub   = null;
 
 /* ────────────────────────────────────
-   HELPERS
+    HELPERS
 ──────────────────────────────────── */
 const esc = s => String(s ?? '')
   .replace(/&/g,'&amp;').replace(/</g,'&lt;')
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
-/**
- * Validate a photo URL: must start with http(s):// and have real content.
- */
 function isValidUrl(raw) {
   if (typeof raw !== 'string') return false;
   const t = raw.trim();
   return t.length > 12 && /^https?:\/\/.{5,}/.test(t);
 }
 
-/**
- * Return first valid photo URL from a profile.
- * Checks album[], photos[], and standalone foto field.
- * Returns null when none found.
- */
 function firstValidPhoto(data) {
   if (!data) return null;
   const sources = [
-    ...(Array.isArray(data.album)  ? data.album  : []),
+    ...(data.profilePic ? [data.profilePic] : []),
+    ...(Array.isArray(data.album) ? data.album : []),
     ...(Array.isArray(data.photos) ? data.photos : []),
-    ...(data.foto ? [data.foto] : []),
+    ...(data.foto ? [data.foto] : [])
   ];
   for (const u of sources) {
     if (isValidUrl(u)) return u.trim();
@@ -638,37 +629,25 @@ function firstValidPhoto(data) {
   return null;
 }
 
-/**
- * Normalize gender string to a filter key for comparison.
- */
-function genderKey(g) {
-  if (!g) return 'otro';
-  const l = String(g).toLowerCase();
-  if (l.includes('masc') || l.includes('hombre') || l === 'm') return 'hombre';
-  if (l.includes('fem')  || l.includes('mujer')  || l === 'f') return 'mujer';
-  return 'otro';
-}
-
-/**
- * Short label shown in the card badge (gender abbreviation).
- */
-function genderLabel(g) {
-  const k = genderKey(g);
-  if (k === 'hombre') return '♂';
-  if (k === 'mujer')  return '♀';
+function genderLabel(gender) {
+  if (gender === 'male') return '♂';
+  if (gender === 'female') return '♀';
   return '✦';
 }
 
-/* ────────────────────────────────────
-   SKELETON HIDE
-──────────────────────────────────── */
+function genderTextSpanish(gender) {
+  if (gender === 'male') return 'Hombre';
+  if (gender === 'female') return 'Mujer';
+  return 'Otro';
+}
+
 function hideSkeleton() {
   const sk = document.getElementById('skeleton');
   if (sk) sk.style.display = 'none';
 }
 
 /* ────────────────────────────────────
-   AUTH
+    AUTH
 ──────────────────────────────────── */
 onAuthStateChanged(auth, user => {
   if (user) {
@@ -684,7 +663,7 @@ onAuthStateChanged(auth, user => {
 });
 
 /* ────────────────────────────────────
-   USERS REAL-TIME LISTENER
+    USERS REAL-TIME LISTENER
 ──────────────────────────────────── */
 function startUsersListener() {
   const usersRef = ref(db, 'users');
@@ -696,7 +675,7 @@ function startUsersListener() {
       snap.forEach(child => {
         const uid  = child.key;
         const data = child.val();
-        if (uid === me.uid) return;    // exclude self
+        if (uid === me.uid) return;    // Excluirse a sí mismo
         allUsers[uid] = { uid, ...data };
       });
     }
@@ -708,34 +687,33 @@ function startUsersListener() {
 }
 
 /* ────────────────────────────────────
-   RENDER RADAR GRID
+    RENDER RADAR GRID
 ──────────────────────────────────── */
 function renderGrid() {
   const grid  = document.getElementById('radarGrid');
   const empty = document.getElementById('emptyState');
   const pill  = document.getElementById('livePill');
 
-  // Apply active filter
   let users = Object.values(allUsers);
 
+  // Filtrado optimizado con llaves fijas
   if (activeFilter === 'online') {
     users = users.filter(u => u.online === true);
-  } else if (activeFilter === 'hombre') {
-    users = users.filter(u => genderKey(u.genero || u.gender) === 'hombre');
-  } else if (activeFilter === 'mujer') {
-    users = users.filter(u => genderKey(u.genero || u.gender) === 'mujer');
-  } else if (activeFilter === 'otro') {
-    users = users.filter(u => genderKey(u.genero || u.gender) === 'otro');
+  } else if (activeFilter === 'male') {
+    users = users.filter(u => (u.gender || 'other') === 'male');
+  } else if (activeFilter === 'female') {
+    users = users.filter(u => (u.gender || 'other') === 'female');
+  } else if (activeFilter === 'other') {
+    users = users.filter(u => (u.gender || 'other') === 'other');
   }
 
-  // Sort: online first, then by name
+  // Ordenar: primero online, luego por nombre
   users.sort((a, b) => {
     if (a.online && !b.online) return -1;
     if (!a.online && b.online) return 1;
-    return (a.nombre || a.name || '').localeCompare(b.nombre || b.name || '');
+    return (a.name || '').localeCompare(b.name || '');
   });
 
-  // Live pill
   const onlineCount = Object.values(allUsers).filter(u => u.online).length;
   if (onlineCount > 0) {
     document.getElementById('liveCount').textContent = onlineCount;
@@ -744,7 +722,6 @@ function renderGrid() {
     pill.style.display = 'none';
   }
 
-  // No results
   if (users.length === 0) {
     grid.style.display  = 'none';
     empty.classList.add('show');
@@ -762,13 +739,13 @@ function renderGrid() {
 }
 
 /* ────────────────────────────────────
-   BUILD SINGLE CARD
+    BUILD SINGLE CARD
 ──────────────────────────────────── */
 function buildCard(data, idx) {
   const uid      = data.uid;
-  const name     = data.nombre || data.name     || 'Desconocido';
-  const age      = data.edad   || data.age      || null;
-  const gender   = data.genero || data.gender   || null;
+  const name     = data.name   || 'Desconocido';
+  const age      = (data.age && typeof data.age === 'number') ? data.age : null;
+  const gender   = data.gender || 'other';
   const online   = data.online === true;
   const photoUrl = firstValidPhoto(data);
 
@@ -776,14 +753,12 @@ function buildCard(data, idx) {
   card.className = 'radar-card';
   card.style.animationDelay = `${Math.min(idx * 0.035, 0.7)}s`;
 
-  /* ── Photo or SVG placeholder ── */
   if (photoUrl) {
     const img = document.createElement('img');
     img.className = 'card-photo';
-    img.alt       = name;
+    img.alt        = name;
     img.loading   = 'lazy';
     img.src       = photoUrl;
-    // On error: replace with SVG placeholder — never a broken icon
     img.onerror   = () => {
       img.remove();
       const ph = document.createElement('div');
@@ -793,34 +768,27 @@ function buildCard(data, idx) {
     };
     card.appendChild(img);
   } else {
-    // No URL at all — inject SVG directly
     const ph = document.createElement('div');
     ph.className = 'card-avatar-ph';
     ph.innerHTML = defaultAvatar;
     card.appendChild(ph);
   }
 
-  /* ── Gradient overlay ── */
   const grad = document.createElement('div');
   grad.className = 'card-grad';
   card.appendChild(grad);
 
-  /* ── Online indicator ── */
   if (online) {
     const dot = document.createElement('div');
     dot.className = 'card-online';
     card.appendChild(dot);
   }
 
-  /* ── Gender badge (top-right) ── */
-  if (gender) {
-    const badge = document.createElement('div');
-    badge.className   = 'card-badge';
-    badge.textContent = genderLabel(gender);
-    card.appendChild(badge);
-  }
+  const badge = document.createElement('div');
+  badge.className   = 'card-badge';
+  badge.textContent = genderLabel(gender);
+  card.appendChild(badge);
 
-  /* ── Info overlay (bottom) ── */
   const info = document.createElement('div');
   info.className = 'card-info';
 
@@ -829,30 +797,28 @@ function buildCard(data, idx) {
   nameEl.textContent = name;
   info.appendChild(nameEl);
 
-  if (age || gender) {
-    const meta = document.createElement('div');
-    meta.className = 'card-meta';
-    const parts = [];
-    if (age)    parts.push(`<span class="card-age-accent">${esc(String(age))} años</span>`);
-    if (gender) parts.push(esc(gender));
-    meta.innerHTML = parts.join(' · ');
-    info.appendChild(meta);
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  const parts = [];
+  if (age) {
+    parts.push(`<span class="card-age-accent">${age} años</span>`);
   }
+  parts.push(esc(genderTextSpanish(gender)));
+  meta.innerHTML = parts.join(' · ');
+  info.appendChild(meta);
 
   card.appendChild(info);
 
-  /* ── Botón de Corazón Quirúrgico (Like directo desde el Radar) ── */
+  /* Like directo quirúrgico */
   const likeBtn = document.createElement('div');
   likeBtn.className = 'card-like-btn';
   likeBtn.innerHTML = `<i class="fa-solid fa-heart"></i>`;
   likeBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); // Evita que se abra el perfil al tocar el corazón
+    e.stopPropagation();
     if (!me) return;
     
-    // Inyección quirúrgica: Guarda el Like en la Realtime Database
     set(ref(db, `likes/${uid}/${me.uid}`), true)
       .then(() => {
-        // Efecto visual de feedback rápido al dar like
         likeBtn.style.transform = 'scale(1.4)';
         likeBtn.style.backgroundColor = 'var(--magenta)';
         likeBtn.innerHTML = `<i class="fa-solid fa-heart" style="color:#fff"></i>`;
@@ -861,7 +827,6 @@ function buildCard(data, idx) {
           card.style.transform = 'scale(0.8) translateY(-20px)';
           setTimeout(() => {
             card.remove();
-            // Si la grilla se vació del todo, refrescar para mostrar empty state
             if (document.getElementById('radarGrid').children.length === 0) {
               renderGrid();
             }
@@ -875,7 +840,6 @@ function buildCard(data, idx) {
   });
   card.appendChild(likeBtn);
 
-  /* ── Click en el resto de la tarjeta → guarda & redirige al detalle ── */
   card.addEventListener('click', () => {
     try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
     window.location.href = `perfil-detalle.html?id=${encodeURIComponent(uid)}`;
@@ -885,7 +849,7 @@ function buildCard(data, idx) {
 }
 
 /* ────────────────────────────────────
-   FILTER CHIPS WIRING
+    FILTER CHIPS WIRING
 ──────────────────────────────────── */
 function wireFilters() {
   document.querySelectorAll('#filterBar .chip').forEach(chip => {
@@ -900,9 +864,7 @@ function wireFilters() {
 }
 
 /* ────────────────────────────────────
-   CHATS LISTENER — notification badge
-   Counts rooms where lastInfo.unreadTarget === me.uid
-   (+ fallback scan of messages[].unread)
+    CHATS LISTENER
 ──────────────────────────────────── */
 function startChatsListener() {
   const chatsRef = ref(db, 'chats');
@@ -919,13 +881,11 @@ function startChatsListener() {
         const chat = chatSnap.val();
         if (!chat) return;
 
-        // Strategy A — fast path via lastInfo
         if (chat.lastInfo?.unreadTarget === me.uid) {
           pending++;
           return;
         }
 
-        // Strategy B — check we are a participant, then scan messages
         const parts = chat.participants || {};
         const inId  = chatSnap.key.split('_').includes(me.uid);
         if (!parts[me.uid] && !inId) return;
@@ -943,7 +903,6 @@ function startChatsListener() {
 }
 
 function updateNavBadge(count, iconEl, navItemEl) {
-  // Remove stale badge
   navItemEl.querySelectorAll('.badge-counter').forEach(b => b.remove());
 
   if (count > 0) {
