@@ -1,497 +1,433 @@
 <!DOCTYPE html>
 <html lang="es">
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  KINETIC — perfil-detalle.html                          ║
+  ║  Versión definitiva. Reglas cumplidas:                  ║
+  ║  ✅ UN solo <script type="module">                       ║
+  ║  ✅ Credenciales Firebase reales                         ║
+  ║  ✅ let miUid = null en scope global del módulo          ║
+  ║  ✅ miUid = user.uid dentro de onAuthStateChanged        ║
+  ║  ✅ Like: set() cruzado recibidos + enviados             ║
+  ║  ✅ Chat: chat-interno.html?id=selected_user_id          ║
+  ║  ✅ Fallback SVG neón para avatares rotos                ║
+  ║  ✅ Badge tiempo real de mensajes sin leer               ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
 <head>
-  <!-- ═══════════════════════════════════════════════════════════════
-       KINETIC — perfil-detalle.html
-       Vista de perfil de usuario seleccionado
-       ─────────────────────────────────────────────────────────────
-       FLUJO
-       1. Lee selected_user_id de localStorage
-       2. onAuthStateChanged → obtiene miUid
-       3. get(users/${selected_user_id}) → pinta perfil completo
-       4. onValue(chats) → badge global de mensajes sin leer
-       5. Botón Like  → recibidos + enviados en Firebase
-       6. Botón Chat  → chat-interno.html?id=${selected_user_id}
-  ═══════════════════════════════════════════════════════════════ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Kinetic — Perfil</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
-    /* ══════════════════════════════════════════════════════════
-       1. TOKENS
-    ══════════════════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════
+       VARIABLES / TOKENS
+    ═══════════════════════════════════════════════ */
     :root {
-      --bg-deep     : #0d0616;
-      --bg-card     : #12091f;
-      --bg-card2    : #1a0f2e;
-      --accent      : #ff00ff;
-      --accent2     : #00ffff;
-      --accent-glow : rgba(255, 0, 255, 0.35);
-      --accent2-glow: rgba(0, 255, 255, 0.28);
-      --text-hi     : #f0e6ff;
-      --text-mid    : #9b84b8;
-      --text-lo     : #5c4a7a;
-      --border      : rgba(255, 0, 255, 0.14);
-      --border-hi   : rgba(255, 0, 255, 0.38);
-      --header-h    : 58px;
-      --nav-h       : 64px;
-      --safe-t      : env(safe-area-inset-top,    0px);
-      --safe-b      : env(safe-area-inset-bottom, 0px);
+      --bg       : #0d0616;
+      --card     : #12091f;
+      --card2    : #1a0f2e;
+      --pink     : #ff00ff;
+      --cyan     : #00ffff;
+      --pglow    : rgba(255,0,255,.36);
+      --cglow    : rgba(0,255,255,.24);
+      --hi       : #f0e6ff;
+      --mid      : #9b84b8;
+      --lo       : #5c4a7a;
+      --br       : rgba(255,0,255,.13);
+      --br-hi    : rgba(255,0,255,.38);
+      --hh       : 58px;
+      --nh       : 64px;
+      --sb       : env(safe-area-inset-bottom, 0px);
+      --st       : env(safe-area-inset-top,    0px);
     }
 
-    /* ══════════════════════════════════════════════════════════
-       2. RESET
-    ══════════════════════════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* ═══════════════════════════════════════════════
+       RESET
+    ═══════════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing : border-box;
+      margin     : 0;
+      padding    : 0;
+    }
     html, body {
-      min-height : 100%;
-      background : var(--bg-deep);
-      color      : var(--text-hi);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size  : 16px;
-      overscroll-behavior: none;
+      min-height          : 100%;
+      background          : var(--bg);
+      color               : var(--hi);
+      font-family         : 'Segoe UI', system-ui, sans-serif;
+      overscroll-behavior : none;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* ══════════════════════════════════════════════════════════
-       3. HEADER FIJO (botón volver + título)
-    ══════════════════════════════════════════════════════════ */
-    .top-bar {
-      position       : fixed;
-      top            : 0; left: 0; right: 0;
-      height         : var(--header-h);
-      padding-top    : var(--safe-t);
-      z-index        : 200;
-      display        : flex;
-      align-items    : center;
-      gap            : 12px;
-      padding-left   : 16px;
-      padding-right  : 16px;
-      background     : rgba(13, 6, 22, 0.96);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom  : 1px solid var(--border);
+    /* ═══════════════════════════════════════════════
+       HEADER FIJO
+    ═══════════════════════════════════════════════ */
+    #topbar {
+      position        : fixed;
+      inset           : 0 0 auto 0;
+      height          : var(--hh);
+      padding-top     : var(--st);
+      z-index         : 300;
+      display         : flex;
+      align-items     : center;
+      gap             : 12px;
+      padding-inline  : 16px;
+      background      : rgba(13,6,22,.97);
+      backdrop-filter : blur(18px);
+      border-bottom   : 1px solid var(--br);
     }
-
-    .btn-back {
-      display        : flex;
-      align-items    : center;
-      justify-content: center;
-      width          : 36px;
-      height         : 36px;
-      border-radius  : 50%;
-      background     : none;
-      border         : none;
-      color          : var(--accent2);
-      font-size      : 1.1rem;
-      cursor         : pointer;
-      transition     : background 0.2s, color 0.2s;
-      flex-shrink    : 0;
+    #btnBack {
+      flex-shrink     : 0;
+      width           : 38px;
+      height          : 38px;
+      border-radius   : 50%;
+      background      : none;
+      border          : none;
+      color           : var(--cyan);
+      font-size       : 1.1rem;
+      cursor          : pointer;
+      display         : flex;
+      align-items     : center;
+      justify-content : center;
+      transition      : background .2s;
     }
-    .btn-back:hover  { background: rgba(0,255,255,0.1); }
-    .btn-back:active { background: rgba(0,255,255,0.2); }
-
-    .top-bar-title {
-      flex        : 1;
-      font-size   : 1rem;
-      font-weight : 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      background  : linear-gradient(90deg, var(--accent), var(--accent2));
+    #btnBack:hover  { background: rgba(0,255,255,.1); }
+    #btnBack:active { background: rgba(0,255,255,.2); }
+    #pageTitle {
+      flex            : 1;
+      font-size       : 1rem;
+      font-weight     : 800;
+      letter-spacing  : .1em;
+      text-transform  : uppercase;
+      white-space     : nowrap;
+      overflow        : hidden;
+      text-overflow   : ellipsis;
+      background      : linear-gradient(90deg, var(--pink), var(--cyan));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
-      white-space : nowrap;
-      overflow    : hidden;
-      text-overflow: ellipsis;
+      background-clip : text;
     }
 
-    /* ══════════════════════════════════════════════════════════
-       4. ÁREA PRINCIPAL
-    ══════════════════════════════════════════════════════════ */
-    .page {
-      padding-top   : calc(var(--header-h) + 12px);
-      padding-bottom: calc(var(--nav-h) + var(--safe-b) + 24px);
-      max-width     : 560px;
-      margin        : 0 auto;
-      padding-left  : 16px;
-      padding-right : 16px;
+    /* ═══════════════════════════════════════════════
+       ÁREA PRINCIPAL
+    ═══════════════════════════════════════════════ */
+    #page {
+      padding-top    : calc(var(--hh) + 14px);
+      padding-bottom : calc(var(--nh) + var(--sb) + 28px);
+      max-width      : 560px;
+      margin         : 0 auto;
+      padding-inline : 16px;
     }
 
-    /* ══════════════════════════════════════════════════════════
-       5. GALERÍA / FOTO PRINCIPAL
-    ══════════════════════════════════════════════════════════ */
-    .photo-card {
-      position     : relative;
-      width        : 100%;
-      aspect-ratio : 4 / 5;
-      border-radius: 20px;
-      overflow     : hidden;
-      background   : var(--bg-card);
-      border       : 1px solid var(--border-hi);
-      box-shadow   : 0 0 30px rgba(255,0,255,0.12), 0 8px 32px rgba(0,0,0,0.6);
-      margin-bottom: 20px;
+    /* ═══════════════════════════════════════════════
+       FOTO PRINCIPAL
+    ═══════════════════════════════════════════════ */
+    #photoCard {
+      position      : relative;
+      width         : 100%;
+      aspect-ratio  : 4 / 5;
+      border-radius : 20px;
+      overflow      : hidden;
+      background    : var(--card);
+      border        : 1px solid var(--br-hi);
+      box-shadow    : 0 0 30px rgba(255,0,255,.1), 0 10px 38px rgba(0,0,0,.5);
+      margin-bottom : 16px;
+    }
+    #photoCard > img {
+      width      : 100%;
+      height     : 100%;
+      object-fit : cover;
+      display    : block;
+    }
+    /* SVG Fallback centrado */
+    .svgwrap {
+      width           : 100%;
+      height          : 100%;
+      display         : flex;
+      align-items     : center;
+      justify-content : center;
+      background      : var(--card);
+    }
+    .svgwrap svg { width: 55%; height: 55%; }
+    /* Overlay degradado sobre la foto */
+    #photoOverlay {
+      position   : absolute;
+      inset      : auto 0 0;
+      padding    : 56px 20px 20px;
+      background : linear-gradient(to top, rgba(13,6,22,.94), transparent);
+      pointer-events: none;
+    }
+    #ovName {
+      font-size   : 1.65rem;
+      font-weight : 800;
+      color       : #fff;
+      line-height : 1.1;
+      text-shadow : 0 2px 14px rgba(0,0,0,.8);
+    }
+    #ovAge {
+      font-size   : 1rem;
+      color       : var(--cyan);
+      font-weight : 500;
+      margin-top  : 3px;
     }
 
-    .photo-card img {
-      width     : 100%;
-      height    : 100%;
-      object-fit: cover;
-      display   : block;
+    /* ═══════════════════════════════════════════════
+       STRIP MINIATURAS
+    ═══════════════════════════════════════════════ */
+    #albumStrip {
+      display         : flex;
+      gap             : 8px;
+      overflow-x      : auto;
+      padding-bottom  : 4px;
+      margin-bottom   : 18px;
+      scrollbar-width : none;
+    }
+    #albumStrip::-webkit-scrollbar { display: none; }
+    .thumb {
+      flex-shrink   : 0;
+      width         : 70px;
+      height        : 70px;
+      border-radius : 12px;
+      overflow      : hidden;
+      border        : 2px solid var(--br);
+      cursor        : pointer;
+      background    : var(--card);
+      transition    : border-color .2s, transform .2s;
+    }
+    .thumb img         { width:100%; height:100%; object-fit:cover; display:block; }
+    .thumb:hover       { border-color: var(--pink); transform: scale(1.06); }
+    .thumb.activa      { border-color: var(--pink); box-shadow: 0 0 10px var(--pglow); }
+
+    /* ═══════════════════════════════════════════════
+       BOTONES DE ACCIÓN
+    ═══════════════════════════════════════════════ */
+    #actionRow {
+      display       : flex;
+      gap           : 12px;
+      margin-bottom : 24px;
+    }
+    .abtn {
+      flex            : 1;
+      display         : flex;
+      align-items     : center;
+      justify-content : center;
+      gap             : 8px;
+      padding         : 14px 12px;
+      border-radius   : 14px;
+      border          : none;
+      font-family     : inherit;
+      font-size       : .9rem;
+      font-weight     : 700;
+      letter-spacing  : .03em;
+      cursor          : pointer;
+      user-select     : none;
+      transition      : transform .16s, box-shadow .2s, background .3s, color .25s;
+    }
+    .abtn:active   { transform: scale(.93); }
+    .abtn:disabled { cursor: not-allowed; transform: none !important; }
+
+    /* Like */
+    #btnLike {
+      background  : var(--card2);
+      color       : var(--pink);
+      border      : 1.5px solid var(--br-hi);
+    }
+    #btnLike:not(:disabled):hover { box-shadow: 0 0 18px var(--pglow); }
+    /* Estado liked — fucsia neón total */
+    #btnLike.liked {
+      background  : var(--pink);
+      color       : #fff;
+      border-color: var(--pink);
+      box-shadow  : 0 0 22px var(--pink), 0 0 44px rgba(255,0,255,.28);
+      animation   : pop .4s ease-out;
+    }
+    @keyframes pop {
+      0%  { transform: scale(1);    }
+      35% { transform: scale(1.13); }
+      65% { transform: scale(.96);  }
+      100%{ transform: scale(1);    }
     }
 
-    /* SVG fallback llenando la tarjeta */
-    .photo-card .avatar-svg-wrap {
-      width          : 100%;
-      height         : 100%;
-      display        : flex;
-      align-items    : center;
-      justify-content: center;
-      background     : var(--bg-card);
+    /* Chat */
+    #btnChat {
+      background : linear-gradient(135deg, #00b4d8, var(--cyan));
+      color      : #07071a;
+      box-shadow : 0 4px 16px var(--cglow);
     }
-    .photo-card .avatar-svg-wrap svg {
-      width : 52%;
-      height: 52%;
-    }
-
-    /* Degradado sobre la foto para el nombre */
-    .photo-overlay {
-      position  : absolute;
-      bottom    : 0; left: 0; right: 0;
-      padding   : 48px 20px 20px;
-      background: linear-gradient(to top, rgba(13,6,22,0.92) 0%, transparent 100%);
-    }
-    .overlay-name {
-      font-size  : 1.6rem;
-      font-weight: 800;
-      color      : #fff;
-      line-height: 1.1;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.8);
-    }
-    .overlay-age {
-      font-size  : 1rem;
-      color      : var(--accent2);
-      font-weight: 500;
-      margin-top : 2px;
-    }
-
-    /* Miniaturas de álbum */
-    .album-strip {
-      display  : flex;
-      gap      : 8px;
-      overflow-x: auto;
-      padding  : 0 0 8px;
-      margin-bottom: 20px;
-      scrollbar-width: none;
-    }
-    .album-strip::-webkit-scrollbar { display: none; }
-
-    .album-thumb {
-      flex-shrink  : 0;
-      width        : 72px;
-      height       : 72px;
-      border-radius: 12px;
-      overflow     : hidden;
-      border       : 2px solid var(--border);
-      cursor       : pointer;
-      transition   : border-color 0.2s, transform 0.2s;
-      background   : var(--bg-card);
-    }
-    .album-thumb:hover  { border-color: var(--accent); transform: scale(1.05); }
-    .album-thumb.active { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
-
-    .album-thumb img {
-      width     : 100%;
-      height    : 100%;
-      object-fit: cover;
-      display   : block;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       6. BOTONES DE ACCIÓN (Like + Chat)
-    ══════════════════════════════════════════════════════════ */
-    .action-bar {
-      display        : flex;
-      gap            : 12px;
-      margin-bottom  : 24px;
-    }
-
-    /* Base compartida */
-    .action-btn {
-      flex           : 1;
-      display        : flex;
-      align-items    : center;
-      justify-content: center;
-      gap            : 8px;
-      padding        : 14px 10px;
-      border-radius  : 14px;
-      border         : none;
-      font-family    : inherit;
-      font-size      : 0.9rem;
-      font-weight    : 700;
-      letter-spacing : 0.04em;
-      cursor         : pointer;
-      transition     : transform 0.18s, box-shadow 0.18s, opacity 0.18s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .action-btn:active { transform: scale(0.95); }
-    .action-btn:disabled {
-      cursor : not-allowed;
-      opacity: 0.7;
-      transform: none !important;
-    }
-
-    /* Botón Like */
-    .btn-like {
-      background : var(--bg-card2);
-      color      : var(--accent);
-      border     : 1.5px solid var(--border-hi);
-      box-shadow : 0 0 0 rgba(255,0,255,0);
-      transition : background 0.3s, box-shadow 0.3s, border-color 0.3s, color 0.3s;
-    }
-    .btn-like:not(:disabled):hover {
-      box-shadow: 0 0 18px var(--accent-glow);
-    }
-    /* Estado: like enviado */
-    .btn-like.liked {
-      background : var(--accent);
-      color      : #fff;
-      border-color: var(--accent);
-      box-shadow : 0 0 24px var(--accent), 0 0 48px rgba(255,0,255,0.3);
-      animation  : likeFlash 0.45s ease-out;
-    }
-    @keyframes likeFlash {
-      0%   { transform: scale(1);    }
-      30%  { transform: scale(1.12); }
-      60%  { transform: scale(0.96); }
-      100% { transform: scale(1);    }
-    }
-
-    /* Botón Chat */
-    .btn-chat {
-      background : linear-gradient(135deg, #00b4d8, var(--accent2));
-      color      : #0a0a14;
-      box-shadow : 0 4px 18px rgba(0,255,255,0.25);
-    }
-    .btn-chat:not(:disabled):hover {
-      box-shadow: 0 4px 28px rgba(0,255,255,0.45);
+    #btnChat:not(:disabled):hover {
+      box-shadow: 0 4px 28px rgba(0,255,255,.42);
       transform : translateY(-1px);
     }
 
-    /* ══════════════════════════════════════════════════════════
-       7. TARJETAS DE INFORMACIÓN
-    ══════════════════════════════════════════════════════════ */
-    .info-section {
-      display       : flex;
-      flex-direction: column;
-      gap           : 12px;
-      margin-bottom : 28px;
-    }
+    /* ═══════════════════════════════════════════════
+       TARJETAS DE INFO
+    ═══════════════════════════════════════════════ */
+    #infoSec { display: flex; flex-direction: column; gap: 12px; }
 
-    .info-card {
-      background   : var(--bg-card);
-      border       : 1px solid var(--border);
-      border-radius: 16px;
-      padding      : 16px 18px;
-      transition   : border-color 0.2s;
+    .info-grid {
+      display                 : grid;
+      grid-template-columns   : 1fr 1fr;
+      gap                     : 12px;
     }
-    .info-card:hover { border-color: var(--border-hi); }
-
-    .info-label {
-      font-size     : 0.65rem;
+    .icard {
+      background    : var(--card);
+      border        : 1px solid var(--br);
+      border-radius : 16px;
+      padding       : 16px 18px;
+      transition    : border-color .2s;
+    }
+    .icard:hover { border-color: var(--br-hi); }
+    .ilabel {
+      font-size     : .64rem;
       font-weight   : 700;
-      letter-spacing: 0.14em;
+      letter-spacing: .14em;
       text-transform: uppercase;
-      color         : var(--accent);
+      color         : var(--pink);
       margin-bottom : 6px;
     }
+    .ival { font-size: .9rem; color: var(--hi); line-height: 1.55; }
 
-    .info-value {
-      font-size  : 0.92rem;
-      color      : var(--text-hi);
-      line-height: 1.55;
-    }
-
-    /* Grid para datos pequeños (género + qué busca) */
-    .info-grid {
-      display              : grid;
-      grid-template-columns: 1fr 1fr;
-      gap                  : 12px;
-      margin-bottom        : 12px;
-    }
-
-    /* Chips de etiquetas */
-    .tags-wrap {
-      display  : flex;
-      flex-wrap: wrap;
-      gap      : 8px;
-      margin-top: 4px;
-    }
+    /* Tags */
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
     .tag {
-      display      : inline-flex;
-      align-items  : center;
-      gap          : 5px;
       padding      : 5px 12px;
       border-radius: 99px;
-      font-size    : 0.75rem;
+      font-size    : .74rem;
       font-weight  : 600;
-      background   : rgba(255,0,255,0.1);
-      color        : var(--accent);
-      border       : 1px solid rgba(255,0,255,0.25);
+      background   : rgba(255,0,255,.1);
+      color        : var(--pink);
+      border       : 1px solid rgba(255,0,255,.24);
     }
 
-    /* ══════════════════════════════════════════════════════════
-       8. SKELETON LOADER
-    ══════════════════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════
+       SKELETON
+    ═══════════════════════════════════════════════ */
     @keyframes shimmer {
-      0%   { background-position: -600px 0; }
-      100% { background-position:  600px 0; }
+      from { background-position: -600px 0; }
+      to   { background-position:  600px 0; }
     }
-    .skeleton {
-      background     : linear-gradient(
-        90deg,
-        var(--bg-card)  25%,
-        var(--bg-card2) 50%,
-        var(--bg-card)  75%
-      );
-      background-size: 1200px 100%;
-      animation      : shimmer 1.5s infinite linear;
-      border-radius  : 10px;
+    .skel {
+      background      : linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%);
+      background-size : 1200px 100%;
+      animation       : shimmer 1.5s infinite linear;
+      border-radius   : 10px;
     }
+    #skPhoto { width:100%; aspect-ratio:4/5; border-radius:20px; margin-bottom:18px; }
+    .skline  { height:13px; margin-bottom:10px; }
 
-    .skel-photo {
-      width        : 100%;
-      aspect-ratio : 4 / 5;
-      border-radius: 20px;
-      margin-bottom: 20px;
-    }
-    .skel-line { height: 14px; margin-bottom: 10px; }
-
-    /* ══════════════════════════════════════════════════════════
-       9. ERROR / ESTADO VACÍO
-    ══════════════════════════════════════════════════════════ */
-    .error-state {
-      display       : flex;
-      flex-direction: column;
-      align-items   : center;
-      justify-content: center;
-      gap           : 14px;
-      padding       : 80px 24px 40px;
-      text-align    : center;
-      color         : var(--text-lo);
-    }
-    .error-state i    { font-size: 3rem; }
-    .error-state h3   { font-size: 1rem; font-weight: 700; color: var(--text-mid); }
-    .error-state p    { font-size: 0.82rem; line-height: 1.6; }
-    .error-state .btn-retry {
-      margin-top   : 8px;
-      padding      : 10px 24px;
-      border-radius: 99px;
-      background   : none;
-      border       : 1.5px solid var(--accent);
-      color        : var(--accent);
-      font-family  : inherit;
-      font-size    : 0.85rem;
-      font-weight  : 600;
-      cursor       : pointer;
-      transition   : background 0.2s;
-    }
-    .error-state .btn-retry:hover { background: rgba(255,0,255,0.1); }
-
-    /* ══════════════════════════════════════════════════════════
-       10. BARRA DE NAVEGACIÓN INFERIOR
-    ══════════════════════════════════════════════════════════ */
-    .bottom-nav {
-      position       : fixed;
-      bottom         : 0; left: 0; right: 0;
-      height         : calc(var(--nav-h) + var(--safe-b));
-      padding-bottom : var(--safe-b);
-      z-index        : 200;
-      display        : flex;
-      justify-content: space-around;
-      align-items    : center;
-      background     : rgba(13, 6, 22, 0.97);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top     : 1px solid var(--border);
-    }
-
-    .nav-item {
-      position       : relative;
+    /* ═══════════════════════════════════════════════
+       ERROR STATE
+    ═══════════════════════════════════════════════ */
+    .errbox {
       display        : flex;
       flex-direction : column;
       align-items    : center;
-      gap            : 3px;
-      padding        : 6px 18px;
-      color          : var(--text-lo);
-      font-size      : 1.25rem;
-      text-decoration: none;
-      cursor         : pointer;
-      transition     : color 0.2s;
+      gap            : 14px;
+      padding        : 80px 24px 40px;
+      text-align     : center;
     }
-    .nav-item span {
-      font-size     : 0.58rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    .errbox i  { font-size: 3rem; color: var(--pink); }
+    .errbox h3 { font-size: 1rem; font-weight: 700; color: var(--mid); }
+    .errbox p  { font-size: .82rem; color: var(--mid); line-height: 1.6; }
+    .errbtn {
+      margin-top    : 6px;
+      padding       : 10px 26px;
+      border-radius : 99px;
+      background    : none;
+      border        : 1.5px solid var(--pink);
+      color         : var(--pink);
+      font-family   : inherit;
+      font-size     : .85rem;
       font-weight   : 600;
+      cursor        : pointer;
+      transition    : background .2s;
     }
-    .nav-item.active {
-      color      : var(--accent);
-      text-shadow: 0 0 12px var(--accent);
-    }
-    .nav-item:not(.active):hover { color: var(--text-mid); }
+    .errbtn:hover { background: rgba(255,0,255,.1); }
 
-    .badge-counter {
-      position       : absolute;
-      top            : 2px;
-      right          : 8px;
-      min-width      : 18px;
-      height         : 18px;
-      border-radius  : 9px;
-      background     : var(--accent);
-      box-shadow     : 0 0 8px var(--accent);
-      color          : #fff;
-      font-size      : 0.58rem;
-      font-weight    : 700;
-      display        : flex;
-      align-items    : center;
-      justify-content: center;
-      padding        : 0 5px;
-      pointer-events : none;
-      transition     : transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+    /* ═══════════════════════════════════════════════
+       BARRA INFERIOR FIJA
+    ═══════════════════════════════════════════════ */
+    #bottomNav {
+      position        : fixed;
+      inset           : auto 0 0;
+      height          : calc(var(--nh) + var(--sb));
+      padding-bottom  : var(--sb);
+      z-index         : 300;
+      display         : flex;
+      justify-content : space-around;
+      align-items     : center;
+      background      : rgba(13,6,22,.97);
+      backdrop-filter : blur(18px);
+      border-top      : 1px solid var(--br);
     }
-    .badge-counter.hidden {
-      transform     : scale(0);
+    .navi {
+      position        : relative;
+      display         : flex;
+      flex-direction  : column;
+      align-items     : center;
+      gap             : 3px;
+      padding         : 6px 18px;
+      color           : var(--lo);
+      font-size       : 1.22rem;
+      text-decoration : none;
+      transition      : color .2s;
+    }
+    .navi span {
+      font-size      : .58rem;
+      letter-spacing : .08em;
+      text-transform : uppercase;
+      font-weight    : 600;
+    }
+    .navi.activo            { color: var(--pink); text-shadow: 0 0 10px var(--pink); }
+    .navi:not(.activo):hover{ color: var(--mid); }
+
+    /* Badge contador */
+    #msgBadge {
+      position        : absolute;
+      top             : 2px;
+      right           : 8px;
+      min-width       : 18px;
+      height          : 18px;
+      border-radius   : 9px;
+      padding         : 0 5px;
+      background      : var(--pink);
+      box-shadow      : 0 0 8px var(--pink);
+      color           : #fff;
+      font-size       : .58rem;
+      font-weight     : 700;
+      display         : flex;
+      align-items     : center;
+      justify-content : center;
+      pointer-events  : none;
+      transition      : transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+    }
+    #msgBadge.oculto { transform: scale(0); opacity: 0; }
+
+    /* ═══════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════ */
+    #toast {
+      position      : fixed;
+      bottom        : calc(var(--nh) + var(--sb) + 14px);
+      left          : 50%;
+      transform     : translateX(-50%) translateY(14px);
+      background    : var(--card2);
+      border        : 1px solid var(--br-hi);
+      border-radius : 99px;
+      padding       : 10px 22px;
+      font-size     : .85rem;
+      font-weight   : 600;
+      color         : var(--hi);
+      box-shadow    : 0 4px 24px rgba(0,0,0,.5);
+      z-index       : 500;
       opacity       : 0;
       pointer-events: none;
+      white-space   : nowrap;
+      transition    : opacity .28s, transform .28s;
     }
-
-    /* ══════════════════════════════════════════════════════════
-       11. TOAST DE NOTIFICACIÓN
-    ══════════════════════════════════════════════════════════ */
-    .toast {
-      position     : fixed;
-      bottom       : calc(var(--nav-h) + var(--safe-b) + 16px);
-      left         : 50%;
-      transform    : translateX(-50%) translateY(20px);
-      background   : var(--bg-card2);
-      border       : 1px solid var(--border-hi);
-      border-radius: 99px;
-      padding      : 10px 22px;
-      font-size    : 0.85rem;
-      font-weight  : 600;
-      color        : var(--text-hi);
-      box-shadow   : 0 4px 24px rgba(0,0,0,0.5);
-      z-index      : 300;
-      opacity      : 0;
-      pointer-events: none;
-      white-space  : nowrap;
-      transition   : opacity 0.3s, transform 0.3s;
-    }
-    .toast.show {
+    #toast.visible {
       opacity  : 1;
       transform: translateX(-50%) translateY(0);
     }
@@ -499,124 +435,107 @@
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════════════
+  <!-- ══════════════════════════════════════
        HEADER
-  ═══════════════════════════════════════════════════ -->
-  <header class="top-bar">
-    <button class="btn-back" id="btnBack" aria-label="Volver">
+  ══════════════════════════════════════ -->
+  <header id="topbar">
+    <button id="btnBack" aria-label="Volver">
       <i class="fa-solid fa-arrow-left"></i>
     </button>
-    <div class="top-bar-title" id="topBarTitle">Perfil</div>
+    <div id="pageTitle">Perfil</div>
   </header>
 
+  <!-- ══════════════════════════════════════
+       CONTENIDO
+  ══════════════════════════════════════ -->
+  <main id="page">
 
-  <!-- ═══════════════════════════════════════════════════
-       CONTENIDO PRINCIPAL
-  ═══════════════════════════════════════════════════ -->
-  <main class="page" id="page">
-
-    <!-- Skeleton inicial -->
-    <div id="skeletonView">
-      <div class="skel-photo skeleton"></div>
-      <div class="skel-line skeleton" style="width:55%"></div>
-      <div class="skel-line skeleton" style="width:75%"></div>
-      <div class="skel-line skeleton" style="width:45%"></div>
+    <!-- Skeleton de carga -->
+    <div id="vSkeleton">
+      <div id="skPhoto" class="skel"></div>
+      <div class="skline skel" style="width:50%"></div>
+      <div class="skline skel" style="width:74%"></div>
+      <div class="skline skel" style="width:44%"></div>
     </div>
 
-    <!-- Contenido real (oculto hasta que cargue) -->
-    <div id="profileView" style="display:none;">
+    <!-- Perfil completo (oculto hasta que cargue) -->
+    <div id="vPerfil" style="display:none">
 
-      <!-- Foto principal -->
-      <div class="photo-card" id="photoCard">
-        <!-- Inyectado por JS -->
+      <!-- Foto principal con overlay -->
+      <div id="photoCard">
+        <div id="photoOverlay">
+          <div id="ovName"></div>
+          <div id="ovAge"></div>
+        </div>
       </div>
 
-      <!-- Miniaturas del álbum -->
-      <div class="album-strip" id="albumStrip"></div>
+      <!-- Miniaturas álbum -->
+      <div id="albumStrip"></div>
 
-      <!-- Botones de acción -->
-      <div class="action-bar">
-        <button class="action-btn btn-like" id="btnLike" aria-label="Dar like">
-          <i class="fa-regular fa-heart" id="likeIcon"></i>
-          <span id="likeText">Me gusta</span>
+      <!-- Botones Like + Chat -->
+      <div id="actionRow">
+        <button id="btnLike" class="abtn" aria-label="Dar like">
+          <i id="icoLike" class="fa-regular fa-heart"></i>
+          <span id="txtLike">Me gusta</span>
         </button>
-        <button class="action-btn btn-chat" id="btnChat" aria-label="Iniciar chat">
+        <button id="btnChat" class="abtn" aria-label="Enviar mensaje">
           <i class="fa-solid fa-comment"></i>
           <span>Mensaje</span>
         </button>
       </div>
 
-      <!-- Sección de información -->
-      <div class="info-section" id="infoSection">
-        <!-- Inyectado por JS -->
-      </div>
+      <!-- Datos del usuario -->
+      <div id="infoSec"></div>
 
     </div>
 
     <!-- Estado de error -->
-    <div id="errorView" style="display:none;">
-      <!-- Inyectado por JS -->
-    </div>
+    <div id="vError" style="display:none"></div>
 
   </main>
 
-
-  <!-- ═══════════════════════════════════════════════════
-       BARRA DE NAVEGACIÓN INFERIOR
-  ═══════════════════════════════════════════════════ -->
-  <nav class="bottom-nav" aria-label="Navegación principal">
-
-    <a href="index.html" class="nav-item" aria-label="Inicio">
-      <i class="fa-solid fa-house"></i>
-      <span>Inicio</span>
-    </a>
-
-    <a href="radar.html" class="nav-item" aria-label="Radar">
-      <i class="fa-solid fa-location-crosshairs"></i>
-      <span>Radar</span>
-    </a>
-
-    <a href="likes.html" class="nav-item" aria-label="Likes">
-      <i class="fa-solid fa-heart"></i>
-      <span>Likes</span>
-    </a>
-
-    <a href="chats.html" class="nav-item" id="navChats" aria-label="Mensajes">
+  <!-- ══════════════════════════════════════
+       BARRA INFERIOR
+  ══════════════════════════════════════ -->
+  <nav id="bottomNav" aria-label="Navegación">
+    <a href="index.html" class="navi"><i class="fa-solid fa-house"></i><span>Inicio</span></a>
+    <a href="radar.html" class="navi"><i class="fa-solid fa-location-crosshairs"></i><span>Radar</span></a>
+    <a href="likes.html" class="navi"><i class="fa-solid fa-heart"></i><span>Likes</span></a>
+    <a href="chats.html" class="navi">
       <i class="fa-solid fa-comment"></i>
-      <div class="badge-counter hidden" id="globalBadge" aria-live="polite"></div>
+      <div id="msgBadge" class="oculto" aria-live="polite"></div>
       <span>Chats</span>
     </a>
-
-    <a href="perfil.html" class="nav-item" aria-label="Mi perfil">
-      <i class="fa-solid fa-user"></i>
-      <span>Perfil</span>
-    </a>
-
+    <a href="perfil.html" class="navi"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
   </nav>
 
-  <!-- Toast de feedback -->
-  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+  <!-- Toast -->
+  <div id="toast" role="alert" aria-live="assertive"></div>
 
-
-  <!-- ═══════════════════════════════════════════════════
-       FIREBASE + LÓGICA PRINCIPAL
-  ═══════════════════════════════════════════════════ -->
+  <!-- ══════════════════════════════════════════════════════════
+       SCRIPT PRINCIPAL
+       ► UN SOLO bloque <script type="module">
+       ► Credenciales Firebase reales
+       ► let miUid = null declarado en scope global del módulo
+  ══════════════════════════════════════════════════════════ -->
   <script type="module">
 
-    /* ──────────────────────────────────────────────────
-       IMPORTACIONES FIREBASE
-    ────────────────────────────────────────────────── */
+    /* ─────────────────────────────────────────────────
+       A) IMPORTS  — Firebase v10.8.0 módulos ES
+    ───────────────────────────────────────────────── */
     import { initializeApp }
       from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+
     import { getAuth, onAuthStateChanged }
       from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
     import { getDatabase, ref, get, set, onValue }
       from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 
-    /* ──────────────────────────────────────────────────
-       CONFIGURACIÓN FIREBASE
-    ────────────────────────────────────────────────── */
+    /* ─────────────────────────────────────────────────
+       B) CONFIGURACIÓN FIREBASE  — credenciales reales
+    ───────────────────────────────────────────────── */
     const firebaseConfig = {
       apiKey           : "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
       authDomain       : "kinetic-app-67ae5.firebaseapp.com",
@@ -632,467 +551,450 @@
     const db   = getDatabase(app);
 
 
-    /* ──────────────────────────────────────────────────
-       SVG FALLBACK CYBERPUNK
-    ────────────────────────────────────────────────── */
-    const DEFAULT_SVG = `<svg viewBox="0 0 24 24" fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style="width:60%;height:60%;stroke:#ff00ff;stroke-width:1.5;
-             stroke-linecap:round;stroke-linejoin:round;">
-      <circle cx="12" cy="8" r="4"/>
-      <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
-    </svg>`;
+    /* ─────────────────────────────────────────────────
+       C) VARIABLES GLOBALES DEL MÓDULO
+          Declaradas aquí, en el scope raíz, son visibles
+          en TODAS las funciones y addEventListener.
+          No importa el orden de ejecución: cuando un
+          handler se invoca, estas variables ya tienen
+          el valor asignado por onAuthStateChanged.
+    ───────────────────────────────────────────────── */
+    let miUid          = null;  // ← asignado en onAuthStateChanged
+    let selected_user_id = null;  // ← leído de localStorage
+    let fotosValidas   = [];    // URLs del álbum del perfil visitado
+    let likeYaEnviado  = false; // bloquea doble clic
 
-    /**
-     * Genera el wrapper del SVG fallback para insertarlo en .photo-card
-     * o en cualquier contenedor de avatar.
-     */
-    function makeSvgFallback() {
-      const wrap = document.createElement('div');
-      wrap.className = 'avatar-svg-wrap';
-      wrap.innerHTML = DEFAULT_SVG;
+
+    /* ─────────────────────────────────────────────────
+       D) REFERENCIAS AL DOM
+    ───────────────────────────────────────────────── */
+    const vSkeleton  = document.getElementById("vSkeleton");
+    const vPerfil    = document.getElementById("vPerfil");
+    const vError     = document.getElementById("vError");
+    const photoCard  = document.getElementById("photoCard");
+    const photoOvl   = document.getElementById("photoOverlay");
+    const ovName     = document.getElementById("ovName");
+    const ovAge      = document.getElementById("ovAge");
+    const albumStrip = document.getElementById("albumStrip");
+    const infoSec    = document.getElementById("infoSec");
+    const btnLike    = document.getElementById("btnLike");
+    const btnChat    = document.getElementById("btnChat");
+    const icoLike    = document.getElementById("icoLike");
+    const txtLike    = document.getElementById("txtLike");
+    const msgBadge   = document.getElementById("msgBadge");
+    const pageTitle  = document.getElementById("pageTitle");
+    const toastEl    = document.getElementById("toast");
+
+
+    /* ─────────────────────────────────────────────────
+       E) SVG FALLBACK CYBERPUNK
+          Se inserta como nodo DOM — nunca genera
+          una petición de red fallida ni rompe la UI.
+    ───────────────────────────────────────────────── */
+    function crearSvgFallback() {
+      const wrap = document.createElement("div");
+      wrap.className = "svgwrap";
+      wrap.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none"
+             xmlns="http://www.w3.org/2000/svg"
+             style="stroke:#ff00ff;stroke-width:1.5;
+                    stroke-linecap:round;stroke-linejoin:round;">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+        </svg>`;
       return wrap;
     }
 
-    /**
-     * Valida que `val` sea una URL HTTP/HTTPS real.
-     * @param {*} val
-     * @returns {boolean}
-     */
-    function isValidUrl(val) {
-      if (!val || typeof val !== 'string' || val.trim() === '') return false;
+
+    /* ─────────────────────────────────────────────────
+       F) HELPERS
+    ───────────────────────────────────────────────── */
+    function esUrlHttp(v) {
+      if (!v || typeof v !== "string" || !v.trim()) return false;
       try {
-        const u = new URL(val.trim());
-        return u.protocol === 'http:' || u.protocol === 'https:';
+        const u = new URL(v.trim());
+        return u.protocol === "http:" || u.protocol === "https:";
       } catch { return false; }
     }
 
-    /**
-     * Extrae el array de fotos del usuario con validación estricta.
-     * Retorna un array (posiblemente vacío) de URLs válidas.
-     * @param {object|null} user
-     * @returns {string[]}
-     */
-    function resolvePhotos(user) {
-      if (!user || typeof user !== 'object') return [];
-      const album = Array.isArray(user.album)
-        ? user.album.filter(isValidUrl)
+    function extraerFotos(user) {
+      if (!user) return [];
+      const arr = Array.isArray(user.album)
+        ? user.album.filter(esUrlHttp)
         : [];
-      // Incluir user.foto si no está ya en el álbum
-      if (isValidUrl(user.foto) && !album.includes(user.foto)) {
-        album.unshift(user.foto);
-      }
-      return album;
+      if (esUrlHttp(user.foto) && !arr.includes(user.foto))
+        arr.unshift(user.foto);
+      return arr;
     }
 
-    /** Escapa texto para inserción segura (anti-XSS). */
-    function esc(str) {
-      return String(str ?? '')
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    function nombreSeguro(user) {
+      const n = (user?.nombre || user?.name || user?.displayName || "").trim();
+      return n || "Sin nombre";
+    }
+
+    // Escapa texto para textContent (anti-XSS — se usa sólo donde necesario)
+    function esc(s) {
+      return String(s ?? "")
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    // Toast de notificación
+    let _toastTmr = null;
+    function mostrarToast(msg, ms = 3200) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("visible");
+      clearTimeout(_toastTmr);
+      _toastTmr = setTimeout(() => toastEl.classList.remove("visible"), ms);
+    }
+
+    // Muestra error a pantalla completa
+    function mostrarError(icono, titulo, cuerpoHtml, labelBtn, accion) {
+      vSkeleton.style.display = "none";
+      vPerfil.style.display   = "none";
+      vError.style.display    = "block";
+      vError.innerHTML = `
+        <div class="errbox">
+          <i class="fa-solid ${esc(icono)}"></i>
+          <h3>${esc(titulo)}</h3>
+          <p>${cuerpoHtml}</p>
+          <button class="errbtn" id="errBtn">${esc(labelBtn)}</button>
+        </div>`;
+      document.getElementById("errBtn")
+        ?.addEventListener("click", accion);
+    }
+
+    // Crea una tarjeta de dato
+    function crearCard(label, valor) {
+      const c = document.createElement("div");
+      c.className = "icard";
+      const l = document.createElement("div");
+      l.className   = "ilabel";
+      l.textContent = label;
+      const v = document.createElement("div");
+      v.className   = "ival";
+      v.textContent = valor;   // textContent → protegido contra XSS
+      c.appendChild(l);
+      c.appendChild(v);
+      return c;
     }
 
 
-    /* ──────────────────────────────────────────────────
-       REFERENCIAS DOM
-    ────────────────────────────────────────────────── */
-    const $skeleton  = document.getElementById('skeletonView');
-    const $profile   = document.getElementById('profileView');
-    const $error     = document.getElementById('errorView');
-    const $photoCard = document.getElementById('photoCard');
-    const $album     = document.getElementById('albumStrip');
-    const $info      = document.getElementById('infoSection');
-    const $btnLike   = document.getElementById('btnLike');
-    const $btnChat   = document.getElementById('btnChat');
-    const $likeIcon  = document.getElementById('likeIcon');
-    const $likeText  = document.getElementById('likeText');
-    const $badge     = document.getElementById('globalBadge');
-    const $topTitle  = document.getElementById('topBarTitle');
-    const $toast     = document.getElementById('toast');
+    /* ─────────────────────────────────────────────────
+       G) LEER selected_user_id DESDE localStorage
+    ───────────────────────────────────────────────── */
+    selected_user_id = (localStorage.getItem("selected_user_id") || "").trim() || null;
 
-
-    /* ──────────────────────────────────────────────────
-       TOAST HELPER
-    ────────────────────────────────────────────────── */
-    let _toastTimer = null;
-    function showToast(msg, durationMs = 3000) {
-      $toast.textContent = msg;
-      $toast.classList.add('show');
-      clearTimeout(_toastTimer);
-      _toastTimer = setTimeout(() => $toast.classList.remove('show'), durationMs);
-    }
-
-
-    /* ──────────────────────────────────────────────────
-       ESTADO GLOBAL
-    ────────────────────────────────────────────────── */
-    let miUid          = null;
-    let selectedUserId = null;
-    let photoUrls      = [];   // fotos válidas del perfil
-    let activePhotoIdx = 0;    // índice activo en la galería
-
-
-    /* ──────────────────────────────────────────────────
-       LEER selected_user_id DE localStorage
-    ────────────────────────────────────────────────── */
-    selectedUserId = localStorage.getItem('selected_user_id');
-
-    if (!selectedUserId || selectedUserId.trim() === '') {
-      // Sin ID → error y redirige
-      showErrorView(
-        'fa-triangle-exclamation',
-        'Sin usuario seleccionado',
-        'No se encontró el ID del perfil.<br>Vuelve al Radar para seleccionar uno.',
-        true
+    if (!selected_user_id) {
+      mostrarError(
+        "fa-triangle-exclamation",
+        "Sin usuario seleccionado",
+        "No se encontró el ID del perfil.<br>Vuelve al Radar.",
+        "Ir al Radar",
+        () => { window.location.href = "radar.html"; }
       );
     }
 
-    /* Botón volver */
-    document.getElementById('btnBack').addEventListener('click', () => {
+
+    /* ─────────────────────────────────────────────────
+       H) LISTENERS DE BOTONES — registrados UNA SOLA VEZ
+          Los handlers leen miUid / selected_user_id
+          en el momento del clic → para entonces ya
+          tienen valor (asignado por onAuthStateChanged).
+    ───────────────────────────────────────────────── */
+
+    // Botón volver
+    document.getElementById("btnBack").addEventListener("click", () => {
       window.history.length > 1
         ? window.history.back()
-        : window.location.href = 'radar.html';
+        : (window.location.href = "radar.html");
     });
 
+    /* ── LIKE ──────────────────────────────────────────
+       ✅ set() modular Firebase v10.8.0
+       ✅ Escritura cruzada en dos nodos:
+            recibidos/${selected_user_id}/${miUid} = true
+            enviados/${miUid}/${selected_user_id}  = true
+       ✅ Al tener éxito: botón fucsia, texto cambiado,
+          disabled=true para evitar bucles.
+    ──────────────────────────────────────────────── */
+    btnLike.addEventListener("click", async () => {
 
-    /* ──────────────────────────────────────────────────
-       AUTENTICACIÓN → PUNTO DE ENTRADA
-    ────────────────────────────────────────────────── */
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = 'login.html'; return; }
-      miUid = user.uid;
+      // Leer globals en el momento exacto del clic
+      const uid    = miUid;
+      const target = selected_user_id;
 
-      // Si ya mostramos error por falta de ID, no continuar
-      if (!selectedUserId) return;
+      // Validaciones
+      if (!uid)    { mostrarToast("⚠️ Inicia sesión para dar like."); return; }
+      if (!target) { mostrarToast("⚠️ No hay perfil seleccionado."); return; }
+      if (likeYaEnviado) return;
 
-      // Evitar que alguien vea su propio perfil aquí
-      if (selectedUserId === miUid) {
-        window.location.href = 'perfil.html';
-        return;
-      }
-
-      // Cargar perfil del usuario seleccionado
-      await loadProfile();
-
-      // Comprobar si ya le dimos like antes
-      checkExistingLike();
-
-      // Escuchar mensajes sin leer para el badge global
-      listenUnreadBadge();
-    });
-
-
-    /* ──────────────────────────────────────────────────
-       CARGAR PERFIL DESDE FIREBASE
-    ────────────────────────────────────────────────── */
-    async function loadProfile() {
-      let userData = null;
+      // Bloquear UI durante la operación
+      likeYaEnviado      = true;
+      btnLike.disabled   = true;
+      txtLike.textContent = "Enviando…";
 
       try {
-        const snap = await get(ref(db, `users/${selectedUserId}`));
-        if (snap.exists()) userData = snap.val();
-      } catch (err) {
-        console.error('[Kinetic/perfil-detalle] Error al cargar perfil:', err);
-        showErrorView(
-          'fa-wifi',
-          'Error de conexión',
-          'No se pudo cargar el perfil.<br>Verifica tu conexión e intenta de nuevo.',
-          false
-        );
-        return;
-      }
-
-      if (!userData) {
-        showErrorView(
-          'fa-user-slash',
-          'Perfil no encontrado',
-          'Este usuario no existe o fue eliminado.',
-          true
-        );
-        return;
-      }
-
-      renderProfile(userData);
-    }
-
-
-    /* ──────────────────────────────────────────────────
-       RENDERIZAR PERFIL
-    ────────────────────────────────────────────────── */
-    function renderProfile(user) {
-      // Datos básicos con fallbacks
-      const nombre  = (user.nombre || user.name || user.displayName || '').trim() || 'Sin nombre';
-      const edad    = user.edad    ? `${user.edad} años`    : null;
-      const genero  = user.genero  || user.gender           || null;
-      const busca   = user.busca   || user.buscando         || null;
-      const bio     = (user.bio    || user.biografia || '').trim() || null;
-
-      // Actualizar título del header
-      $topTitle.textContent = nombre;
-
-      // Fotos válidas
-      photoUrls = resolvePhotos(user);
-
-      /* ── Foto principal ──────────────────────────── */
-      renderMainPhoto(0);
-
-      /* ── Overlay nombre + edad ───────────────────── */
-      const overlay = document.createElement('div');
-      overlay.className = 'photo-overlay';
-      overlay.innerHTML = `
-        <div class="overlay-name">${esc(nombre)}</div>
-        ${edad ? `<div class="overlay-age">${esc(edad)}</div>` : ''}
-      `;
-      $photoCard.appendChild(overlay);
-
-      /* ── Miniaturas del álbum ────────────────────── */
-      $album.innerHTML = '';
-      if (photoUrls.length > 1) {
-        photoUrls.forEach((url, i) => {
-          const thumb = document.createElement('div');
-          thumb.className = `album-thumb${i === 0 ? ' active' : ''}`;
-
-          const img   = document.createElement('img');
-          img.src     = url;
-          img.alt     = `Foto ${i + 1}`;
-          img.onerror = () => { thumb.style.display = 'none'; };
-          thumb.appendChild(img);
-
-          thumb.addEventListener('click', () => {
-            renderMainPhoto(i);
-            document.querySelectorAll('.album-thumb').forEach((t, ti) => {
-              t.classList.toggle('active', ti === i);
-            });
-          });
-
-          $album.appendChild(thumb);
-        });
-      }
-
-      /* ── Sección de información ──────────────────── */
-      $info.innerHTML = '';
-
-      // Grid: género + qué busca
-      if (genero || busca) {
-        const grid = document.createElement('div');
-        grid.className = 'info-grid';
-
-        if (genero) grid.appendChild(makeInfoCard('Género', genero));
-        if (busca)  grid.appendChild(makeInfoCard('Busca', busca));
-        $info.appendChild(grid);
-      }
-
-      // Biografía
-      if (bio) {
-        const bioCard = makeInfoCard('Sobre mí', bio);
-        bioCard.style.gridColumn = '1 / -1';
-        $info.appendChild(bioCard);
-      }
-
-      // Intereses / tags si existen
-      if (Array.isArray(user.intereses) && user.intereses.length > 0) {
-        const tagCard = document.createElement('div');
-        tagCard.className = 'info-card';
-        const label = document.createElement('div');
-        label.className   = 'info-label';
-        label.textContent = 'Intereses';
-        const tagsWrap = document.createElement('div');
-        tagsWrap.className = 'tags-wrap';
-        user.intereses.forEach((tag) => {
-          const chip = document.createElement('span');
-          chip.className   = 'tag';
-          chip.textContent = tag;
-          tagsWrap.appendChild(chip);
-        });
-        tagCard.appendChild(label);
-        tagCard.appendChild(tagsWrap);
-        $info.appendChild(tagCard);
-      }
-
-      /* ── Botón Chat ──────────────────────────────── */
-      $btnChat.addEventListener('click', () => {
-        // ✅ CORRECCIÓN: apunta a chat-interno.html con ?id= (no chat.html)
-        window.location.href = `chat-interno.html?id=${selectedUserId}`;
-      });
-
-      /* ── Mostrar vista ───────────────────────────── */
-      $skeleton.style.display = 'none';
-      $profile.style.display  = 'block';
-    }
-
-
-    /* ──────────────────────────────────────────────────
-       RENDERIZAR FOTO PRINCIPAL
-    ────────────────────────────────────────────────── */
-    function renderMainPhoto(idx) {
-      activePhotoIdx = idx;
-
-      // Limpiar foto anterior (no el overlay)
-      const existing = $photoCard.querySelector('img, .avatar-svg-wrap');
-      if (existing) existing.remove();
-
-      if (photoUrls.length > 0 && isValidUrl(photoUrls[idx])) {
-        const img   = document.createElement('img');
-        img.src     = photoUrls[idx];
-        img.alt     = 'Foto de perfil';
-        // onerror: reemplaza con SVG
-        img.onerror = () => {
-          img.remove();
-          $photoCard.insertBefore(makeSvgFallback(), $photoCard.firstChild);
-        };
-        $photoCard.insertBefore(img, $photoCard.firstChild);
-      } else {
-        // Sin fotos válidas → SVG fallback directamente
-        $photoCard.insertBefore(makeSvgFallback(), $photoCard.firstChild);
-      }
-    }
-
-
-    /* ──────────────────────────────────────────────────
-       CREAR TARJETA DE INFO
-    ────────────────────────────────────────────────── */
-    function makeInfoCard(label, value) {
-      const card = document.createElement('div');
-      card.className = 'info-card';
-
-      const lbl = document.createElement('div');
-      lbl.className   = 'info-label';
-      lbl.textContent = label;
-
-      const val = document.createElement('div');
-      val.className   = 'info-value';
-      val.textContent = value; // textContent: anti-XSS
-
-      card.appendChild(lbl);
-      card.appendChild(val);
-      return card;
-    }
-
-
-    /* ──────────────────────────────────────────────────
-       COMPROBAR SI YA DI LIKE (estado inicial del botón)
-    ────────────────────────────────────────────────── */
-    async function checkExistingLike() {
-      if (!miUid || !selectedUserId) return;
-      try {
-        const snap = await get(ref(db, `enviados/${miUid}/${selectedUserId}`));
-        if (snap.exists() && snap.val() === true) {
-          setLikeButtonLiked();
-        }
-      } catch { /* silencioso */ }
-    }
-
-
-    /* ──────────────────────────────────────────────────
-       DAR LIKE
-       ✅ CORRECCIÓN: usa Firebase v10.8.0 set() modular.
-       Escritura cruzada en dos nodos:
-         recibidos/${selected_user_id}/${miUid} = true
-           → aparece en likes.html del receptor
-         enviados/${miUid}/${selected_user_id}  = true
-           → registro propio del usuario logueado
-    ────────────────────────────────────────────────── */
-    $btnLike.addEventListener('click', async () => {
-      // Guardas: sin auth, sin target, o ya enviado → salir
-      if (!miUid || !selectedUserId || $btnLike.classList.contains('liked')) return;
-
-      // Deshabilitar inmediatamente para evitar doble clic
-      $btnLike.disabled = true;
-      $likeText.textContent = 'Enviando…';
-
-      try {
-        // ✅ set() modular de firebase-database v10.8.0
-        // Escritura en paralelo — más rápida que secuencial
+        // set() paralelo — escritura cruzada
         await Promise.all([
-          set(ref(db, `recibidos/${selectedUserId}/${miUid}`), true),
-          set(ref(db, `enviados/${miUid}/${selectedUserId}`),  true)
+          set(ref(db, `recibidos/${target}/${uid}`), true),
+          set(ref(db, `enviados/${uid}/${target}`),  true)
         ]);
 
-        // Éxito → cambio visual definitivo
-        setLikeButtonLiked();
-        showToast('💜 ¡Like enviado!');
+        // Éxito visual
+        marcarLikeDado();
+        mostrarToast("💜 ¡Like enviado!");
 
       } catch (err) {
-        // Error en la escritura → restaurar botón para reintentar
-        console.error('[Kinetic/perfil-detalle] Error al enviar like:', err.message);
-        $btnLike.disabled     = false;
-        $likeText.textContent = 'Me gusta';
-        showToast('⚠️ No se pudo enviar el like. Intenta de nuevo.');
+        // Restaurar para poder reintentar
+        console.error("[Kinetic] Error like →", err.message);
+        likeYaEnviado      = false;
+        btnLike.disabled   = false;
+        txtLike.textContent = "Me gusta";
+        mostrarToast("⚠️ No se pudo enviar. Intenta de nuevo.");
       }
     });
 
+    /* ── CHAT ─────────────────────────────────────────
+       ✅ Redirige a chat-interno.html?id=  (sin 404)
+    ──────────────────────────────────────────────── */
+    btnChat.addEventListener("click", () => {
+      const target = selected_user_id;
+      if (!target) { mostrarToast("⚠️ No hay perfil seleccionado."); return; }
+      window.location.href = "chat-interno.html?id=" + target;
+    });
 
-    /* ──────────────────────────────────────────────────
-       CAMBIAR ESTADO VISUAL DEL BOTÓN A "LIKED"
-    ────────────────────────────────────────────────── */
-    function setLikeButtonLiked() {
-      $btnLike.classList.add('liked');
-      $btnLike.disabled     = true;
-      $likeIcon.className   = 'fa-solid fa-heart'; // corazón sólido
-      $likeText.textContent = '¡Like enviado!';
+
+    /* ─────────────────────────────────────────────────
+       I) AUTENTICACIÓN
+          onAuthStateChanged:
+          1. Asigna miUid = user.uid  (global del módulo)
+          2. Llama a inicializarPerfil()
+          A partir de este punto, el listener del Like
+          lee miUid con valor válido.
+    ───────────────────────────────────────────────── */
+    onAuthStateChanged(auth, (user) => {
+
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      // ✅ Asignación global segura
+      miUid = user.uid;
+
+      if (!selected_user_id) return; // ya se mostró error antes
+
+      // No abrir el propio perfil aquí
+      if (selected_user_id === miUid) {
+        window.location.href = "perfil.html";
+        return;
+      }
+
+      inicializarPerfil();
+    });
+
+
+    /* ─────────────────────────────────────────────────
+       J) INICIALIZAR  — agrupa lógica post-auth
+    ───────────────────────────────────────────────── */
+    async function inicializarPerfil() {
+      await cargarPerfil();
+      await verificarLikePrevio();
+      escucharBadgeMensajes();
     }
 
 
-    /* ──────────────────────────────────────────────────
-       BADGE GLOBAL — MENSAJES SIN LEER EN TIEMPO REAL
-    ────────────────────────────────────────────────── */
-    function listenUnreadBadge() {
-      if (!miUid) return;
+    /* ─────────────────────────────────────────────────
+       K) CARGAR DATOS DEL PERFIL DESDE FIREBASE
+    ───────────────────────────────────────────────── */
+    async function cargarPerfil() {
+      let datos = null;
 
-      onValue(ref(db, 'chats'), (snapshot) => {
-        const allChats = snapshot.val() || {};
-        let unreadCount = 0;
+      try {
+        const snap = await get(ref(db, `users/${selected_user_id}`));
+        if (snap.exists()) datos = snap.val();
+      } catch (err) {
+        console.error("[Kinetic] cargarPerfil →", err.message);
+        mostrarError(
+          "fa-wifi", "Error de conexión",
+          "No se pudo cargar el perfil.<br>Revisa tu conexión.",
+          "Reintentar", () => window.location.reload()
+        );
+        return;
+      }
 
-        Object.entries(allChats).forEach(([chatId, chatData]) => {
-          // Solo contar salas en las que participo
-          if (!chatId.includes(miUid)) return;
-          const info = chatData?.lastInfo;
-          if (info && info.unreadTarget === miUid) unreadCount++;
-        });
+      if (!datos) {
+        mostrarError(
+          "fa-user-slash", "Perfil no encontrado",
+          "Este usuario no existe o fue eliminado.",
+          "Ir al Radar", () => { window.location.href = "radar.html"; }
+        );
+        return;
+      }
 
-        if (unreadCount > 0) {
-          $badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
-          $badge.classList.remove('hidden');
-        } else {
-          $badge.classList.add('hidden');
-        }
-      });
+      pintarPerfil(datos);
     }
 
 
-    /* ──────────────────────────────────────────────────
-       MOSTRAR VISTA DE ERROR
-    ────────────────────────────────────────────────── */
-    function showErrorView(icon, title, bodyHtml, showRedirect) {
-      $skeleton.style.display = 'none';
-      $profile.style.display  = 'none';
-      $error.style.display    = 'block';
+    /* ─────────────────────────────────────────────────
+       L) PINTAR PERFIL EN EL DOM
+    ───────────────────────────────────────────────── */
+    function pintarPerfil(user) {
+      const nombre = nombreSeguro(user);
+      const edad   = user.edad   ? `${user.edad} años`         : null;
+      const genero = user.genero || user.gender                  || null;
+      const busca  = user.busca  || user.buscando                || null;
+      const bio    = (user.bio   || user.biografia || "").trim() || null;
 
-      $error.innerHTML = `
-        <div class="error-state">
-          <i class="fa-solid ${esc(icon)}" style="color:var(--accent)"></i>
-          <h3>${esc(title)}</h3>
-          <p>${bodyHtml}</p>
-          ${showRedirect
-            ? `<button class="btn-retry" id="btnRedirect">
-                 <i class="fa-solid fa-arrow-left"></i> Volver al Radar
-               </button>`
-            : `<button class="btn-retry" id="btnRetry">
-                 <i class="fa-solid fa-rotate-right"></i> Reintentar
-               </button>`
-          }
-        </div>
-      `;
+      // Título header
+      pageTitle.textContent = nombre;
 
-      const btn = document.getElementById('btnRedirect') || document.getElementById('btnRetry');
-      if (btn) {
-        btn.addEventListener('click', () => {
-          if (showRedirect) window.location.href = 'radar.html';
-          else window.location.reload();
+      // Fotos válidas
+      fotosValidas = extraerFotos(user);
+
+      // Foto principal
+      mostrarFoto(0);
+
+      // Overlay nombre + edad
+      ovName.textContent = nombre;
+      if (edad) { ovAge.textContent = edad; } else { ovAge.style.display = "none"; }
+
+      // Asegurar que el overlay quede encima de la imagen
+      photoCard.appendChild(photoOvl);
+
+      // Miniaturas
+      albumStrip.innerHTML = "";
+      if (fotosValidas.length > 1) {
+        fotosValidas.forEach((url, i) => {
+          const t   = document.createElement("div");
+          t.className = "thumb" + (i === 0 ? " activa" : "");
+          const img = document.createElement("img");
+          img.src     = url;
+          img.alt     = `Foto ${i + 1}`;
+          img.onerror = () => { t.style.display = "none"; };
+          t.appendChild(img);
+          t.addEventListener("click", () => {
+            mostrarFoto(i);
+            albumStrip.querySelectorAll(".thumb").forEach((x, xi) =>
+              x.classList.toggle("activa", xi === i));
+          });
+          albumStrip.appendChild(t);
         });
       }
+
+      // Cards de información
+      infoSec.innerHTML = "";
+      if (genero || busca) {
+        const grid = document.createElement("div");
+        grid.className = "info-grid";
+        if (genero) grid.appendChild(crearCard("Género", genero));
+        if (busca)  grid.appendChild(crearCard("Busca", busca));
+        infoSec.appendChild(grid);
+      }
+      if (bio) infoSec.appendChild(crearCard("Sobre mí", bio));
+
+      if (Array.isArray(user.intereses) && user.intereses.length > 0) {
+        const c = document.createElement("div");
+        c.className = "icard";
+        const l = document.createElement("div");
+        l.className = "ilabel"; l.textContent = "Intereses";
+        const tw = document.createElement("div");
+        tw.className = "tags";
+        user.intereses.forEach((t) => {
+          const chip = document.createElement("span");
+          chip.className = "tag"; chip.textContent = t;
+          tw.appendChild(chip);
+        });
+        c.appendChild(l); c.appendChild(tw);
+        infoSec.appendChild(c);
+      }
+
+      // Mostrar vista
+      vSkeleton.style.display = "none";
+      vPerfil.style.display   = "block";
+    }
+
+
+    /* ─────────────────────────────────────────────────
+       M) MOSTRAR FOTO PRINCIPAL
+          Fallback SVG si no hay URLs válidas.
+    ───────────────────────────────────────────────── */
+    function mostrarFoto(idx) {
+      // Eliminar foto o SVG previo (respetar el overlay)
+      const prev = photoCard.querySelector("img, .svgwrap");
+      if (prev) prev.remove();
+
+      if (fotosValidas.length > 0 && esUrlHttp(fotosValidas[idx])) {
+        const img   = document.createElement("img");
+        img.src     = fotosValidas[idx];
+        img.alt     = "Foto de perfil";
+        img.onerror = () => {
+          img.remove();
+          photoCard.insertBefore(crearSvgFallback(), photoOvl);
+        };
+        photoCard.insertBefore(img, photoOvl);
+      } else {
+        // Sin fotos válidas → SVG directamente
+        photoCard.insertBefore(crearSvgFallback(), photoOvl);
+      }
+    }
+
+
+    /* ─────────────────────────────────────────────────
+       N) VERIFICAR LIKE PREVIO (estado inicial botón)
+    ───────────────────────────────────────────────── */
+    async function verificarLikePrevio() {
+      if (!miUid || !selected_user_id) return;
+      try {
+        const snap = await get(ref(db, `enviados/${miUid}/${selected_user_id}`));
+        if (snap.exists() && snap.val() === true) {
+          likeYaEnviado = true;
+          marcarLikeDado();
+        }
+      } catch { /* silencioso — no es crítico */ }
+    }
+
+
+    /* ─────────────────────────────────────────────────
+       O) ESTADO VISUAL "LIKE DADO"
+          Fucsia neón, corazón sólido, texto cambiado,
+          botón desactivado.
+    ───────────────────────────────────────────────── */
+    function marcarLikeDado() {
+      btnLike.classList.add("liked");
+      btnLike.disabled    = true;
+      icoLike.className   = "fa-solid fa-heart";
+      txtLike.textContent = "¡Like enviado!";
+    }
+
+
+    /* ─────────────────────────────────────────────────
+       P) BADGE GLOBAL — mensajes sin leer en tiempo real
+          Escucha onValue en el nodo "chats" y cuenta
+          las salas donde unreadTarget === miUid.
+    ───────────────────────────────────────────────── */
+    function escucharBadgeMensajes() {
+      if (!miUid) return;
+
+      onValue(ref(db, "chats"), (snap) => {
+        const todos = snap.val() || {};
+        let n = 0;
+        Object.entries(todos).forEach(([id, data]) => {
+          if (!id.includes(miUid)) return;
+          if (data?.lastInfo?.unreadTarget === miUid) n++;
+        });
+        if (n > 0) {
+          msgBadge.textContent = n > 99 ? "99+" : String(n);
+          msgBadge.classList.remove("oculto");
+        } else {
+          msgBadge.classList.add("oculto");
+        }
+      });
     }
 
   </script>
+  <!-- FIN DEL ÚNICO BLOQUE SCRIPT -->
+
 </body>
 </html>
