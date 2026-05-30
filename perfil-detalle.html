@@ -1,162 +1,1088 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinetic - Perfil</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- ═══════════════════════════════════════════════════════════════
+       KINETIC — perfil-detalle.html
+       Vista de perfil de usuario seleccionado
+       ─────────────────────────────────────────────────────────────
+       FLUJO
+       1. Lee selected_user_id de localStorage
+       2. onAuthStateChanged → obtiene miUid
+       3. get(users/${selected_user_id}) → pinta perfil completo
+       4. onValue(chats) → badge global de mensajes sin leer
+       5. Botón Like  → recibidos + enviados en Firebase
+       6. Botón Chat  → chat.html?id=${selected_user_id}
+  ═══════════════════════════════════════════════════════════════ -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Kinetic — Perfil</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Urbanist', sans-serif; }
-        body { background-color: #0d0616; color: #ffffff; min-height: 100vh; display: flex; justify-content: center; }
-        .profile-wrapper { width: 100%; max-width: 500px; background-color: #0d0616; position: relative; padding-bottom: 30px; }
-        .btn-top-back { position: absolute; top: 20px; left: 20px; width: 45px; height: 45px; background: rgba(18, 9, 31, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); }
-        .main-photo-container { width: 100%; aspect-ratio: 1 / 1; position: relative; background-color: #12091f; }
-        .main-photo-container img { width: 100%; height: 100%; object-fit: cover; }
-        .action-float-bar { position: absolute; bottom: -30px; right: 30px; display: flex; gap: 15px; z-index: 20; }
-        
-        /* BOTONES ACCION */
-        .action-btn { width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: transform 0.2s; }
-        .action-btn:active { transform: scale(0.9); }
-        
-        .btn-like { background: linear-gradient(135deg, #ff0055, #ff00ff); }
-        /* Estado activo cuando tiene Like */
-        .btn-like.liked { background: #ffffff !important; color: #ff0055 !important; box-shadow: 0 0 20px #ff0055 !important; }
-        
-        .btn-chat { background: linear-gradient(135deg, #00f2ff, #0077ff); }
-        .profile-details { padding: 45px 25px 25px 25px; }
-        .identity-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .user-name-age { font-size: 26px; font-weight: 800; }
-        .online-badge { padding: 4px 10px; background-color: rgba(0, 255, 102, 0.1); border: 1px solid #00ff66; color: #00ff66; font-size: 11px; font-weight: 700; border-radius: 20px; text-transform: uppercase; }
-        .user-meta-info { font-size: 14px; color: #00f2ff; font-weight: 600; margin-bottom: 20px; }
-        .bio-box { background-color: #12091f; border: 1px solid #25123e; padding: 15px; border-radius: 14px; font-size: 15px; line-height: 1.5; color: #dcd1f0; margin-bottom: 25px; }
-        .section-title { font-size: 14px; color: #ff00ff; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
-        .sub-album-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .sub-album-item { aspect-ratio: 1 / 1; background-color: #12091f; border-radius: 10px; overflow: hidden; border: 1px solid rgba(61, 28, 99, 0.4); cursor: pointer; }
-        .sub-album-item img { width: 100%; height: 100%; object-fit: cover; }
-    </style>
+  <style>
+    /* ══════════════════════════════════════════════════════════
+       1. TOKENS
+    ══════════════════════════════════════════════════════════ */
+    :root {
+      --bg-deep     : #0d0616;
+      --bg-card     : #12091f;
+      --bg-card2    : #1a0f2e;
+      --accent      : #ff00ff;
+      --accent2     : #00ffff;
+      --accent-glow : rgba(255, 0, 255, 0.35);
+      --accent2-glow: rgba(0, 255, 255, 0.28);
+      --text-hi     : #f0e6ff;
+      --text-mid    : #9b84b8;
+      --text-lo     : #5c4a7a;
+      --border      : rgba(255, 0, 255, 0.14);
+      --border-hi   : rgba(255, 0, 255, 0.38);
+      --header-h    : 58px;
+      --nav-h       : 64px;
+      --safe-t      : env(safe-area-inset-top,    0px);
+      --safe-b      : env(safe-area-inset-bottom, 0px);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       2. RESET
+    ══════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height : 100%;
+      background : var(--bg-deep);
+      color      : var(--text-hi);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size  : 16px;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       3. HEADER FIJO (botón volver + título)
+    ══════════════════════════════════════════════════════════ */
+    .top-bar {
+      position       : fixed;
+      top            : 0; left: 0; right: 0;
+      height         : var(--header-h);
+      padding-top    : var(--safe-t);
+      z-index        : 200;
+      display        : flex;
+      align-items    : center;
+      gap            : 12px;
+      padding-left   : 16px;
+      padding-right  : 16px;
+      background     : rgba(13, 6, 22, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom  : 1px solid var(--border);
+    }
+
+    .btn-back {
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      width          : 36px;
+      height         : 36px;
+      border-radius  : 50%;
+      background     : none;
+      border         : none;
+      color          : var(--accent2);
+      font-size      : 1.1rem;
+      cursor         : pointer;
+      transition     : background 0.2s, color 0.2s;
+      flex-shrink    : 0;
+    }
+    .btn-back:hover  { background: rgba(0,255,255,0.1); }
+    .btn-back:active { background: rgba(0,255,255,0.2); }
+
+    .top-bar-title {
+      flex        : 1;
+      font-size   : 1rem;
+      font-weight : 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background  : linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space : nowrap;
+      overflow    : hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       4. ÁREA PRINCIPAL
+    ══════════════════════════════════════════════════════════ */
+    .page {
+      padding-top   : calc(var(--header-h) + 12px);
+      padding-bottom: calc(var(--nav-h) + var(--safe-b) + 24px);
+      max-width     : 560px;
+      margin        : 0 auto;
+      padding-left  : 16px;
+      padding-right : 16px;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       5. GALERÍA / FOTO PRINCIPAL
+    ══════════════════════════════════════════════════════════ */
+    .photo-card {
+      position     : relative;
+      width        : 100%;
+      aspect-ratio : 4 / 5;
+      border-radius: 20px;
+      overflow     : hidden;
+      background   : var(--bg-card);
+      border       : 1px solid var(--border-hi);
+      box-shadow   : 0 0 30px rgba(255,0,255,0.12), 0 8px 32px rgba(0,0,0,0.6);
+      margin-bottom: 20px;
+    }
+
+    .photo-card img {
+      width     : 100%;
+      height    : 100%;
+      object-fit: cover;
+      display   : block;
+    }
+
+    /* SVG fallback llenando la tarjeta */
+    .photo-card .avatar-svg-wrap {
+      width          : 100%;
+      height         : 100%;
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      background     : var(--bg-card);
+    }
+    .photo-card .avatar-svg-wrap svg {
+      width : 52%;
+      height: 52%;
+    }
+
+    /* Degradado sobre la foto para el nombre */
+    .photo-overlay {
+      position  : absolute;
+      bottom    : 0; left: 0; right: 0;
+      padding   : 48px 20px 20px;
+      background: linear-gradient(to top, rgba(13,6,22,0.92) 0%, transparent 100%);
+    }
+    .overlay-name {
+      font-size  : 1.6rem;
+      font-weight: 800;
+      color      : #fff;
+      line-height: 1.1;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+    }
+    .overlay-age {
+      font-size  : 1rem;
+      color      : var(--accent2);
+      font-weight: 500;
+      margin-top : 2px;
+    }
+
+    /* Miniaturas de álbum */
+    .album-strip {
+      display  : flex;
+      gap      : 8px;
+      overflow-x: auto;
+      padding  : 0 0 8px;
+      margin-bottom: 20px;
+      scrollbar-width: none;
+    }
+    .album-strip::-webkit-scrollbar { display: none; }
+
+    .album-thumb {
+      flex-shrink  : 0;
+      width        : 72px;
+      height       : 72px;
+      border-radius: 12px;
+      overflow     : hidden;
+      border       : 2px solid var(--border);
+      cursor       : pointer;
+      transition   : border-color 0.2s, transform 0.2s;
+      background   : var(--bg-card);
+    }
+    .album-thumb:hover  { border-color: var(--accent); transform: scale(1.05); }
+    .album-thumb.active { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+
+    .album-thumb img {
+      width     : 100%;
+      height    : 100%;
+      object-fit: cover;
+      display   : block;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       6. BOTONES DE ACCIÓN (Like + Chat)
+    ══════════════════════════════════════════════════════════ */
+    .action-bar {
+      display        : flex;
+      gap            : 12px;
+      margin-bottom  : 24px;
+    }
+
+    /* Base compartida */
+    .action-btn {
+      flex           : 1;
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      gap            : 8px;
+      padding        : 14px 10px;
+      border-radius  : 14px;
+      border         : none;
+      font-family    : inherit;
+      font-size      : 0.9rem;
+      font-weight    : 700;
+      letter-spacing : 0.04em;
+      cursor         : pointer;
+      transition     : transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .action-btn:active { transform: scale(0.95); }
+    .action-btn:disabled {
+      cursor : not-allowed;
+      opacity: 0.7;
+      transform: none !important;
+    }
+
+    /* Botón Like */
+    .btn-like {
+      background : var(--bg-card2);
+      color      : var(--accent);
+      border     : 1.5px solid var(--border-hi);
+      box-shadow : 0 0 0 rgba(255,0,255,0);
+      transition : background 0.3s, box-shadow 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .btn-like:not(:disabled):hover {
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+    /* Estado: like enviado */
+    .btn-like.liked {
+      background : var(--accent);
+      color      : #fff;
+      border-color: var(--accent);
+      box-shadow : 0 0 24px var(--accent), 0 0 48px rgba(255,0,255,0.3);
+      animation  : likeFlash 0.45s ease-out;
+    }
+    @keyframes likeFlash {
+      0%   { transform: scale(1);    }
+      30%  { transform: scale(1.12); }
+      60%  { transform: scale(0.96); }
+      100% { transform: scale(1);    }
+    }
+
+    /* Botón Chat */
+    .btn-chat {
+      background : linear-gradient(135deg, #00b4d8, var(--accent2));
+      color      : #0a0a14;
+      box-shadow : 0 4px 18px rgba(0,255,255,0.25);
+    }
+    .btn-chat:not(:disabled):hover {
+      box-shadow: 0 4px 28px rgba(0,255,255,0.45);
+      transform : translateY(-1px);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       7. TARJETAS DE INFORMACIÓN
+    ══════════════════════════════════════════════════════════ */
+    .info-section {
+      display       : flex;
+      flex-direction: column;
+      gap           : 12px;
+      margin-bottom : 28px;
+    }
+
+    .info-card {
+      background   : var(--bg-card);
+      border       : 1px solid var(--border);
+      border-radius: 16px;
+      padding      : 16px 18px;
+      transition   : border-color 0.2s;
+    }
+    .info-card:hover { border-color: var(--border-hi); }
+
+    .info-label {
+      font-size     : 0.65rem;
+      font-weight   : 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color         : var(--accent);
+      margin-bottom : 6px;
+    }
+
+    .info-value {
+      font-size  : 0.92rem;
+      color      : var(--text-hi);
+      line-height: 1.55;
+    }
+
+    /* Grid para datos pequeños (género + qué busca) */
+    .info-grid {
+      display              : grid;
+      grid-template-columns: 1fr 1fr;
+      gap                  : 12px;
+      margin-bottom        : 12px;
+    }
+
+    /* Chips de etiquetas */
+    .tags-wrap {
+      display  : flex;
+      flex-wrap: wrap;
+      gap      : 8px;
+      margin-top: 4px;
+    }
+    .tag {
+      display      : inline-flex;
+      align-items  : center;
+      gap          : 5px;
+      padding      : 5px 12px;
+      border-radius: 99px;
+      font-size    : 0.75rem;
+      font-weight  : 600;
+      background   : rgba(255,0,255,0.1);
+      color        : var(--accent);
+      border       : 1px solid rgba(255,0,255,0.25);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       8. SKELETON LOADER
+    ══════════════════════════════════════════════════════════ */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+    .skeleton {
+      background     : linear-gradient(
+        90deg,
+        var(--bg-card)  25%,
+        var(--bg-card2) 50%,
+        var(--bg-card)  75%
+      );
+      background-size: 1200px 100%;
+      animation      : shimmer 1.5s infinite linear;
+      border-radius  : 10px;
+    }
+
+    .skel-photo {
+      width        : 100%;
+      aspect-ratio : 4 / 5;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .skel-line { height: 14px; margin-bottom: 10px; }
+
+    /* ══════════════════════════════════════════════════════════
+       9. ERROR / ESTADO VACÍO
+    ══════════════════════════════════════════════════════════ */
+    .error-state {
+      display       : flex;
+      flex-direction: column;
+      align-items   : center;
+      justify-content: center;
+      gap           : 14px;
+      padding       : 80px 24px 40px;
+      text-align    : center;
+      color         : var(--text-lo);
+    }
+    .error-state i    { font-size: 3rem; }
+    .error-state h3   { font-size: 1rem; font-weight: 700; color: var(--text-mid); }
+    .error-state p    { font-size: 0.82rem; line-height: 1.6; }
+    .error-state .btn-retry {
+      margin-top   : 8px;
+      padding      : 10px 24px;
+      border-radius: 99px;
+      background   : none;
+      border       : 1.5px solid var(--accent);
+      color        : var(--accent);
+      font-family  : inherit;
+      font-size    : 0.85rem;
+      font-weight  : 600;
+      cursor       : pointer;
+      transition   : background 0.2s;
+    }
+    .error-state .btn-retry:hover { background: rgba(255,0,255,0.1); }
+
+    /* ══════════════════════════════════════════════════════════
+       10. BARRA DE NAVEGACIÓN INFERIOR
+    ══════════════════════════════════════════════════════════ */
+    .bottom-nav {
+      position       : fixed;
+      bottom         : 0; left: 0; right: 0;
+      height         : calc(var(--nav-h) + var(--safe-b));
+      padding-bottom : var(--safe-b);
+      z-index        : 200;
+      display        : flex;
+      justify-content: space-around;
+      align-items    : center;
+      background     : rgba(13, 6, 22, 0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top     : 1px solid var(--border);
+    }
+
+    .nav-item {
+      position       : relative;
+      display        : flex;
+      flex-direction : column;
+      align-items    : center;
+      gap            : 3px;
+      padding        : 6px 18px;
+      color          : var(--text-lo);
+      font-size      : 1.25rem;
+      text-decoration: none;
+      cursor         : pointer;
+      transition     : color 0.2s;
+    }
+    .nav-item span {
+      font-size     : 0.58rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight   : 600;
+    }
+    .nav-item.active {
+      color      : var(--accent);
+      text-shadow: 0 0 12px var(--accent);
+    }
+    .nav-item:not(.active):hover { color: var(--text-mid); }
+
+    .badge-counter {
+      position       : absolute;
+      top            : 2px;
+      right          : 8px;
+      min-width      : 18px;
+      height         : 18px;
+      border-radius  : 9px;
+      background     : var(--accent);
+      box-shadow     : 0 0 8px var(--accent);
+      color          : #fff;
+      font-size      : 0.58rem;
+      font-weight    : 700;
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      padding        : 0 5px;
+      pointer-events : none;
+      transition     : transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+    }
+    .badge-counter.hidden {
+      transform     : scale(0);
+      opacity       : 0;
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       11. TOAST DE NOTIFICACIÓN
+    ══════════════════════════════════════════════════════════ */
+    .toast {
+      position     : fixed;
+      bottom       : calc(var(--nav-h) + var(--safe-b) + 16px);
+      left         : 50%;
+      transform    : translateX(-50%) translateY(20px);
+      background   : var(--bg-card2);
+      border       : 1px solid var(--border-hi);
+      border-radius: 99px;
+      padding      : 10px 22px;
+      font-size    : 0.85rem;
+      font-weight  : 600;
+      color        : var(--text-hi);
+      box-shadow   : 0 4px 24px rgba(0,0,0,0.5);
+      z-index      : 300;
+      opacity      : 0;
+      pointer-events: none;
+      white-space  : nowrap;
+      transition   : opacity 0.3s, transform 0.3s;
+    }
+    .toast.show {
+      opacity  : 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
 </head>
 <body>
-    <div class="profile-wrapper">
-        <button class="btn-top-back" onclick="window.location.href='radar.html'"><i class="fa-solid fa-arrow-left"></i></button>
-        <div class="main-photo-container">
-            <img id="mainTargetPhoto" src="https://via.placeholder.com/500" alt="Foto">
-            <div class="action-float-bar">
-                <button class="action-btn btn-like" id="btnLikeAction"><i class="fa-solid fa-heart"></i></button>
-                <button class="action-btn btn-chat" id="btnChatAction"><i class="fa-solid fa-comment"></i></button>
-            </div>
-        </div>
-        <div class="profile-details">
-            <div class="identity-row">
-                <span id="txtNombreEdad" class="user-name-age">Cargando...</span>
-                <span id="badgeOnline" class="online-badge" style="display:none;">En línea</span>
-            </div>
-            <div id="txtBusquedaMeta" class="user-meta-info">...</div>
-            <div class="section-title">Sobre mí</div>
-            <p id="txtBio" class="bio-box">Sin descripción disponible.</p>
-            <div class="section-title">Álbum de fotos</div>
-            <div class="sub-album-grid" id="albumGrid"></div>
-        </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════════════ -->
+  <header class="top-bar">
+    <button class="btn-back" id="btnBack" aria-label="Volver">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="top-bar-title" id="topBarTitle">Perfil</div>
+  </header>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       CONTENIDO PRINCIPAL
+  ═══════════════════════════════════════════════════ -->
+  <main class="page" id="page">
+
+    <!-- Skeleton inicial -->
+    <div id="skeletonView">
+      <div class="skel-photo skeleton"></div>
+      <div class="skel-line skeleton" style="width:55%"></div>
+      <div class="skel-line skeleton" style="width:75%"></div>
+      <div class="skel-line skeleton" style="width:45%"></div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <!-- Contenido real (oculto hasta que cargue) -->
+    <div id="profileView" style="display:none;">
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-            authDomain: "kinetic-app-67ae5.firebaseapp.com",
-            databaseURL: "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-            projectId: "kinetic-app-67ae5",
-            storageBucket: "kinetic-app-67ae5.firebasestorage.app",
-            messagingSenderId: "825570718975",
-            appId: "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+      <!-- Foto principal -->
+      <div class="photo-card" id="photoCard">
+        <!-- Inyectado por JS -->
+      </div>
+
+      <!-- Miniaturas del álbum -->
+      <div class="album-strip" id="albumStrip"></div>
+
+      <!-- Botones de acción -->
+      <div class="action-bar">
+        <button class="action-btn btn-like" id="btnLike" aria-label="Dar like">
+          <i class="fa-regular fa-heart" id="likeIcon"></i>
+          <span id="likeText">Me gusta</span>
+        </button>
+        <button class="action-btn btn-chat" id="btnChat" aria-label="Iniciar chat">
+          <i class="fa-solid fa-comment"></i>
+          <span>Mensaje</span>
+        </button>
+      </div>
+
+      <!-- Sección de información -->
+      <div class="info-section" id="infoSection">
+        <!-- Inyectado por JS -->
+      </div>
+
+    </div>
+
+    <!-- Estado de error -->
+    <div id="errorView" style="display:none;">
+      <!-- Inyectado por JS -->
+    </div>
+
+  </main>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       BARRA DE NAVEGACIÓN INFERIOR
+  ═══════════════════════════════════════════════════ -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+
+    <a href="index.html" class="nav-item" aria-label="Inicio">
+      <i class="fa-solid fa-house"></i>
+      <span>Inicio</span>
+    </a>
+
+    <a href="radar.html" class="nav-item" aria-label="Radar">
+      <i class="fa-solid fa-location-crosshairs"></i>
+      <span>Radar</span>
+    </a>
+
+    <a href="likes.html" class="nav-item" aria-label="Likes">
+      <i class="fa-solid fa-heart"></i>
+      <span>Likes</span>
+    </a>
+
+    <a href="chats.html" class="nav-item" id="navChats" aria-label="Mensajes">
+      <i class="fa-solid fa-comment"></i>
+      <div class="badge-counter hidden" id="globalBadge" aria-live="polite"></div>
+      <span>Chats</span>
+    </a>
+
+    <a href="perfil.html" class="nav-item" aria-label="Mi perfil">
+      <i class="fa-solid fa-user"></i>
+      <span>Perfil</span>
+    </a>
+
+  </nav>
+
+  <!-- Toast de feedback -->
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       FIREBASE + LÓGICA PRINCIPAL
+  ═══════════════════════════════════════════════════ -->
+  <script type="module">
+
+    /* ──────────────────────────────────────────────────
+       IMPORTACIONES FIREBASE
+    ────────────────────────────────────────────────── */
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, get, set, onValue }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+
+    /* ──────────────────────────────────────────────────
+       CONFIGURACIÓN FIREBASE
+    ────────────────────────────────────────────────── */
+    const firebaseConfig = {
+      apiKey           : "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+      authDomain       : "kinetic-app-67ae5.firebaseapp.com",
+      databaseURL      : "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+      projectId        : "kinetic-app-67ae5",
+      storageBucket    : "kinetic-app-67ae5.firebasestorage.app",
+      messagingSenderId: "825570718975",
+      appId            : "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getDatabase(app);
+
+
+    /* ──────────────────────────────────────────────────
+       SVG FALLBACK CYBERPUNK
+    ────────────────────────────────────────────────── */
+    const DEFAULT_SVG = `<svg viewBox="0 0 24 24" fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style="width:60%;height:60%;stroke:#ff00ff;stroke-width:1.5;
+             stroke-linecap:round;stroke-linejoin:round;">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+    </svg>`;
+
+    /**
+     * Genera el wrapper del SVG fallback para insertarlo en .photo-card
+     * o en cualquier contenedor de avatar.
+     */
+    function makeSvgFallback() {
+      const wrap = document.createElement('div');
+      wrap.className = 'avatar-svg-wrap';
+      wrap.innerHTML = DEFAULT_SVG;
+      return wrap;
+    }
+
+    /**
+     * Valida que `val` sea una URL HTTP/HTTPS real.
+     * @param {*} val
+     * @returns {boolean}
+     */
+    function isValidUrl(val) {
+      if (!val || typeof val !== 'string' || val.trim() === '') return false;
+      try {
+        const u = new URL(val.trim());
+        return u.protocol === 'http:' || u.protocol === 'https:';
+      } catch { return false; }
+    }
+
+    /**
+     * Extrae el array de fotos del usuario con validación estricta.
+     * Retorna un array (posiblemente vacío) de URLs válidas.
+     * @param {object|null} user
+     * @returns {string[]}
+     */
+    function resolvePhotos(user) {
+      if (!user || typeof user !== 'object') return [];
+      const album = Array.isArray(user.album)
+        ? user.album.filter(isValidUrl)
+        : [];
+      // Incluir user.foto si no está ya en el álbum
+      if (isValidUrl(user.foto) && !album.includes(user.foto)) {
+        album.unshift(user.foto);
+      }
+      return album;
+    }
+
+    /** Escapa texto para inserción segura (anti-XSS). */
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+
+    /* ──────────────────────────────────────────────────
+       REFERENCIAS DOM
+    ────────────────────────────────────────────────── */
+    const $skeleton  = document.getElementById('skeletonView');
+    const $profile   = document.getElementById('profileView');
+    const $error     = document.getElementById('errorView');
+    const $photoCard = document.getElementById('photoCard');
+    const $album     = document.getElementById('albumStrip');
+    const $info      = document.getElementById('infoSection');
+    const $btnLike   = document.getElementById('btnLike');
+    const $btnChat   = document.getElementById('btnChat');
+    const $likeIcon  = document.getElementById('likeIcon');
+    const $likeText  = document.getElementById('likeText');
+    const $badge     = document.getElementById('globalBadge');
+    const $topTitle  = document.getElementById('topBarTitle');
+    const $toast     = document.getElementById('toast');
+
+
+    /* ──────────────────────────────────────────────────
+       TOAST HELPER
+    ────────────────────────────────────────────────── */
+    let _toastTimer = null;
+    function showToast(msg, durationMs = 3000) {
+      $toast.textContent = msg;
+      $toast.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => $toast.classList.remove('show'), durationMs);
+    }
+
+
+    /* ──────────────────────────────────────────────────
+       ESTADO GLOBAL
+    ────────────────────────────────────────────────── */
+    let miUid          = null;
+    let selectedUserId = null;
+    let photoUrls      = [];   // fotos válidas del perfil
+    let activePhotoIdx = 0;    // índice activo en la galería
+
+
+    /* ──────────────────────────────────────────────────
+       LEER selected_user_id DE localStorage
+    ────────────────────────────────────────────────── */
+    selectedUserId = localStorage.getItem('selected_user_id');
+
+    if (!selectedUserId || selectedUserId.trim() === '') {
+      // Sin ID → error y redirige
+      showErrorView(
+        'fa-triangle-exclamation',
+        'Sin usuario seleccionado',
+        'No se encontró el ID del perfil.<br>Vuelve al Radar para seleccionar uno.',
+        true
+      );
+    }
+
+    /* Botón volver */
+    document.getElementById('btnBack').addEventListener('click', () => {
+      window.history.length > 1
+        ? window.history.back()
+        : window.location.href = 'radar.html';
+    });
+
+
+    /* ──────────────────────────────────────────────────
+       AUTENTICACIÓN → PUNTO DE ENTRADA
+    ────────────────────────────────────────────────── */
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = 'login.html'; return; }
+      miUid = user.uid;
+
+      // Si ya mostramos error por falta de ID, no continuar
+      if (!selectedUserId) return;
+
+      // Evitar que alguien vea su propio perfil aquí
+      if (selectedUserId === miUid) {
+        window.location.href = 'perfil.html';
+        return;
+      }
+
+      // Cargar perfil del usuario seleccionado
+      await loadProfile();
+
+      // Comprobar si ya le dimos like antes
+      checkExistingLike();
+
+      // Escuchar mensajes sin leer para el badge global
+      listenUnreadBadge();
+    });
+
+
+    /* ──────────────────────────────────────────────────
+       CARGAR PERFIL DESDE FIREBASE
+    ────────────────────────────────────────────────── */
+    async function loadProfile() {
+      let userData = null;
+
+      try {
+        const snap = await get(ref(db, `users/${selectedUserId}`));
+        if (snap.exists()) userData = snap.val();
+      } catch (err) {
+        console.error('[Kinetic/perfil-detalle] Error al cargar perfil:', err);
+        showErrorView(
+          'fa-wifi',
+          'Error de conexión',
+          'No se pudo cargar el perfil.<br>Verifica tu conexión e intenta de nuevo.',
+          false
+        );
+        return;
+      }
+
+      if (!userData) {
+        showErrorView(
+          'fa-user-slash',
+          'Perfil no encontrado',
+          'Este usuario no existe o fue eliminado.',
+          true
+        );
+        return;
+      }
+
+      renderProfile(userData);
+    }
+
+
+    /* ──────────────────────────────────────────────────
+       RENDERIZAR PERFIL
+    ────────────────────────────────────────────────── */
+    function renderProfile(user) {
+      // Datos básicos con fallbacks
+      const nombre  = (user.nombre || user.name || user.displayName || '').trim() || 'Sin nombre';
+      const edad    = user.edad    ? `${user.edad} años`    : null;
+      const genero  = user.genero  || user.gender           || null;
+      const busca   = user.busca   || user.buscando         || null;
+      const bio     = (user.bio    || user.biografia || '').trim() || null;
+
+      // Actualizar título del header
+      $topTitle.textContent = nombre;
+
+      // Fotos válidas
+      photoUrls = resolvePhotos(user);
+
+      /* ── Foto principal ──────────────────────────── */
+      renderMainPhoto(0);
+
+      /* ── Overlay nombre + edad ───────────────────── */
+      const overlay = document.createElement('div');
+      overlay.className = 'photo-overlay';
+      overlay.innerHTML = `
+        <div class="overlay-name">${esc(nombre)}</div>
+        ${edad ? `<div class="overlay-age">${esc(edad)}</div>` : ''}
+      `;
+      $photoCard.appendChild(overlay);
+
+      /* ── Miniaturas del álbum ────────────────────── */
+      $album.innerHTML = '';
+      if (photoUrls.length > 1) {
+        photoUrls.forEach((url, i) => {
+          const thumb = document.createElement('div');
+          thumb.className = `album-thumb${i === 0 ? ' active' : ''}`;
+
+          const img   = document.createElement('img');
+          img.src     = url;
+          img.alt     = `Foto ${i + 1}`;
+          img.onerror = () => { thumb.style.display = 'none'; };
+          thumb.appendChild(img);
+
+          thumb.addEventListener('click', () => {
+            renderMainPhoto(i);
+            document.querySelectorAll('.album-thumb').forEach((t, ti) => {
+              t.classList.toggle('active', ti === i);
+            });
+          });
+
+          $album.appendChild(thumb);
+        });
+      }
+
+      /* ── Sección de información ──────────────────── */
+      $info.innerHTML = '';
+
+      // Grid: género + qué busca
+      if (genero || busca) {
+        const grid = document.createElement('div');
+        grid.className = 'info-grid';
+
+        if (genero) grid.appendChild(makeInfoCard('Género', genero));
+        if (busca)  grid.appendChild(makeInfoCard('Busca', busca));
+        $info.appendChild(grid);
+      }
+
+      // Biografía
+      if (bio) {
+        const bioCard = makeInfoCard('Sobre mí', bio);
+        bioCard.style.gridColumn = '1 / -1';
+        $info.appendChild(bioCard);
+      }
+
+      // Intereses / tags si existen
+      if (Array.isArray(user.intereses) && user.intereses.length > 0) {
+        const tagCard = document.createElement('div');
+        tagCard.className = 'info-card';
+        const label = document.createElement('div');
+        label.className   = 'info-label';
+        label.textContent = 'Intereses';
+        const tagsWrap = document.createElement('div');
+        tagsWrap.className = 'tags-wrap';
+        user.intereses.forEach((tag) => {
+          const chip = document.createElement('span');
+          chip.className   = 'tag';
+          chip.textContent = tag;
+          tagsWrap.appendChild(chip);
+        });
+        tagCard.appendChild(label);
+        tagCard.appendChild(tagsWrap);
+        $info.appendChild(tagCard);
+      }
+
+      /* ── Botón Chat ──────────────────────────────── */
+      $btnChat.addEventListener('click', () => {
+        // Redirección estándar con ?id=
+        window.location.href = 'chat.html?id=' + selectedUserId;
+      });
+
+      /* ── Mostrar vista ───────────────────────────── */
+      $skeleton.style.display = 'none';
+      $profile.style.display  = 'block';
+    }
+
+
+    /* ──────────────────────────────────────────────────
+       RENDERIZAR FOTO PRINCIPAL
+    ────────────────────────────────────────────────── */
+    function renderMainPhoto(idx) {
+      activePhotoIdx = idx;
+
+      // Limpiar foto anterior (no el overlay)
+      const existing = $photoCard.querySelector('img, .avatar-svg-wrap');
+      if (existing) existing.remove();
+
+      if (photoUrls.length > 0 && isValidUrl(photoUrls[idx])) {
+        const img   = document.createElement('img');
+        img.src     = photoUrls[idx];
+        img.alt     = 'Foto de perfil';
+        // onerror: reemplaza con SVG
+        img.onerror = () => {
+          img.remove();
+          $photoCard.insertBefore(makeSvgFallback(), $photoCard.firstChild);
         };
+        $photoCard.insertBefore(img, $photoCard.firstChild);
+      } else {
+        // Sin fotos válidas → SVG fallback directamente
+        $photoCard.insertBefore(makeSvgFallback(), $photoCard.firstChild);
+      }
+    }
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
 
-        // Captura el ID seleccionado
-        const targetUserId = localStorage.getItem('selected_user_id');
-        let currentUid = null;
+    /* ──────────────────────────────────────────────────
+       CREAR TARJETA DE INFO
+    ────────────────────────────────────────────────── */
+    function makeInfoCard(label, value) {
+      const card = document.createElement('div');
+      card.className = 'info-card';
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "index.html";
-            } else if (!targetUserId) {
-                window.location.href = "radar.html";
-            } else {
-                currentUid = user.uid;
-                cargarPerfilCompleto();
-                verificarEstadoLike();
-            }
-        });
+      const lbl = document.createElement('div');
+      lbl.className   = 'info-label';
+      lbl.textContent = label;
 
-        function cargarPerfilCompleto() {
-            onValue(ref(db, `users/${targetUserId}`), (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
+      const val = document.createElement('div');
+      val.className   = 'info-value';
+      val.textContent = value; // textContent: anti-XSS
 
-                document.getElementById('txtNombreEdad').innerText = `${data.nombre || 'Usuario Kinetic'}${data.edad ? ', ' + data.edad : ''}`;
-                document.getElementById('txtBusquedaMeta').innerText = `Género: ${data.genero || 'No definido'} • Busca: ${data.busca || 'Todos'}`;
-                document.getElementById('txtBio').innerText = data.bio || "¡Hola! Estoy usando Kinetic.";
-                document.getElementById('badgeOnline').style.display = data.online ? 'inline-block' : 'none';
+      card.appendChild(lbl);
+      card.appendChild(val);
+      return card;
+    }
 
-                const grid = document.getElementById('albumGrid');
-                grid.innerHTML = '';
-                const listaFotos = data.album || [];
-                if (listaFotos.length > 0) {
-                    document.getElementById('mainTargetPhoto').src = listaFotos[0];
-                    listaFotos.forEach(url => {
-                        const cell = document.createElement('div');
-                        cell.className = 'sub-album-item';
-                        cell.innerHTML = `<img src="${url}">`;
-                        cell.onclick = () => { document.getElementById('mainTargetPhoto').src = url; };
-                        grid.appendChild(cell);
-                    });
-                } else {
-                    document.getElementById('mainTargetPhoto').src = 'https://via.placeholder.com/500?text=Kinetic+User';
-                }
-            });
+
+    /* ──────────────────────────────────────────────────
+       COMPROBAR SI YA DI LIKE (estado inicial del botón)
+    ────────────────────────────────────────────────── */
+    async function checkExistingLike() {
+      if (!miUid || !selectedUserId) return;
+      try {
+        const snap = await get(ref(db, `enviados/${miUid}/${selectedUserId}`));
+        if (snap.exists() && snap.val() === true) {
+          setLikeButtonLiked();
         }
+      } catch { /* silencioso */ }
+    }
 
-        function verificarEstadoLike() {
-            onValue(ref(db, `likes/${currentUid}/${targetUserId}`), (snap) => {
-                const btn = document.getElementById('btnLikeAction');
-                if (snap.exists()) {
-                    btn.classList.add('liked');
-                    btn.innerHTML = `<i class="fa-solid fa-heart-circle-check"></i>`;
-                } else {
-                    btn.classList.remove('liked');
-                    btn.innerHTML = `<i class="fa-solid fa-heart"></i>`;
-                }
-            });
+
+    /* ──────────────────────────────────────────────────
+       DAR LIKE
+       Escribe en dos nodos de forma cruzada:
+         recibidos/${selectedUserId}/${miUid}  = true  ← para likes.html del receptor
+         enviados/${miUid}/${selectedUserId}   = true  ← registro propio
+    ────────────────────────────────────────────────── */
+    $btnLike.addEventListener('click', async () => {
+      if (!miUid || !selectedUserId || $btnLike.disabled) return;
+
+      $btnLike.disabled = true;
+
+      try {
+        // Escritura en paralelo — más rápido
+        await Promise.all([
+          set(ref(db, `recibidos/${selectedUserId}/${miUid}`), true),
+          set(ref(db, `enviados/${miUid}/${selectedUserId}`),  true)
+        ]);
+
+        setLikeButtonLiked();
+        showToast('💜 ¡Like enviado!');
+
+      } catch (err) {
+        console.error('[Kinetic/perfil-detalle] Error al enviar like:', err);
+        $btnLike.disabled = false;
+        showToast('⚠️ Error al enviar el like. Intenta de nuevo.');
+      }
+    });
+
+
+    /* ──────────────────────────────────────────────────
+       CAMBIAR ESTADO VISUAL DEL BOTÓN A "LIKED"
+    ────────────────────────────────────────────────── */
+    function setLikeButtonLiked() {
+      $btnLike.classList.add('liked');
+      $btnLike.disabled     = true;
+      $likeIcon.className   = 'fa-solid fa-heart'; // corazón sólido
+      $likeText.textContent = '¡Like enviado!';
+    }
+
+
+    /* ──────────────────────────────────────────────────
+       BADGE GLOBAL — MENSAJES SIN LEER EN TIEMPO REAL
+    ────────────────────────────────────────────────── */
+    function listenUnreadBadge() {
+      if (!miUid) return;
+
+      onValue(ref(db, 'chats'), (snapshot) => {
+        const allChats = snapshot.val() || {};
+        let unreadCount = 0;
+
+        Object.entries(allChats).forEach(([chatId, chatData]) => {
+          // Solo contar salas en las que participo
+          if (!chatId.includes(miUid)) return;
+          const info = chatData?.lastInfo;
+          if (info && info.unreadTarget === miUid) unreadCount++;
+        });
+
+        if (unreadCount > 0) {
+          $badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+          $badge.classList.remove('hidden');
+        } else {
+          $badge.classList.add('hidden');
         }
+      });
+    }
 
-        document.getElementById('btnLikeAction').addEventListener('click', () => {
-            const btn = document.getElementById('btnLikeAction');
-            
-            if (btn.classList.contains('liked')) {
-                // Quitar el Like en tiempo real de Firebase
-                remove(ref(db, `likes/${currentUid}/${targetUserId}`)).then(() => {
-                    remove(ref(db, `recibidos/${targetUserId}/${currentUid}`));
-                });
-            } else {
-                // Asignar el Like de manera efectiva
-                set(ref(db, `likes/${currentUid}/${targetUserId}`), true).then(() => {
-                    set(ref(db, `recibidos/${targetUserId}/${currentUid}`), true);
-                });
-            }
-        });
 
-        document.getElementById('btnChatAction').addEventListener('click', () => {
-            window.location.href = 'chat-interno.html';
+    /* ──────────────────────────────────────────────────
+       MOSTRAR VISTA DE ERROR
+    ────────────────────────────────────────────────── */
+    function showErrorView(icon, title, bodyHtml, showRedirect) {
+      $skeleton.style.display = 'none';
+      $profile.style.display  = 'none';
+      $error.style.display    = 'block';
+
+      $error.innerHTML = `
+        <div class="error-state">
+          <i class="fa-solid ${esc(icon)}" style="color:var(--accent)"></i>
+          <h3>${esc(title)}</h3>
+          <p>${bodyHtml}</p>
+          ${showRedirect
+            ? `<button class="btn-retry" id="btnRedirect">
+                 <i class="fa-solid fa-arrow-left"></i> Volver al Radar
+               </button>`
+            : `<button class="btn-retry" id="btnRetry">
+                 <i class="fa-solid fa-rotate-right"></i> Reintentar
+               </button>`
+          }
+        </div>
+      `;
+
+      const btn = document.getElementById('btnRedirect') || document.getElementById('btnRetry');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          if (showRedirect) window.location.href = 'radar.html';
+          else window.location.reload();
         });
-    </script>
+      }
+    }
+
+  </script>
 </body>
 </html>
