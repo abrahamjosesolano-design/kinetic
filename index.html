@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0d0616" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Kinetic · Inicio</title>
+  <title>Kinetic · Conecta sin límites</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,9 +14,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
-    /* ═══════════════════════════════════════
-       DESIGN TOKENS
-    ═══════════════════════════════════════ */
+    /* ═══════════════════════════════════════════
+       DESIGN TOKENS — Kinetic Cyberpunk
+    ═══════════════════════════════════════════ */
     :root {
       --bg:        #0d0616;
       --bg-s:      #12091f;
@@ -37,6 +37,8 @@
       --grad:      linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
       --glow-p:    0 0 20px rgba(138,43,226,.6);
       --glow-m:    0 0 18px rgba(255,0,255,.65);
+      --st:        env(safe-area-inset-top, 0px);
+      --sb:        env(safe-area-inset-bottom, 0px);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,10 +55,9 @@
     }
 
     ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
 
-    /* ── GRID ATMOSPHERE ── */
+    /* ── ATMOSPHERE ── */
     body::before {
       content: '';
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -64,19 +65,18 @@
         repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.03) 40px),
         repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.03) 40px);
     }
-    /* ── RADIAL GLOWS ── */
     body::after {
       content: '';
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
-        radial-gradient(ellipse 70% 48% at 15%  8%,  rgba(138,43,226,.22) 0%, transparent 65%),
+        radial-gradient(ellipse 70% 48% at 15% 8%,  rgba(138,43,226,.22) 0%, transparent 65%),
         radial-gradient(ellipse 55% 38% at 85% 90%, rgba(255,0,255,.14)  0%, transparent 60%),
         radial-gradient(ellipse 45% 30% at 60% 14%, rgba(0,255,255,.07)  0%, transparent 55%);
     }
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════════════════
        LOADING SCREEN
-    ═══════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     #loadingScreen {
       position: fixed; inset: 0; z-index: 999;
       background: var(--bg);
@@ -105,21 +105,21 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════════════════
        PAGE WRAPPER
-    ═══════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     #page {
       position: relative; z-index: 1;
-      min-height: 100vh;
+      min-height: 100svh;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 28px 20px 40px;
+      padding: calc(var(--st) + 28px) 20px calc(var(--sb) + 40px);
       gap: 28px;
     }
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════════════════
        HERO
-    ═══════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     .hero { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
     .logo-ring {
@@ -169,9 +169,9 @@
       line-height: 1.65; max-width: 270px; margin-top: 2px;
     }
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════════════════
        AUTH BOX
-    ═══════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     .auth-box {
       width: min(440px, 100%);
       background: rgba(22,12,40,.85);
@@ -201,8 +201,7 @@
       font-family: 'Urbanist', sans-serif;
       font-size: .88rem; font-weight: 700; letter-spacing: .04em;
       border-radius: 8px; cursor: pointer;
-      transition: all .25s;
-      white-space: nowrap;
+      transition: all .25s; white-space: nowrap;
     }
     .auth-tab.active {
       background: var(--grad); color: #fff;
@@ -220,12 +219,20 @@
       letter-spacing: .1em; text-transform: uppercase;
       color: var(--text-2);
     }
+
+    .fw { position: relative; display: flex; align-items: center; }
+    .fw .fi {
+      position: absolute; left: 13px;
+      color: var(--text-3); font-size: .88rem;
+      pointer-events: none; z-index: 1;
+    }
+
     .field input, .field select {
       width: 100%;
       background: var(--bg-input);
       border: 1px solid rgba(138,43,226,.25);
       border-radius: var(--r-sm);
-      padding: 11px 14px;
+      padding: 11px 14px 11px 40px;
       color: var(--text);
       font-family: 'Urbanist', sans-serif;
       font-size: .93rem; outline: none;
@@ -256,6 +263,45 @@
       transition: color .2s; padding: 4px; line-height: 1;
     }
     .pass-eye:hover { color: var(--text-2); }
+
+    /* Textarea */
+    .field textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid rgba(138,43,226,.25);
+      border-radius: var(--r-sm);
+      padding: 11px 14px 11px 40px;
+      color: var(--text);
+      font-family: 'Urbanist', sans-serif;
+      font-size: .93rem; outline: none;
+      resize: vertical; min-height: 72px; line-height: 1.55;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field textarea:focus {
+      border-color: var(--purple-hi);
+      box-shadow: 0 0 0 3px rgba(138,43,226,.18);
+    }
+    .field textarea::placeholder { color: var(--text-3); }
+
+    /* ── STEP BAR (registro) ── */
+    .step-bar {
+      display: flex; gap: 6px; margin-bottom: 20px;
+    }
+    .step-seg {
+      flex: 1; height: 3px; border-radius: 2px;
+      background: rgba(138,43,226,.18);
+      transition: background .35s;
+    }
+    .step-seg.done   { background: var(--grad); }
+    .step-seg.active {
+      background: var(--magenta);
+      box-shadow: 0 0 8px rgba(255,0,255,.55);
+      animation: stepPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes stepPulse {
+      0%,100% { box-shadow: 0 0 6px rgba(255,0,255,.5); }
+      50%     { box-shadow: 0 0 14px rgba(255,0,255,.9); }
+    }
 
     /* ── ERROR BOX ── */
     .auth-error {
@@ -295,16 +341,50 @@
     .btn-auth:active { transform: scale(.98); opacity: .9; }
     .btn-auth:disabled { opacity: .38; cursor: not-allowed; transform: none; box-shadow: none; }
 
+    .btn-sec {
+      width: 100%; padding: 12px;
+      background: rgba(138,43,226,.08);
+      border: 1px solid rgba(138,43,226,.3);
+      border-radius: var(--r-sm);
+      color: var(--purple-hi);
+      font-family: 'Urbanist', sans-serif;
+      font-size: .88rem; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background .2s, border-color .2s;
+      margin-top: 8px;
+    }
+    .btn-sec:hover { background: rgba(138,43,226,.18); border-color: var(--purple); }
+
+    /* ── SUCCESS STEP ── */
+    #regStep3 {
+      text-align: center; padding: 10px 0;
+    }
+    .success-emoji { font-size: 3rem; margin-bottom: 12px; display: block; }
+    .success-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem; font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .success-sub {
+      font-size: .84rem; color: var(--text-2);
+      line-height: 1.6; margin-bottom: 20px;
+    }
+
     /* Footer note */
     .auth-footer {
       text-align: center; font-size: .72rem;
       color: var(--text-3); margin-top: 14px; line-height: 1.7;
     }
+    .auth-footer a { color: var(--cyan); text-decoration: none; font-weight: 700; }
     .auth-footer strong { color: var(--text-2); }
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════════════════
        TOAST
-    ═══════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     #toast {
       position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(10px);
@@ -320,9 +400,9 @@
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════════════════
        RESPONSIVE
-    ═══════════════════════════════════════ */
+    ═══════════════════════════════════════════ */
     @media (max-height: 680px) {
       .logo-ring { width: 64px; height: 64px; }
       .logo-icon { font-size: 1.7rem; }
@@ -345,7 +425,7 @@
 </div>
 
 <!-- TOAST -->
-<div id="toast"></div>
+<div id="toast" role="alert" aria-live="assertive"></div>
 
 <!-- PAGE -->
 <div id="page">
@@ -374,21 +454,21 @@
 
       <div class="field">
         <label>Correo electrónico</label>
-        <input type="email" id="loginEmail"
-               placeholder="tu@correo.com"
-               autocomplete="email"
-               inputmode="email" />
+        <div class="fw">
+          <i class="fa-solid fa-envelope fi"></i>
+          <input type="email" id="loginEmail" placeholder="tu@correo.com"
+                 autocomplete="email" inputmode="email" />
+        </div>
       </div>
 
       <div class="field">
         <label>Contraseña</label>
-        <div class="pass-wrap">
-          <input type="password" id="loginPass"
-                 placeholder="••••••••"
+        <div class="fw pass-wrap">
+          <i class="fa-solid fa-lock fi"></i>
+          <input type="password" id="loginPass" placeholder="••••••••"
                  autocomplete="current-password" />
           <button type="button" class="pass-eye"
-                  onclick="togglePass('loginPass', this)"
-                  tabindex="-1" aria-label="Mostrar contraseña">
+                  onclick="togglePass('loginPass', this)" aria-label="Mostrar contraseña">
             <i class="fa-regular fa-eye"></i>
           </button>
         </div>
@@ -403,348 +483,456 @@
         <i class="fa-solid fa-bolt"></i> ENTRAR
       </button>
 
-    </div>
+      <div class="auth-footer">
+        ¿No tienes cuenta? <a href="#" onclick="switchTab('register');return false">Regístrate gratis</a>
+      </div>
+
+    </div><!-- /panelLogin -->
 
     <!-- ══ REGISTER PANEL ══ -->
     <div class="auth-panel" id="panelRegister">
 
-      <div class="field-row">
-        <div class="field">
-          <label>Nombre / Nick</label>
-          <input type="text" id="regNombre"
-                 placeholder="Tu nombre"
-                 maxlength="40"
-                 autocomplete="nickname" />
+      <!-- Step bar -->
+      <div class="step-bar">
+        <div class="step-seg active" id="seg1"></div>
+        <div class="step-seg"        id="seg2"></div>
+      </div>
+
+      <!-- STEP 1: Identidad -->
+      <div id="regStep1">
+
+        <div style="display:flex;flex-direction:column;gap:13px">
+          <div class="field-row">
+            <div class="field">
+              <label>Nombre / Nick</label>
+              <div class="fw">
+                <i class="fa-solid fa-user fi"></i>
+                <input type="text" id="regNombre" placeholder="Tu nombre"
+                       maxlength="40" autocomplete="nickname" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Edad</label>
+              <div class="fw">
+                <i class="fa-solid fa-cake-candles fi"></i>
+                <input type="number" id="regEdad" placeholder="25"
+                       min="18" max="80" inputmode="numeric" />
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Género</label>
+            <div class="fw">
+              <i class="fa-solid fa-venus-mars fi"></i>
+              <select id="regGenero">
+                <option value="">Selecciona tu género</option>
+                <option value="male">Masculino</option>
+                <option value="female">Femenino</option>
+                <option value="other">No binario / Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Busca</label>
+            <div class="fw">
+              <i class="fa-solid fa-magnifying-glass fi"></i>
+              <select id="regBusca">
+                <option value="">¿A quién buscas?</option>
+                <option value="men">Hombres</option>
+                <option value="women">Mujeres</option>
+                <option value="all">Todos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Biografía <span style="color:var(--text-3);font-weight:400;text-transform:none">(opcional)</span></label>
+            <div class="fw" style="align-items:flex-start">
+              <i class="fa-solid fa-pen-to-square fi" style="top:12px;position:absolute"></i>
+              <textarea id="regBio" placeholder="Cuéntanos algo sobre ti…" maxlength="200" rows="2"></textarea>
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label>Edad</label>
-          <input type="number" id="regEdad"
-                 placeholder="25"
-                 min="18" max="80"
-                 inputmode="numeric" />
+
+        <div class="auth-error" id="regError1">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span id="regError1Msg"></span>
         </div>
-      </div>
 
-      <div class="field">
-        <label>Género</label>
-        <select id="regGenero">
-          <option value="">Selecciona tu género</option>
-          <option value="male">Masculino</option>
-          <option value="female">Femenino</option>
-          <option value="other">No binario / Otro</option>
-        </select>
-      </div>
+        <button class="btn-auth" id="btnRegStep1" onclick="handleRegStep1()" style="margin-top:16px">
+          <i class="fa-solid fa-arrow-right"></i> CONTINUAR
+        </button>
 
-      <div class="field">
-        <label>Busca</label>
-        <select id="regBusca">
-          <option value="">¿A quién buscas?</option>
-          <option value="Hombres">Hombres</option>
-          <option value="Mujeres">Mujeres</option>
-          <option value="all">Todos</option>
-        </select>
-      </div>
+      </div><!-- /regStep1 -->
 
-      <div class="field">
-        <label>Correo electrónico</label>
-        <input type="email" id="regEmail"
-               placeholder="tu@correo.com"
-               autocomplete="email"
-               inputmode="email" />
-      </div>
+      <!-- STEP 2: Credenciales -->
+      <div id="regStep2" style="display:none">
 
-      <div class="field">
-        <label>Contraseña</label>
-        <div class="pass-wrap">
-          <input type="password" id="regPass"
-                 placeholder="Mínimo 6 caracteres"
-                 autocomplete="new-password"
-                 minlength="6" />
-          <button type="button" class="pass-eye"
-                  onclick="togglePass('regPass', this)"
-                  tabindex="-1" aria-label="Mostrar contraseña">
-            <i class="fa-regular fa-eye"></i>
-          </button>
+        <div style="display:flex;flex-direction:column;gap:13px">
+          <div class="field">
+            <label>Correo electrónico</label>
+            <div class="fw">
+              <i class="fa-solid fa-envelope fi"></i>
+              <input type="email" id="regEmail" placeholder="tu@correo.com"
+                     autocomplete="email" inputmode="email" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Contraseña</label>
+            <div class="fw pass-wrap">
+              <i class="fa-solid fa-lock fi"></i>
+              <input type="password" id="regPass" placeholder="Mínimo 6 caracteres"
+                     autocomplete="new-password" minlength="6" />
+              <button type="button" class="pass-eye"
+                      onclick="togglePass('regPass', this)" aria-label="Mostrar">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Confirmar contraseña</label>
+            <div class="fw pass-wrap">
+              <i class="fa-solid fa-lock fi"></i>
+              <input type="password" id="regPass2" placeholder="Repite la contraseña"
+                     autocomplete="new-password" />
+              <button type="button" class="pass-eye"
+                      onclick="togglePass('regPass2', this)" aria-label="Mostrar">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
         </div>
+
+        <div class="auth-error" id="regError2">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span id="regError2Msg"></span>
+        </div>
+
+        <button class="btn-auth" id="btnRegStep2" onclick="handleRegStep2()" style="margin-top:16px">
+          <i class="fa-solid fa-user-plus"></i> CREAR CUENTA
+        </button>
+
+        <button class="btn-sec" onclick="goRegStep1()">
+          <i class="fa-solid fa-arrow-left"></i> Volver
+        </button>
+
+      </div><!-- /regStep2 -->
+
+      <!-- STEP 3: Éxito -->
+      <div id="regStep3" style="display:none">
+        <span class="success-emoji">🚀</span>
+        <div class="success-title">¡Cuenta creada!</div>
+        <div class="success-sub">Bienvenido/a a Kinetic.<br>Preparando tu perfil…</div>
+        <div class="ld-spinner" style="margin:0 auto"></div>
       </div>
 
-      <div class="auth-error" id="regError">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="regErrorMsg"></span>
+      <div class="auth-footer" id="regFooter">
+        Al registrarte aceptas los <strong>Términos de uso</strong><br />
+        y la <strong>Política de privacidad</strong> de Kinetic.
       </div>
 
-      <button class="btn-auth" id="btnRegister" onclick="handleRegister()">
-        <i class="fa-solid fa-user-plus"></i> CREAR CUENTA
-      </button>
-
-    </div>
-
-    <p class="auth-footer">
-      Al registrarte aceptas los <strong>Términos de uso</strong><br />
-      y la <strong>Política de privacidad</strong> de Kinetic.
-    </p>
+    </div><!-- /panelRegister -->
 
   </div><!-- /auth-box -->
 
 </div><!-- /page -->
 
-<!-- ═══════════════════════════════════════════════
-     ÚNICO <script type="module"> — SDK v10.14.1
-═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════
+     SUPABASE JS SDK — módulo ES via CDN
+═══════════════════════════════════════════════════ -->
 <script type="module">
 
-/* ── FIREBASE SDK v10.14.1 ── */
-import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getDatabase, ref, set }
-  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  /* ── A) SUPABASE INIT ── */
+  import { createClient }
+    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-/* ── FIREBASE CONFIG — todas las propiedades presentes ── */
-const firebaseConfig = {
-  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
-  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-  projectId:         "kinetic-app-67ae5",
-  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
-  messagingSenderId: "825570718975",
-  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-};
+  const SUPABASE_URL = 'https://qemnczuklcztdajyjblb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_HE46cLZtaukvcva6bdKLGg_gz8HRet3';
 
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getDatabase(app);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ── DESTINO TRAS AUTENTICACIÓN ──
-   radar.html — pantalla principal de Kinetic.
-   Sin barra inicial → compatible con GitHub Pages.
-─────────────────────────────────────────────── */
-const HOME = "radar.html";
+  /* ── B) DESTINO TRAS AUTH ── */
+  const HOME       = 'radar.html';
+  const ONBOARDING = 'onboarding.html'; // post-registro si perfil incompleto
 
-/* ─────────────────────────────────────────
-   PERSISTENCIA DE SESIÓN
-   Si ya hay sesión activa al cargar index.html
-   → redirigir de inmediato a HOME.
-   Si no hay sesión → ocultar loading y mostrar form.
-───────────────────────────────────────── */
-onAuthStateChanged(auth, user => {
-  if (user) {
+  /* ── C) ESTADO LOCAL ── */
+  let dataPaso1   = {};  // guarda datos del step 1 del registro
+  let registrando = false;
+
+  /* ── D) VERIFICAR SESIÓN ACTIVA ──
+     Si ya hay sesión → redirigir a HOME inmediatamente.
+  ────────────────────────────────── */
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session) {
     window.location.replace(HOME);
   } else {
     document.getElementById('loadingScreen').classList.add('hidden');
   }
-});
 
-/* ─────────────────────────────────────────
-   HELPERS
-───────────────────────────────────────── */
+  /* Escuchar cambios de sesión futuros */
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session && !registrando) {
+      window.location.replace(HOME);
+    }
+  });
 
-/** Traduce códigos de error Firebase → español */
-function parseFirebaseError(code) {
-  const map = {
-    'auth/email-already-in-use':    'Este correo ya tiene una cuenta registrada.',
-    'auth/invalid-email':           'El formato del correo no es válido.',
-    'auth/weak-password':           'La contraseña es muy débil (mínimo 6 caracteres).',
-    'auth/user-not-found':          'No existe una cuenta con ese correo.',
-    'auth/wrong-password':          'Contraseña incorrecta. Intenta de nuevo.',
-    'auth/invalid-credential':      'Correo o contraseña incorrectos.',
-    'auth/too-many-requests':       'Demasiados intentos fallidos. Espera unos minutos.',
-    'auth/network-request-failed':  'Sin conexión a internet. Revisa tu red.',
-    'auth/auth-domain-config-required': 'Error de configuración de dominio.',
-    'auth/operation-not-allowed':   'Este método de inicio de sesión no está habilitado.',
-    'auth/user-disabled':           'Esta cuenta ha sido deshabilitada.',
+  /* ── E) HELPERS ── */
+
+  /** Toast de notificación */
+  let _toastTimer = null;
+  function showToast(msg, isErr = false) {
+    const el = document.getElementById('toast');
+    el.textContent = isErr ? `⚠  ${msg}` : `✓  ${msg}`;
+    el.style.borderColor = isErr
+      ? 'rgba(255,34,85,.55)'
+      : 'rgba(138,43,226,.5)';
+    el.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+  }
+
+  /** Muestra error en un error-box */
+  function showError(boxId, msgId, text) {
+    document.getElementById(msgId).textContent = text;
+    document.getElementById(boxId).classList.add('show');
+  }
+  function clearError(boxId) {
+    document.getElementById(boxId).classList.remove('show');
+  }
+
+  /** Estado del botón */
+  function setBtn(btnId, loading, defaultHTML) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.innerHTML = loading
+      ? '<i class="fa-solid fa-spinner fa-spin"></i> Procesando…'
+      : defaultHTML;
+  }
+
+  /** Traduce errores de Supabase Auth → español */
+  function parseError(msg = '') {
+    if (!msg) return 'Error inesperado. Intenta de nuevo.';
+    const m = msg.toLowerCase();
+    if (m.includes('invalid login') || m.includes('invalid credentials'))
+      return 'Correo o contraseña incorrectos.';
+    if (m.includes('email already'))
+      return 'Este correo ya tiene una cuenta registrada.';
+    if (m.includes('weak password') || m.includes('at least 6'))
+      return 'La contraseña debe tener al menos 6 caracteres.';
+    if (m.includes('network') || m.includes('fetch'))
+      return 'Sin conexión. Revisa tu red e intenta de nuevo.';
+    if (m.includes('user not found') || m.includes('no user'))
+      return 'No existe una cuenta con ese correo.';
+    if (m.includes('too many'))
+      return 'Demasiados intentos. Espera unos minutos.';
+    return msg;
+  }
+
+  /* ── F) TAB SWITCHER ── */
+  window.switchTab = function(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+    document.getElementById('panelLogin').classList.toggle('active', isLogin);
+    document.getElementById('panelRegister').classList.toggle('active', !isLogin);
+    clearError('loginError');
+    clearError('regError1');
+    clearError('regError2');
   };
-  return map[code] || `Error inesperado (${code}). Intenta de nuevo.`;
-}
 
-/** Muestra un error visible en el formulario */
-function showError(boxId, spanId, message) {
-  document.getElementById(spanId).textContent = message;
-  document.getElementById(boxId).classList.add('show');
-}
+  /* ── G) TOGGLE CONTRASEÑA ── */
+  window.togglePass = function(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon  = btn.querySelector('i');
+    const show  = input.type === 'password';
+    input.type     = show ? 'text' : 'password';
+    icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+  };
 
-/** Limpia el error visible */
-function clearError(boxId) {
-  document.getElementById(boxId).classList.remove('show');
-}
+  /* ══════════════════════════════════════════════
+     H) LOGIN — supabase.auth.signInWithPassword
+  ══════════════════════════════════════════════ */
+  window.handleLogin = async function() {
+    clearError('loginError');
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPass').value;
 
-/** Cambia el estado del botón a cargando o restaura */
-function setButtonLoading(btnId, loading, defaultHTML) {
-  const btn = document.getElementById(btnId);
-  btn.disabled = loading;
-  btn.innerHTML = loading
-    ? '<i class="fa-solid fa-spinner fa-spin"></i> Procesando…'
-    : defaultHTML;
-}
+    if (!email)    { showError('loginError', 'loginErrorMsg', 'Ingresa tu correo.'); return; }
+    if (!password) { showError('loginError', 'loginErrorMsg', 'Ingresa tu contraseña.'); return; }
 
-/** Toast de confirmación */
-let _toastTimer = null;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
-}
+    setBtn('btnLogin', true, '<i class="fa-solid fa-bolt"></i> ENTRAR');
 
-/* ─────────────────────────────────────────
-   TAB SWITCHER
-───────────────────────────────────────── */
-window.switchTab = function(tab) {
-  const isLogin = tab === 'login';
-  document.getElementById('tabLogin').classList.toggle('active', isLogin);
-  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
-  document.getElementById('panelLogin').classList.toggle('active', isLogin);
-  document.getElementById('panelRegister').classList.toggle('active', !isLogin);
-  clearError('loginError');
-  clearError('regError');
-};
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-/* ─────────────────────────────────────────
-   TOGGLE VISIBILIDAD CONTRASEÑA
-───────────────────────────────────────── */
-window.togglePass = function(inputId, btn) {
-  const input = document.getElementById(inputId);
-  const icon  = btn.querySelector('i');
-  const show  = input.type === 'password';
-  input.type     = show ? 'text' : 'password';
-  icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
-};
+    if (error) {
+      showError('loginError', 'loginErrorMsg', parseError(error.message));
+      setBtn('btnLogin', false, '<i class="fa-solid fa-bolt"></i> ENTRAR');
+    }
+    // Si no hay error, onAuthStateChange se dispara y redirige
+  };
 
-/* ─────────────────────────────────────────
-   LOGIN
-───────────────────────────────────────── */
-window.handleLogin = async function() {
-  clearError('loginError');
+  /* ══════════════════════════════════════════════
+     I) REGISTRO — PASO 1: Validar identidad
+  ══════════════════════════════════════════════ */
+  window.handleRegStep1 = function() {
+    clearError('regError1');
 
-  const email    = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPass').value;
+    const nombre  = document.getElementById('regNombre').value.trim();
+    const edadRaw = document.getElementById('regEdad').value;
+    const genero  = document.getElementById('regGenero').value;
+    const busca   = document.getElementById('regBusca').value;
+    const bio     = document.getElementById('regBio').value.trim();
+    const edad    = parseInt(edadRaw, 10);
 
-  // Validación cliente
-  if (!email)    { showError('loginError', 'loginErrorMsg', 'Ingresa tu correo electrónico.'); return; }
-  if (!password) { showError('loginError', 'loginErrorMsg', 'Ingresa tu contraseña.'); return; }
+    if (!nombre)             { showError('regError1','regError1Msg','Ingresa tu nombre o nickname.'); return; }
+    if (!edadRaw || isNaN(edad) || edad < 18) {
+      showError('regError1','regError1Msg','Debes tener al menos 18 años.'); return;
+    }
+    if (!genero)             { showError('regError1','regError1Msg','Selecciona tu género.'); return; }
+    if (!busca)              { showError('regError1','regError1Msg','Indica a quién buscas.'); return; }
 
-  setButtonLoading('btnLogin', true, '<i class="fa-solid fa-bolt"></i> ENTRAR');
+    dataPaso1 = { nombre, edad, genero, busca, bio };
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged detecta la sesión nueva y redirige a HOME
-  } catch (err) {
-    console.error('[Kinetic - index] Error login:', err);
-    showError('loginError', 'loginErrorMsg', parseFirebaseError(err.code));
-    setButtonLoading('btnLogin', false, '<i class="fa-solid fa-bolt"></i> ENTRAR');
-  }
-};
+    // Avanzar a step 2
+    document.getElementById('regStep1').style.display = 'none';
+    document.getElementById('regStep2').style.display = 'block';
+    document.getElementById('regFooter').style.display = 'none';
+    document.getElementById('seg1').className = 'step-seg done';
+    document.getElementById('seg2').className = 'step-seg active';
+    document.getElementById('regEmail').focus();
+  };
 
-/* ─────────────────────────────────────────
-   REGISTER
-   1. createUserWithEmailAndPassword
-   2. set() perfil en users/${uid}         (nodo privado completo)
-   3. set() perfil en radar_public/${uid}  (nodo público para el Radar)
-   4. onAuthStateChanged → redirige a HOME
-───────────────────────────────────────── */
-window.handleRegister = async function() {
-  clearError('regError');
+  window.goRegStep1 = function() {
+    clearError('regError2');
+    document.getElementById('regStep2').style.display = 'none';
+    document.getElementById('regStep1').style.display = 'block';
+    document.getElementById('regFooter').style.display = 'block';
+    document.getElementById('seg1').className = 'step-seg active';
+    document.getElementById('seg2').className = 'step-seg';
+  };
 
-  const nombre   = document.getElementById('regNombre').value.trim();
-  const edadRaw  = document.getElementById('regEdad').value;
-  const genero   = document.getElementById('regGenero').value;
-  const busca    = document.getElementById('regBusca').value;
-  const email    = document.getElementById('regEmail').value.trim();
-  const password = document.getElementById('regPass').value;
+  /* ══════════════════════════════════════════════
+     J) REGISTRO — PASO 2: Crear cuenta en Supabase
 
-  // Validación cliente
-  if (!nombre)  { showError('regError', 'regErrorMsg', 'Ingresa tu nombre o nickname.'); return; }
-  if (!edadRaw || parseInt(edadRaw) < 18) {
-    showError('regError', 'regErrorMsg', 'Debes tener al menos 18 años para registrarte.'); return;
-  }
-  if (!genero)  { showError('regError', 'regErrorMsg', 'Selecciona tu género.'); return; }
-  if (!busca)   { showError('regError', 'regErrorMsg', 'Indica a quién buscas.'); return; }
-  if (!email)   { showError('regError', 'regErrorMsg', 'Ingresa tu correo electrónico.'); return; }
-  if (password.length < 6) {
-    showError('regError', 'regErrorMsg', 'La contraseña debe tener al menos 6 caracteres.'); return;
-  }
+     Flujo:
+     1. supabase.auth.signUp → crea usuario en Auth
+     2. INSERT en tabla `profiles` (con uid = auth.uid)
+     3. Mostrar éxito y redirigir a onboarding
+  ══════════════════════════════════════════════ */
+  window.handleRegStep2 = async function() {
+    clearError('regError2');
 
-  const edad = parseInt(edadRaw, 10);
-  const today = new Date().toISOString().split('T')[0];
+    const email = document.getElementById('regEmail').value.trim();
+    const pass  = document.getElementById('regPass').value;
+    const pass2 = document.getElementById('regPass2').value;
 
-  setButtonLoading('btnRegister', true, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
+    if (!email)           { showError('regError2','regError2Msg','Ingresa tu correo.'); return; }
+    if (pass.length < 6)  { showError('regError2','regError2Msg','La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (pass !== pass2)   { showError('regError2','regError2Msg','Las contraseñas no coinciden.'); return; }
 
-  try {
-    // 1. Crear cuenta en Firebase Auth
-    const credential = await createUserWithEmailAndPassword(auth, email, password);
-    const uid        = credential.user.uid;
+    if (registrando) return;
+    registrando = true;
+    setBtn('btnRegStep2', true, '');
 
-    // Perfil completo — nodo privado (users/)
-    const userData = {
-      uid,
-      name:          nombre,
-      nombre,
-      age:           edad,
-      edad,
-      gender:        genero,   // 'male' | 'female' | 'other'
-      genero,
-      interestedIn:  busca,
-      busca,
+    /* 1. Crear usuario en Supabase Auth */
+    const { data: authData, error: authErr } = await supabase.auth.signUp({
       email,
-      bio:           '',
-      album:         [],
-      photos:        [],
-      profilePic:    '',
-      online:        true,
-      modoExpress:   false,
-      premium:       false,
-      lat:           null,
-      lng:           null,
-      dailyViews:    0,
-      lastResetDate: today,
-      createdAt:     Date.now()
-    };
+      password: pass,
+      options: {
+        data: {
+          nombre:  dataPaso1.nombre,
+          genero:  dataPaso1.genero,
+          edad:    dataPaso1.edad,
+        }
+      }
+    });
 
-    // Perfil público optimizado — nodo radar_public/
-    const publicData = {
-      uid,
-      name:       nombre,
-      age:        edad,
-      gender:     genero,
-      profilePic: '',
-      album:      [],
-      online:     true
-    };
+    if (authErr) {
+      registrando = false;
+      showError('regError2','regError2Msg', parseError(authErr.message));
+      setBtn('btnRegStep2', false, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
+      return;
+    }
 
-    // 2. Escritura paralela en ambos nodos (atómica vía Promise.all)
-    await Promise.all([
-      set(ref(db, `users/${uid}`),        userData),
-      set(ref(db, `radar_public/${uid}`), publicData)
-    ]);
+    const uid = authData.user?.id;
+    if (!uid) {
+      registrando = false;
+      showError('regError2','regError2Msg','Error al obtener ID de usuario. Intenta de nuevo.');
+      setBtn('btnRegStep2', false, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
+      return;
+    }
 
-    showToast(`¡Bienvenido/a, ${nombre}! Entrando… 🚀`);
-    // 3. onAuthStateChanged detecta la sesión y redirige a HOME
+    /* 2. INSERT perfil en tabla `profiles`
+       Esquema unificado — gender en inglés (male/female/other)
+       Columnas que deben existir en Supabase:
+         id (uuid, PK, default auth.uid())
+         nombre text
+         edad integer
+         gender text ('male'|'female'|'other')
+         busca text ('men'|'women'|'all')
+         bio text
+         email text
+         avatar_url text
+         online boolean default true
+         modo_express boolean default false
+         lat float8
+         lng float8
+         created_at timestamptz default now()
+    */
+    const { error: dbErr } = await supabase
+      .from('profiles')
+      .insert({
+        id:          uid,
+        nombre:      dataPaso1.nombre,
+        edad:        dataPaso1.edad,
+        gender:      dataPaso1.genero,   // 'male' | 'female' | 'other'
+        busca:       dataPaso1.busca,    // 'men' | 'women' | 'all'
+        bio:         dataPaso1.bio || '',
+        email,
+        avatar_url:  null,
+        online:      true,
+        modo_express:false,
+        lat:         null,
+        lng:         null,
+      });
 
-  } catch (err) {
-    console.error('[Kinetic - index] Error registro:', err);
-    showError('regError', 'regErrorMsg', parseFirebaseError(err.code));
-    setButtonLoading('btnRegister', false, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
-  }
-};
+    if (dbErr) {
+      console.error('[Kinetic] Error insertando perfil:', dbErr);
+      // No bloquear al usuario — puede completarse en onboarding
+    }
 
-/* ─────────────────────────────────────────
-   SOPORTE TECLA ENTER
-───────────────────────────────────────── */
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const loginActive = document.getElementById('panelLogin').classList.contains('active');
-  if (loginActive) {
-    if (!document.getElementById('btnLogin').disabled) handleLogin();
-  } else {
-    if (!document.getElementById('btnRegister').disabled) handleRegister();
-  }
-});
+    /* 3. Mostrar éxito */
+    document.getElementById('regStep2').style.display = 'none';
+    document.getElementById('regStep3').style.display = 'block';
+    document.getElementById('seg2').className = 'step-seg done';
+
+    showToast(`¡Bienvenido/a, ${dataPaso1.nombre}! 🚀`);
+
+    /* 4. Redirigir a onboarding (completar foto de perfil) */
+    setTimeout(() => {
+      window.location.href = ONBOARDING;
+    }, 1400);
+  };
+
+  /* ── K) ENTER SUPPORT ── */
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (document.getElementById('panelLogin').classList.contains('active')) {
+      if (!document.getElementById('btnLogin').disabled) handleLogin();
+    } else {
+      // Registro: detectar qué step es visible
+      if (document.getElementById('regStep1').style.display !== 'none') {
+        if (!document.getElementById('btnRegStep1').disabled) handleRegStep1();
+      } else if (document.getElementById('regStep2').style.display !== 'none') {
+        if (!document.getElementById('btnRegStep2').disabled) handleRegStep2();
+      }
+    }
+  });
 
 </script>
 </body>
