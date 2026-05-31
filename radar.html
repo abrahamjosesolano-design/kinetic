@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0d0616" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Kinetic · Radar</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap"
+        rel="stylesheet" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
     /* ══════════════════════════════════════════════
@@ -115,7 +116,8 @@
     }
     /* Live users pill */
     .topbar-pill {
-      display: flex; align-items: center; gap: 6px;
+      display: none;
+      align-items: center; gap: 6px;
       padding: 5px 12px;
       background: rgba(57,255,20,.08);
       border: 1px solid rgba(57,255,20,.2);
@@ -124,7 +126,7 @@
       font-size: .6rem; font-weight: 700;
       color: var(--green); letter-spacing: .06em;
     }
-    .topbar-pill .live-dot {
+    .live-dot {
       width: 7px; height: 7px; border-radius: 50%;
       background: var(--green);
       box-shadow: 0 0 6px var(--green);
@@ -136,7 +138,7 @@
     }
 
     /* ══════════════════════════════════════════════
-       FILTER CHIPS BAR
+       FILTER CHIPS
     ══════════════════════════════════════════════ */
     .filter-bar {
       display: flex; gap: 8px; align-items: center;
@@ -156,6 +158,7 @@
       flex-shrink: 0;
       transition: all .2s;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .chip.active {
       background: var(--grad);
@@ -190,7 +193,7 @@
        RADAR GRID
     ══════════════════════════════════════════════ */
     #radarGrid {
-      display: grid;
+      display: none;
       grid-template-columns: repeat(3, 1fr);
       gap: 6px;
       padding: 0 10px;
@@ -225,6 +228,7 @@
     }
     .radar-card:active { transform: scale(.97); }
 
+    /* Foto */
     .card-photo {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
@@ -236,7 +240,13 @@
       background: linear-gradient(160deg, #1a0f2e 0%, #0d0616 100%);
     }
     .card-avatar-ph svg { width: 55%; height: 55%; max-width: 80px; }
-    .card-grad { position: absolute; inset: 0; background: var(--grad-card); pointer-events: none; }
+
+    /* Overlay */
+    .card-grad {
+      position: absolute; inset: 0;
+      background: var(--grad-card);
+      pointer-events: none;
+    }
 
     /* Online dot */
     .card-online {
@@ -265,8 +275,11 @@
       backdrop-filter: blur(4px);
     }
 
-    /* Info overlay */
-    .card-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 8px 7px; z-index: 1; }
+    /* Info area — nombre + meta + distancia */
+    .card-info {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 8px 8px 7px; z-index: 1;
+    }
     .card-name {
       font-size: .78rem; font-weight: 800;
       color: #fff; line-height: 1.2;
@@ -281,6 +294,26 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .card-age-accent { color: rgba(255,0,255,.75); }
+
+    /* ── DISTANCIA ─────────────────────────────────
+       Badge de distancia — parte inferior derecha
+       de la tarjeta. Diseño neón cian para diferenciarse
+       del badge de género (fucsia).
+    ──────────────────────────────────────────────── */
+    .card-dist {
+      position: absolute; bottom: 7px; right: 7px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 2px 7px;
+      background: rgba(0,255,255,.12);
+      border: 1px solid rgba(0,255,255,.35);
+      border-radius: 8px;
+      font-family: 'Orbitron', monospace;
+      font-size: .5rem; font-weight: 700; letter-spacing: .06em;
+      color: var(--cyan);
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+    }
+    .card-dist i { font-size: .52rem; opacity: .8; }
 
     /* ══════════════════════════════════════════════
        SKELETON
@@ -328,7 +361,7 @@
       font-family: 'Orbitron', monospace;
       font-size: .9rem; font-weight: 700; letter-spacing: .06em; color: var(--text-2);
     }
-    .state-sub { font-size: .84rem; color: var(--text-3); line-height: 1.6; max-width: 260px; }
+    .state-sub  { font-size: .84rem; color: var(--text-3); line-height: 1.6; max-width: 260px; }
     .btn-neon {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 10px 22px;
@@ -339,6 +372,31 @@
       transition: background .2s, box-shadow .2s;
     }
     .btn-neon:hover { background: rgba(255,0,255,.18); box-shadow: var(--glow-m); }
+
+    /* Pill de geo permiso */
+    #geoBar {
+      display: none;
+      align-items: center; gap: 10px;
+      margin: 10px 14px 0;
+      padding: 9px 14px;
+      background: rgba(0,255,255,.07);
+      border: 1px solid rgba(0,255,255,.22);
+      border-radius: 10px;
+      font-size: .78rem; color: var(--cyan); font-weight: 600;
+    }
+    #geoBar i { font-size: .9rem; flex-shrink: 0; }
+    #geoBar button {
+      margin-left: auto;
+      padding: 5px 12px;
+      background: rgba(0,255,255,.15);
+      border: 1px solid rgba(0,255,255,.35);
+      border-radius: 8px;
+      color: var(--cyan); font-family: inherit;
+      font-size: .72rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      transition: background .2s;
+    }
+    #geoBar button:hover { background: rgba(0,255,255,.28); }
 
     /* ══════════════════════════════════════════════
        BOTTOM NAV
@@ -376,8 +434,6 @@
       transform: scale(1.18);
     }
     .nav-item.active span { color: var(--purple-hi); }
-
-    /* Fuchsia neon — unread messages */
     .nav-item i.has-notif {
       color: var(--magenta) !important;
       filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45)) !important;
@@ -387,8 +443,6 @@
       0%,100% { filter: drop-shadow(0 0 6px #ff00ff); }
       50%     { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff); }
     }
-
-    /* Badge counter */
     .badge-counter {
       position: absolute; top: 8px; left: calc(50% + 4px);
       min-width: 17px; height: 17px; padding: 0 3px;
@@ -416,10 +470,17 @@
   <div class="topbar">
     <span class="topbar-logo">KINETIC</span>
     <span class="topbar-center">Radar</span>
-    <div class="topbar-pill" id="livePill" style="display:none">
+    <div class="topbar-pill" id="livePill">
       <div class="live-dot"></div>
       <span id="liveCount">0</span>
     </div>
+  </div>
+
+  <!-- BARRA DE SOLICITUD DE GEOLOCALIZACIÓN -->
+  <div id="geoBar">
+    <i class="fa-solid fa-location-dot"></i>
+    <span>Activa tu ubicación para ver distancias</span>
+    <button id="geoBtn">Activar</button>
   </div>
 
   <!-- FILTER CHIPS -->
@@ -443,8 +504,8 @@
     <div class="skel-card"></div>
   </div>
 
-  <!-- RADAR GRID (populated by JS) -->
-  <div id="radarGrid" style="display:none"></div>
+  <!-- RADAR GRID -->
+  <div id="radarGrid"></div>
 
   <!-- EMPTY STATE -->
   <div class="state-wrap" id="emptyState">
@@ -490,393 +551,503 @@
 ════════════════════════════════════════════════ -->
 <script type="module">
 
-/* ── FIREBASE SDK v10.14.1 ── */
-import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getDatabase, ref, get, onValue, off }
-  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  /* ── A) IMPORTS ── */
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getDatabase, ref, get, update, onValue, off }
+    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-/* ── FIREBASE CONFIG ── */
-const firebaseConfig = {
-  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
-  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-  projectId:         "kinetic-app-67ae5",
-  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
-  messagingSenderId: "825570718975",
-  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-};
+  /* ── B) CONFIG FIREBASE ── */
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+    authDomain:        "kinetic-app-67ae5.firebaseapp.com",
+    databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+    projectId:         "kinetic-app-67ae5",
+    storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
+    messagingSenderId: "825570718975",
+    appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+  };
 
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getDatabase(app);
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getDatabase(app);
 
-/* ─────────────────────────────────────────
-   SVG FALLBACK CYBERPUNK
-   Inyectado como innerHTML — jamás queda
-   una etiqueta <img> rota o vacía.
-───────────────────────────────────────── */
-const AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none"
-  style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;
-         background:#12091f;border-radius:50%;">
-  <circle cx="12" cy="8" r="4"/>
-  <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
-</svg>`;
+  /* ── C) SVG FALLBACK ── */
+  const AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none"
+    style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;
+           background:#12091f;border-radius:50%;">
+    <circle cx="12" cy="8" r="4"/>
+    <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+  </svg>`;
 
-/* ─────────────────────────────────────────
-   ESTADO DEL MÓDULO
-───────────────────────────────────────── */
-let me           = null;
-let allUsers     = {};
-let activeFilter = 'all';
-let usersUnsub   = null;
-let chatsUnsub   = null;
+  /* ── D) ESTADO DEL MÓDULO ── */
+  let me           = null;   // usuario autenticado
+  let allUsers     = {};     // mapa uid → perfil
+  let activeFilter = 'all';
+  let myLat        = null;   // latitud del usuario actual
+  let myLng        = null;   // longitud del usuario actual
+  let geoWatchId   = null;   // ID del watchPosition
+  let usersUnsub   = null;
+  let chatsUnsub   = null;
 
-/* ─────────────────────────────────────────
-   HELPERS
-───────────────────────────────────────── */
-const esc = s => String(s ?? '')
-  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  /* ── E) REFS DOM ── */
+  const $skeleton = document.getElementById('skeleton');
+  const $grid     = document.getElementById('radarGrid');
+  const $empty    = document.getElementById('emptyState');
+  const $authGate = document.getElementById('authGate');
+  const $livePill = document.getElementById('livePill');
+  const $geoBar   = document.getElementById('geoBar');
+  const $geoBtn   = document.getElementById('geoBtn');
 
-/** Valida si es una URL HTTP/S con contenido real */
-function isValidUrl(raw) {
-  if (typeof raw !== 'string') return false;
-  const t = raw.trim();
-  return t.length > 12 && /^https?:\/\/.{5,}/.test(t);
-}
+  /* ── F) HELPERS ── */
 
-/**
- * Primera foto válida de un perfil.
- * Revisa: album[], photos[], profilePic, foto.
- * Compatible con TODOS los esquemas del ecosistema Kinetic.
- */
-function firstValidPhoto(data) {
-  if (!data) return null;
-  const sources = [
-    ...(Array.isArray(data.album)  ? data.album  : []),
-    ...(Array.isArray(data.photos) ? data.photos : []),
-    ...(data.profilePic ? [data.profilePic] : []),
-    ...(data.foto       ? [data.foto]        : []),
-  ];
-  for (const u of sources) {
-    if (isValidUrl(u)) return u.trim();
+  const esc = s => String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+  function isValidUrl(raw) {
+    if (typeof raw !== 'string') return false;
+    const t = raw.trim();
+    return t.length > 12 && /^https?:\/\/.{5,}/.test(t);
   }
-  return null;
-}
 
-/** Clave de género normalizada para filtros */
-function genderKey(g) {
-  if (!g) return 'otro';
-  const l = String(g).toLowerCase();
-  if (l.includes('masc') || l.includes('hombre') || l === 'm' || l === 'male')   return 'hombre';
-  if (l.includes('fem')  || l.includes('mujer')  || l === 'f' || l === 'female') return 'mujer';
-  return 'otro';
-}
-
-/** Símbolo de género para el badge de la tarjeta */
-function genderLabel(g) {
-  const k = genderKey(g);
-  if (k === 'hombre') return '♂';
-  if (k === 'mujer')  return '♀';
-  return '✦';
-}
-
-/* ─────────────────────────────────────────
-   ESQUELETO
-───────────────────────────────────────── */
-function hideSkeleton() {
-  const sk = document.getElementById('skeleton');
-  if (sk) sk.style.display = 'none';
-}
-
-/* ─────────────────────────────────────────
-   AUTH STATE
-───────────────────────────────────────── */
-onAuthStateChanged(auth, user => {
-  if (user) {
-    me = user;
-    hideSkeleton();
-    startUsersListener();
-    startChatsListener();
-    wireFilters();
-  } else {
-    hideSkeleton();
-    document.getElementById('authGate').classList.add('show');
+  function firstValidPhoto(data) {
+    if (!data) return null;
+    const sources = [
+      ...(Array.isArray(data.album)  ? data.album  : []),
+      ...(Array.isArray(data.photos) ? data.photos : []),
+      data.profilePic ? [data.profilePic] : [],
+      data.foto       ? [data.foto]        : [],
+    ].flat();
+    for (const u of sources) { if (isValidUrl(u)) return u.trim(); }
+    return null;
   }
-});
 
-/* ─────────────────────────────────────────
-   LISTENER DE USUARIOS EN TIEMPO REAL
-   Lee ambos nodos: users/ y radar_public/
-   Fusiona ambas fuentes para máxima cobertura.
-───────────────────────────────────────── */
-function startUsersListener() {
-  const usersRef = ref(db, 'users');
-  if (usersUnsub) off(usersRef);
+  function genderKey(g) {
+    if (!g) return 'otro';
+    const l = String(g).toLowerCase();
+    if (l.includes('masc') || l.includes('hombre') || l === 'm' || l === 'male')   return 'hombre';
+    if (l.includes('fem')  || l.includes('mujer')  || l === 'f' || l === 'female') return 'mujer';
+    return 'otro';
+  }
 
-  usersUnsub = onValue(usersRef, async snap => {
-    allUsers = {};
+  function genderLabel(g) {
+    const k = genderKey(g);
+    if (k === 'hombre') return '♂';
+    if (k === 'mujer')  return '♀';
+    return '✦';
+  }
 
-    // Nodo principal users/
-    if (snap.exists()) {
-      snap.forEach(child => {
-        const uid = child.key;
-        if (uid === me.uid) return; // excluirse a sí mismo
-        const data = child.val();
-        if (data) allUsers[uid] = { uid, ...data };
-      });
+  /* ══════════════════════════════════════════════════
+     G) CÁLCULO DE DISTANCIA
+     Fórmula de Haversine — precisa para distancias
+     cortas (metros) y largas (kilómetros).
+     Devuelve un string legible:
+       < 1 000 m  → "850m"
+       ≥ 1 000 m  → "1.2km"
+  ══════════════════════════════════════════════════ */
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    const R  = 6371;                          // radio tierra en km
+    const dL = (lat2 - lat1) * Math.PI / 180;
+    const dG = (lng2 - lng1) * Math.PI / 180;
+    const a  = Math.sin(dL / 2) ** 2
+             + Math.cos(lat1 * Math.PI / 180)
+             * Math.cos(lat2 * Math.PI / 180)
+             * Math.sin(dG / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  /**
+   * Devuelve "350m", "1.2km", "24km" o null si no hay datos.
+   * @param {number|null} lat2
+   * @param {number|null} lng2
+   */
+  function formatDistance(lat2, lng2) {
+    if (myLat == null || myLng == null) return null;
+    if (lat2  == null || lng2  == null) return null;
+    const km = haversineKm(myLat, myLng, lat2, lng2);
+    if (km < 1) {
+      const m = Math.round(km * 1000);
+      return `${m}m`;
+    }
+    if (km < 10) return `${km.toFixed(1)}km`;
+    return `${Math.round(km)}km`;
+  }
+
+  /* ══════════════════════════════════════════════════
+     H) GEOLOCALIZACIÓN
+     · Intenta obtener posición al cargar (silencioso)
+     · Si se deniega o no está disponible, muestra la
+       geoBar para que el usuario la active manualmente
+     · Al obtener posición: guarda en myLat/myLng,
+       actualiza el nodo users/${me.uid} en Firebase,
+       y re-renderiza para mostrar distancias
+  ══════════════════════════════════════════════════ */
+  function initGeolocation(silent = true) {
+    if (!('geolocation' in navigator)) {
+      if (!silent) $geoBar.style.display = 'none';
+      return;
     }
 
-    // Nodo complementario radar_public/ — fusión sin sobreescribir
-    try {
-      const pubSnap = await get(ref(db, 'radar_public'));
-      if (pubSnap.exists()) {
-        pubSnap.forEach(child => {
-          const uid = child.key;
+    const opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 };
+
+    navigator.geolocation.getCurrentPosition(
+      pos => onGeoSuccess(pos, true),
+      err => {
+        console.warn('[Kinetic - radar] Geo denegada:', err.message);
+        if (!silent) {
+          // El usuario pulsó el botón pero aún denegó
+          $geoBar.style.display = 'none';
+        } else {
+          // Carga inicial: mostrar barra de invitación
+          $geoBar.style.display = 'flex';
+        }
+      },
+      opts
+    );
+  }
+
+  function onGeoSuccess(pos, updateFirebase) {
+    myLat = pos.coords.latitude;
+    myLng = pos.coords.longitude;
+    $geoBar.style.display = 'none';
+
+    // Actualizar ubicación en Firebase para que otros la vean
+    if (updateFirebase && me) {
+      update(ref(db, `users/${me.uid}`), { lat: myLat, lng: myLng })
+        .catch(err => console.error('[Kinetic - radar] Error guardando geo:', err));
+    }
+
+    // Re-renderizar con distancias
+    renderGrid();
+  }
+
+  /* Botón "Activar" en la geoBar */
+  $geoBtn.addEventListener('click', () => {
+    initGeolocation(false);
+  });
+
+  /* ══════════════════════════════════════════════════
+     I) AUTENTICACIÓN
+  ══════════════════════════════════════════════════ */
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      me = user;
+      hideSkeleton();
+      initGeolocation(true);     // intento silencioso al arrancar
+      startUsersListener();
+      startChatsListener();
+      wireFilters();
+    } else {
+      hideSkeleton();
+      $authGate.classList.add('show');
+    }
+  });
+
+  function hideSkeleton() {
+    if ($skeleton) $skeleton.style.display = 'none';
+  }
+
+  /* ══════════════════════════════════════════════════
+     J) LISTENER USUARIOS EN TIEMPO REAL
+        Lee users/ + radar_public/ y fusiona.
+  ══════════════════════════════════════════════════ */
+  function startUsersListener() {
+    const usersRef = ref(db, 'users');
+    if (usersUnsub) off(usersRef);
+
+    usersUnsub = onValue(usersRef, async snap => {
+      allUsers = {};
+
+      if (snap.exists()) {
+        snap.forEach(child => {
+          const uid  = child.key;
           if (uid === me.uid) return;
           const data = child.val();
-          if (data && !allUsers[uid]) {
-            // Solo añadir si users/ no lo tenía
-            allUsers[uid] = { uid, ...data };
-          } else if (data && allUsers[uid]) {
-            // Complementar campos faltantes (ej. profilePic)
-            allUsers[uid] = { ...data, ...allUsers[uid] };
-          }
+          if (data) allUsers[uid] = { uid, ...data };
         });
       }
-    } catch (err) {
-      console.error('[Kinetic - radar] Error leyendo radar_public:', err);
+
+      /* Complementar con radar_public/ */
+      try {
+        const pubSnap = await get(ref(db, 'radar_public'));
+        if (pubSnap.exists()) {
+          pubSnap.forEach(child => {
+            const uid  = child.key;
+            if (uid === me.uid) return;
+            const data = child.val();
+            if (!data) return;
+            if (!allUsers[uid]) {
+              allUsers[uid] = { uid, ...data };
+            } else {
+              allUsers[uid] = { ...data, ...allUsers[uid] };
+            }
+          });
+        }
+      } catch (err) {
+        console.error('[Kinetic - radar] Error leyendo radar_public:', err);
+      }
+
+      renderGrid();
+
+    }, err => {
+      console.error('[Kinetic - radar] Error listener users:', err);
+      hideSkeleton();
+    });
+  }
+
+  /* ══════════════════════════════════════════════════
+     K) RENDER DEL GRID
+  ══════════════════════════════════════════════════ */
+  function renderGrid() {
+    let users = Object.values(allUsers);
+
+    /* Filtro activo */
+    if      (activeFilter === 'online') users = users.filter(u => u.online === true);
+    else if (activeFilter === 'hombre') users = users.filter(u => genderKey(u.genero || u.gender) === 'hombre');
+    else if (activeFilter === 'mujer')  users = users.filter(u => genderKey(u.genero || u.gender) === 'mujer');
+    else if (activeFilter === 'otro')   users = users.filter(u => genderKey(u.genero || u.gender) === 'otro');
+
+    /* Ordenar: online primero, luego por distancia (si disponible), luego nombre */
+    users.sort((a, b) => {
+      if (a.online && !b.online) return -1;
+      if (!a.online && b.online) return 1;
+
+      // Si tenemos geo, ordenar por distancia ascendente
+      if (myLat != null && myLng != null) {
+        const dA = (a.lat != null && a.lng != null)
+          ? haversineKm(myLat, myLng, a.lat, a.lng) : Infinity;
+        const dB = (b.lat != null && b.lng != null)
+          ? haversineKm(myLat, myLng, b.lat, b.lng) : Infinity;
+        if (dA !== dB) return dA - dB;
+      }
+
+      const na = (a.nombre || a.name || '').toLowerCase();
+      const nb = (b.nombre || b.name || '').toLowerCase();
+      return na.localeCompare(nb);
+    });
+
+    /* Pill de en-línea */
+    const onlineCount = Object.values(allUsers).filter(u => u.online === true).length;
+    if (onlineCount > 0) {
+      document.getElementById('liveCount').textContent = onlineCount;
+      $livePill.style.display = 'flex';
+    } else {
+      $livePill.style.display = 'none';
     }
 
-    renderGrid();
+    if (users.length === 0) {
+      $grid.style.display = 'none';
+      $empty.classList.add('show');
+      return;
+    }
 
-  }, err => {
-    hideSkeleton();
-    console.error('[Kinetic - radar] Error listener users:', err);
-  });
-}
+    $empty.classList.remove('show');
+    $grid.style.display = 'grid';
+    $grid.innerHTML     = '';
 
-/* ─────────────────────────────────────────
-   RENDER DEL GRID
-───────────────────────────────────────── */
-function renderGrid() {
-  const grid  = document.getElementById('radarGrid');
-  const empty = document.getElementById('emptyState');
-  const pill  = document.getElementById('livePill');
-
-  // Aplicar filtro activo
-  let users = Object.values(allUsers);
-
-  if      (activeFilter === 'online') users = users.filter(u => u.online === true);
-  else if (activeFilter === 'hombre') users = users.filter(u => genderKey(u.genero || u.gender) === 'hombre');
-  else if (activeFilter === 'mujer')  users = users.filter(u => genderKey(u.genero || u.gender) === 'mujer');
-  else if (activeFilter === 'otro')   users = users.filter(u => genderKey(u.genero || u.gender) === 'otro');
-
-  // Ordenar: online primero, luego por nombre
-  users.sort((a, b) => {
-    if (a.online && !b.online) return -1;
-    if (!a.online && b.online) return 1;
-    const na = (a.nombre || a.name || '').toLowerCase();
-    const nb = (b.nombre || b.name || '').toLowerCase();
-    return na.localeCompare(nb);
-  });
-
-  // Pill de online
-  const onlineCount = Object.values(allUsers).filter(u => u.online === true).length;
-  if (onlineCount > 0) {
-    document.getElementById('liveCount').textContent = onlineCount;
-    pill.style.display = 'flex';
-  } else {
-    pill.style.display = 'none';
+    const fragment = document.createDocumentFragment();
+    users.forEach((data, idx) => {
+      fragment.appendChild(buildCard(data, idx));
+    });
+    $grid.appendChild(fragment);
   }
 
-  // Sin resultados
-  if (users.length === 0) {
-    grid.style.display = 'none';
-    empty.classList.add('show');
-    return;
-  }
+  /* ══════════════════════════════════════════════════
+     L) CONSTRUIR TARJETA INDIVIDUAL
+  ══════════════════════════════════════════════════ */
+  function buildCard(data, idx) {
+    const uid      = data.uid;
+    const name     = data.nombre || data.name   || 'Desconocido';
+    const age      = data.edad   || data.age    || null;
+    const gender   = data.genero || data.gender || null;
+    const online   = data.online === true;
+    const photoUrl = firstValidPhoto(data);
 
-  empty.classList.remove('show');
-  grid.style.display = 'grid';
-  grid.innerHTML     = '';
+    /* ── Calcular distancia ── */
+    const distStr  = formatDistance(
+      data.lat  ?? data.latitude  ?? null,
+      data.lng  ?? data.longitude ?? null
+    );
 
-  users.forEach((data, idx) => {
-    grid.appendChild(buildCard(data, idx));
-  });
-}
+    const card = document.createElement('div');
+    card.className = 'radar-card';
+    card.style.animationDelay = `${Math.min(idx * 0.035, 0.7)}s`;
 
-/* ─────────────────────────────────────────
-   CONSTRUIR TARJETA INDIVIDUAL
-───────────────────────────────────────── */
-function buildCard(data, idx) {
-  const uid      = data.uid;
-  const name     = data.nombre || data.name   || 'Desconocido';
-  const age      = data.edad   || data.age    || null;
-  const gender   = data.genero || data.gender || null;
-  const online   = data.online === true;
-  const photoUrl = firstValidPhoto(data);
-
-  const card = document.createElement('div');
-  card.className = 'radar-card';
-  card.style.animationDelay = `${Math.min(idx * 0.035, 0.7)}s`;
-
-  /* ── Foto o SVG placeholder ── */
-  if (photoUrl) {
-    const img   = document.createElement('img');
-    img.className = 'card-photo';
-    img.alt       = name;
-    img.loading   = 'lazy';
-    img.src       = photoUrl;
-    img.onerror   = () => {
-      img.remove();
+    /* Foto o SVG placeholder */
+    if (photoUrl) {
+      const img   = document.createElement('img');
+      img.className = 'card-photo';
+      img.alt       = name;
+      img.loading   = 'lazy';
+      img.src       = photoUrl;
+      img.addEventListener('error', () => {
+        img.remove();
+        const ph = document.createElement('div');
+        ph.className = 'card-avatar-ph';
+        ph.innerHTML = AVATAR_SVG;
+        card.insertBefore(ph, card.firstChild);
+      });
+      card.appendChild(img);
+    } else {
       const ph = document.createElement('div');
       ph.className = 'card-avatar-ph';
       ph.innerHTML = AVATAR_SVG;
-      card.insertBefore(ph, card.firstChild);
-    };
-    card.appendChild(img);
-  } else {
-    const ph = document.createElement('div');
-    ph.className = 'card-avatar-ph';
-    ph.innerHTML = AVATAR_SVG;
-    card.appendChild(ph);
-  }
-
-  /* ── Degradado overlay ── */
-  const grad = document.createElement('div');
-  grad.className = 'card-grad';
-  card.appendChild(grad);
-
-  /* ── Indicador online ── */
-  if (online) {
-    const dot = document.createElement('div');
-    dot.className = 'card-online';
-    card.appendChild(dot);
-  }
-
-  /* ── Badge de género ── */
-  if (gender) {
-    const badge = document.createElement('div');
-    badge.className   = 'card-badge';
-    badge.textContent = genderLabel(gender);
-    card.appendChild(badge);
-  }
-
-  /* ── Info (nombre + meta) ── */
-  const info = document.createElement('div');
-  info.className = 'card-info';
-
-  const nameEl = document.createElement('div');
-  nameEl.className   = 'card-name';
-  nameEl.textContent = name;
-  info.appendChild(nameEl);
-
-  if (age || gender) {
-    const meta = document.createElement('div');
-    meta.className = 'card-meta';
-    const parts = [];
-    if (age)    parts.push(`<span class="card-age-accent">${esc(String(age))} años</span>`);
-    if (gender) parts.push(esc(gender));
-    meta.innerHTML = parts.join(' · ');
-    info.appendChild(meta);
-  }
-
-  card.appendChild(info);
-
-  /* ── Click → perfil-detalle.html ── */
-  card.addEventListener('click', () => {
-    try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
-    window.location.href = `perfil-detalle.html?id=${encodeURIComponent(uid)}`;
-  });
-
-  return card;
-}
-
-/* ─────────────────────────────────────────
-   CHIPS DE FILTRO
-───────────────────────────────────────── */
-function wireFilters() {
-  document.querySelectorAll('#filterBar .chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('#filterBar .chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeFilter = chip.dataset.filter || 'all';
-      renderGrid();
-    });
-  });
-}
-
-/* ─────────────────────────────────────────
-   CONTADOR DE NOTIFICACIONES (nav badge)
-   Estrategia A: lastInfo.unreadTarget === me.uid
-   Estrategia B: scan messages[].unread === true
-───────────────────────────────────────── */
-function startChatsListener() {
-  const chatsRef = ref(db, 'chats');
-  if (chatsUnsub) off(chatsRef);
-
-  const iconEl  = document.getElementById('navChatIcon');
-  const navItem = document.getElementById('navChats');
-
-  chatsUnsub = onValue(chatsRef, snap => {
-    if (!me) return; // guard — usuario cerró sesión
-
-    let pending = 0;
-
-    if (snap.exists()) {
-      snap.forEach(chatSnap => {
-        const chat = chatSnap.val();
-        if (!chat) return;
-
-        // Estrategia A — fast path
-        if (chat.lastInfo?.unreadTarget === me.uid) {
-          pending++;
-          return;
-        }
-
-        // Estrategia B — verificar participación y mensajes
-        const inId    = chatSnap.key.split('_').includes(me.uid);
-        const inParts = chat.participants?.[me.uid] === true;
-        if (!inId && !inParts) return;
-
-        const msgs = chat.messages || {};
-        const hasUnread = Object.values(msgs).some(
-          m => m?.senderId !== me.uid && m?.unread === true
-        );
-        if (hasUnread) pending++;
-      });
+      card.appendChild(ph);
     }
 
-    updateNavBadge(pending, iconEl, navItem);
-  }, err => {
-    console.error('[Kinetic - radar] Error listener chats:', err);
-  });
-}
+    /* Overlay degradado */
+    const grad = document.createElement('div');
+    grad.className = 'card-grad';
+    card.appendChild(grad);
 
-function updateNavBadge(count, iconEl, navItemEl) {
-  navItemEl.querySelectorAll('.badge-counter').forEach(b => b.remove());
-  if (count > 0) {
-    iconEl.classList.add('has-notif');
-    const badge = document.createElement('div');
-    badge.className   = 'badge-counter';
-    badge.textContent = count > 9 ? '9+' : String(count);
-    navItemEl.appendChild(badge);
-  } else {
-    iconEl.classList.remove('has-notif');
+    /* Indicador online */
+    if (online) {
+      const dot = document.createElement('div');
+      dot.className = 'card-online';
+      card.appendChild(dot);
+    }
+
+    /* Badge de género */
+    if (gender) {
+      const badge = document.createElement('div');
+      badge.className   = 'card-badge';
+      badge.textContent = genderLabel(gender);
+      card.appendChild(badge);
+    }
+
+    /* ── Badge de distancia ──────────────────────────
+       Solo se pinta si tenemos la ubicación del usuario
+       actual Y la del perfil visitado.
+       Ejemplos: "350m", "1.2km", "24km"
+    ─────────────────────────────────────────────── */
+    if (distStr) {
+      const dist = document.createElement('div');
+      dist.className = 'card-dist';
+      dist.innerHTML = `<i class="fa-solid fa-location-dot"></i>${esc(distStr)}`;
+      card.appendChild(dist);
+    }
+
+    /* Info: nombre + meta */
+    const info = document.createElement('div');
+    info.className = 'card-info';
+
+    const nameEl = document.createElement('div');
+    nameEl.className   = 'card-name';
+    nameEl.textContent = name;
+    info.appendChild(nameEl);
+
+    if (age || gender) {
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
+      const parts = [];
+      if (age)    parts.push(`<span class="card-age-accent">${esc(String(age))} años</span>`);
+      if (gender) parts.push(esc(gender));
+      meta.innerHTML = parts.join(' · ');
+      info.appendChild(meta);
+    }
+
+    card.appendChild(info);
+
+    /* Click → perfil-detalle.html con ?id= ── */
+    card.addEventListener('click', () => {
+      try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
+      window.location.href = `perfil-detalle.html?id=${encodeURIComponent(uid)}`;
+    });
+
+    return card;
   }
-}
 
-/* ─────────────────────────────────────────
-   LIMPIEZA DE LISTENERS AL SALIR
-───────────────────────────────────────── */
-window.addEventListener('pagehide', () => {
-  try { if (usersUnsub) off(ref(db, 'users'));  } catch(_) {}
-  try { if (chatsUnsub) off(ref(db, 'chats'));  } catch(_) {}
-});
+  /* ══════════════════════════════════════════════════
+     M) CHIPS DE FILTRO
+  ══════════════════════════════════════════════════ */
+  function wireFilters() {
+    document.querySelectorAll('#filterBar .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#filterBar .chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeFilter = chip.dataset.filter || 'all';
+        renderGrid();
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════
+     N) BADGE GLOBAL DE MENSAJES SIN LEER
+        4 capas de protección antifreezes
+  ══════════════════════════════════════════════════ */
+  function startChatsListener() {
+    const chatsRef = ref(db, 'chats');
+    if (chatsUnsub) off(chatsRef);
+
+    const $icon = document.getElementById('navChatIcon');
+    const $nav  = document.getElementById('navChats');
+
+    chatsUnsub = onValue(chatsRef, snap => {
+      if (!me) return;
+
+      let pending = 0;
+
+      if (snap.exists()) {
+        snap.forEach(chatSnap => {
+          /* Capa 1 — sala existe y es objeto */
+          const sala = chatSnap.val();
+          if (!sala || typeof sala !== 'object') return;
+
+          /* Capa 2 — verificar membresía */
+          const inId    = chatSnap.key.split('_').includes(me.uid);
+          const inParts = sala.participants?.[me.uid] === true;
+          if (!inId && !inParts) return;
+
+          /* Capa 3A — lastInfo fast path */
+          if (sala.lastInfo
+              && typeof sala.lastInfo === 'object'
+              && sala.lastInfo.unreadTarget === me.uid) {
+            pending++;
+            return;
+          }
+
+          /* Capa 3B — scan mensajes */
+          const msgs = sala.messages;
+          if (!msgs || typeof msgs !== 'object') return;
+          const hasUnread = Object.values(msgs).some(
+            m => m && typeof m === 'object'
+              && m.senderId !== me.uid
+              && m.unread === true
+          );
+          if (hasUnread) pending++;
+        });
+      }
+
+      updateNavBadge(pending, $icon, $nav);
+    }, err => {
+      console.error('[Kinetic - radar] Error listener chats:', err);
+    });
+  }
+
+  function updateNavBadge(count, iconEl, navItemEl) {
+    navItemEl.querySelectorAll('.badge-counter').forEach(b => b.remove());
+    if (count > 0) {
+      iconEl.classList.add('has-notif');
+      const badge = document.createElement('div');
+      badge.className   = 'badge-counter';
+      badge.textContent = count > 9 ? '9+' : String(count);
+      navItemEl.appendChild(badge);
+    } else {
+      iconEl.classList.remove('has-notif');
+    }
+  }
+
+  /* ══════════════════════════════════════════════════
+     O) LIMPIEZA DE LISTENERS AL SALIR
+  ══════════════════════════════════════════════════ */
+  window.addEventListener('pagehide', () => {
+    try { if (usersUnsub) off(ref(db, 'users'));  } catch(e) { console.error('[Kinetic - radar]', e); }
+    try { if (chatsUnsub) off(ref(db, 'chats'));  } catch(e) { console.error('[Kinetic - radar]', e); }
+    try { if (geoWatchId != null) navigator.geolocation.clearWatch(geoWatchId); } catch(_) {}
+  });
 
 </script>
 </body>
