@@ -841,14 +841,14 @@ function buildRow(room, idx) {
 }
 
 /* ────────────────────────────────────
-   OPEN CHAT → chat.html
+   OPEN CHAT → chat-interno.html
 ──────────────────────────────────── */
 function openChat(cid, targetUid) {
   try {
     localStorage.setItem('active_chat_id',   cid);
     localStorage.setItem('selected_user_id', targetUid);
   } catch(_) {}
-  window.location.href = 'chat.html';
+  window.location.href = `chat-interno.html?id=${encodeURIComponent(targetUid)}`;
 }
 
 /* ────────────────────────────────────
