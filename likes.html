@@ -7,17 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Kinetic · Likes</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap"
+        rel="stylesheet" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
     /* ══════════════════════════════════════════
-       DESIGN TOKENS
+       DESIGN TOKENS — Kinetic Cyberpunk
     ══════════════════════════════════════════ */
     :root {
       --bg:           #0d0616;
@@ -60,7 +59,7 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
 
-    /* ── GRID LINES ATMOSPHERE ── */
+    /* ── GRID LINES ── */
     body::before {
       content: '';
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -68,11 +67,12 @@
         repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.04) 40px),
         repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.04) 40px);
     }
+    /* ── RADIAL GLOW ── */
     body::after {
       content: '';
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
-        radial-gradient(ellipse 65% 42% at 10% 5%,  rgba(138,43,226,.17) 0%, transparent 65%),
+        radial-gradient(ellipse 65% 42% at 10%  5%,  rgba(138,43,226,.17) 0%, transparent 65%),
         radial-gradient(ellipse 50% 35% at 90% 90%, rgba(255,0,85,.11)   0%, transparent 60%),
         radial-gradient(ellipse 40% 28% at 70% 15%, rgba(0,242,255,.07)  0%, transparent 55%);
     }
@@ -114,15 +114,15 @@
       color: var(--text-3);
     }
     .topbar-count {
-      display: flex; align-items: center; gap: 6px;
+      display: none;
+      align-items: center; gap: 6px;
       padding: 5px 12px;
       background: rgba(255,0,85,.1);
       border: 1px solid rgba(255,0,85,.25);
       border-radius: 20px;
       font-family: 'Orbitron', monospace;
       font-size: .68rem; font-weight: 700;
-      color: var(--fuchsia);
-      letter-spacing: .06em;
+      color: var(--fuchsia); letter-spacing: .06em;
     }
     .topbar-count i { font-size: .75rem; }
 
@@ -134,28 +134,25 @@
       padding: 18px 18px 12px;
     }
     .section-label::before {
-      content: ''; flex: 1;
-      height: 1px;
+      content: ''; flex: 1; height: 1px;
       background: linear-gradient(90deg, transparent, rgba(255,0,85,.4));
     }
     .section-label::after {
-      content: ''; flex: 1;
-      height: 1px;
+      content: ''; flex: 1; height: 1px;
       background: linear-gradient(90deg, rgba(255,0,85,.4), transparent);
     }
     .section-label span {
       font-family: 'Orbitron', monospace;
       font-size: .58rem; font-weight: 700;
       letter-spacing: .22em; text-transform: uppercase;
-      color: var(--fuchsia);
-      white-space: nowrap;
+      color: var(--fuchsia); white-space: nowrap;
     }
 
     /* ══════════════════════════════════════════
        LIKES GRID
     ══════════════════════════════════════════ */
     #likesGrid {
-      display: grid;
+      display: none;
       grid-template-columns: repeat(3, 1fr);
       gap: 5px;
       padding: 0 10px;
@@ -167,7 +164,7 @@
     /* ── CARD ── */
     .like-card {
       position: relative;
-      aspect-ratio: 3/4;
+      aspect-ratio: 3 / 4;
       border-radius: var(--r-sm);
       overflow: hidden;
       cursor: pointer;
@@ -175,6 +172,7 @@
       border: 1px solid rgba(255,0,85,.12);
       transition: transform .18s, border-color .2s, box-shadow .2s;
       animation: cardIn .3s ease both;
+      -webkit-tap-highlight-color: transparent;
     }
     .like-card:hover {
       transform: scale(1.03) translateY(-2px);
@@ -189,16 +187,18 @@
       to   { opacity: 1; transform: scale(1)   translateY(0); }
     }
 
+    /* Foto o placeholder SVG */
     .card-photo {
+      position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover; display: block;
     }
     .card-photo-ph {
-      width: 100%; height: 100%;
+      position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 2.8rem;
       background: linear-gradient(160deg, #1e1035 0%, #0d0616 100%);
     }
+    .card-photo-ph svg { width: 55%; height: 55%; }
 
     /* Gradient overlay */
     .card-overlay {
@@ -207,9 +207,10 @@
         rgba(0,0,0,.85) 0%,
         rgba(0,0,0,.25) 45%,
         transparent    100%);
+      pointer-events: none;
     }
 
-    /* Heart glow badge */
+    /* Heart badge */
     .card-heart {
       position: absolute; top: 6px; right: 6px;
       width: 26px; height: 26px;
@@ -229,9 +230,8 @@
     /* Online dot */
     .card-online {
       position: absolute; top: 6px; left: 6px;
-      width: 9px; height: 9px;
+      width: 9px; height: 9px; border-radius: 50%;
       background: var(--green);
-      border-radius: 50%;
       border: 2px solid rgba(13,6,22,.8);
       box-shadow: 0 0 6px var(--green);
     }
@@ -239,38 +239,39 @@
     /* Info footer */
     .card-info {
       position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 6px 7px;
+      padding: 6px 7px; z-index: 1;
     }
     .card-name {
       font-size: .78rem; font-weight: 700;
       color: #fff;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      text-shadow: 0 1px 5px rgba(0,0,0,.9);
-      line-height: 1.2;
+      text-shadow: 0 1px 5px rgba(0,0,0,.9); line-height: 1.2;
     }
     .card-meta {
       font-family: 'Orbitron', monospace;
       font-size: .55rem; font-weight: 600;
-      color: rgba(255,255,255,.5);
-      margin-top: 2px;
-      letter-spacing: .04em;
+      color: rgba(255,255,255,.5); margin-top: 2px; letter-spacing: .04em;
     }
-
-    /* Timestamp pill */
     .card-ts {
       position: absolute; bottom: 6px; right: 7px;
       font-family: 'Orbitron', monospace;
       font-size: .5rem; font-weight: 700;
-      color: rgba(255,0,85,.7);
-      letter-spacing: .04em;
+      color: rgba(255,0,85,.7); letter-spacing: .04em;
     }
 
     /* ══════════════════════════════════════════
        SKELETON LOADER
     ══════════════════════════════════════════ */
+    #skeletonGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px; padding: 0 10px;
+    }
+    @media (min-width: 480px) { #skeletonGrid { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 720px) { #skeletonGrid { grid-template-columns: repeat(5, 1fr); } }
+
     .skel-card {
-      aspect-ratio: 3/4;
-      border-radius: var(--r-sm);
+      aspect-ratio: 3 / 4; border-radius: var(--r-sm);
       background: linear-gradient(90deg,
         rgba(138,43,226,.06) 0%,
         rgba(138,43,226,.13) 50%,
@@ -286,20 +287,14 @@
     ══════════════════════════════════════════ */
     #emptyState {
       display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 70px 28px;
-      gap: 18px;
-      text-align: center;
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 70px 28px; gap: 18px; text-align: center;
     }
     .empty-icon-wrap {
-      width: 80px; height: 80px;
-      border-radius: 50%;
+      width: 80px; height: 80px; border-radius: 50%;
       background: rgba(255,0,85,.08);
       border: 1px solid rgba(255,0,85,.22);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.2rem;
+      display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
       box-shadow: 0 0 30px rgba(255,0,85,.15);
       animation: emptyPulse 3s ease-in-out infinite;
     }
@@ -309,46 +304,30 @@
     }
     .empty-title {
       font-family: 'Orbitron', monospace;
-      font-size: .92rem; font-weight: 700;
-      letter-spacing: .06em;
-      color: var(--text-2);
+      font-size: .92rem; font-weight: 700; letter-spacing: .06em; color: var(--text-2);
     }
     .empty-sub {
       font-size: .85rem; font-weight: 500;
-      color: var(--text-3);
-      line-height: 1.6;
-      max-width: 260px;
+      color: var(--text-3); line-height: 1.6; max-width: 260px;
     }
     .empty-cta {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 10px 22px;
-      background: rgba(255,0,85,.1);
-      border: 1px solid rgba(255,0,85,.3);
-      border-radius: 22px;
-      font-size: .82rem; font-weight: 700;
-      letter-spacing: .08em;
-      color: var(--fuchsia);
-      text-decoration: none;
+      background: rgba(255,0,85,.1); border: 1px solid rgba(255,0,85,.3);
+      border-radius: 22px; font-size: .82rem; font-weight: 700;
+      letter-spacing: .08em; color: var(--fuchsia); text-decoration: none;
       transition: background .2s, box-shadow .2s;
     }
-    .empty-cta:hover {
-      background: rgba(255,0,85,.2);
-      box-shadow: 0 0 14px rgba(255,0,85,.3);
-    }
+    .empty-cta:hover { background: rgba(255,0,85,.2); box-shadow: 0 0 14px rgba(255,0,85,.3); }
 
     /* ══════════════════════════════════════════
        AUTH GATE
     ══════════════════════════════════════════ */
     #authGate {
       display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      gap: 14px;
-      color: var(--text-2);
-      text-align: center;
-      padding: 20px;
+      flex-direction: column; align-items: center; justify-content: center;
+      min-height: 60vh; gap: 14px; color: var(--text-2);
+      text-align: center; padding: 20px;
     }
     #authGate i { font-size: 3rem; color: var(--purple); opacity: .5; }
 
@@ -357,18 +336,14 @@
     ══════════════════════════════════════════ */
     #toast {
       position: fixed;
-      bottom: calc(var(--nav-h) + 16px);
-      left: 50%; transform: translateX(-50%) translateY(8px);
+      bottom: calc(var(--nav-h) + 16px); left: 50%;
+      transform: translateX(-50%) translateY(8px);
       background: rgba(19,9,32,.97);
       border: 1px solid rgba(138,43,226,.5);
-      border-radius: var(--r-sm);
-      padding: 10px 18px;
-      font-size: .84rem; font-weight: 600;
-      color: var(--text);
-      box-shadow: var(--glow-p);
-      backdrop-filter: blur(14px);
-      z-index: 9999;
-      white-space: nowrap;
+      border-radius: var(--r-sm); padding: 10px 18px;
+      font-size: .84rem; font-weight: 600; color: var(--text);
+      box-shadow: var(--glow-p); backdrop-filter: blur(14px);
+      z-index: 9999; white-space: nowrap;
       opacity: 0; pointer-events: none;
       transition: opacity .25s, transform .25s;
     }
@@ -388,26 +363,21 @@
       padding-bottom: env(safe-area-inset-bottom, 0);
     }
     .nav-item {
-      flex: 1;
-      display: flex; flex-direction: column;
+      flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 4px;
-      cursor: pointer;
-      position: relative;
-      text-decoration: none;
-      transition: opacity .2s;
+      gap: 4px; cursor: pointer; position: relative;
+      text-decoration: none; transition: opacity .2s;
+      -webkit-tap-highlight-color: transparent;
     }
     .nav-item:active { opacity: .6; }
     .nav-item i {
-      font-size: 1.22rem;
-      color: var(--text-3);
+      font-size: 1.22rem; color: var(--text-3);
       transition: color .25s, filter .25s, transform .25s;
     }
     .nav-item span {
       font-size: .6rem; font-weight: 700;
       letter-spacing: .1em; text-transform: uppercase;
-      color: var(--text-3);
-      transition: color .25s;
+      color: var(--text-3); transition: color .25s;
     }
     .nav-item.active i {
       color: var(--purple-hi);
@@ -416,7 +386,7 @@
     }
     .nav-item.active span { color: var(--purple-hi); }
 
-    /* ── FUCHSIA NEON STATE (unread messages) ── */
+    /* Fuchsia neon — unread messages */
     .nav-item i.has-notif {
       color: var(--magenta) !important;
       filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.5)) !important;
@@ -427,23 +397,16 @@
       50%     { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff); }
     }
 
-    /* ── BADGE COUNTER ── */
+    /* Badge counter */
     .badge-counter {
-      position: absolute;
-      top: 7px;
-      /* Center relative to the icon — offset slightly right */
-      left: calc(50% + 4px);
-      min-width: 17px; height: 17px;
-      background: var(--magenta);
-      border: 2px solid var(--bg);
+      position: absolute; top: 7px; left: calc(50% + 4px);
+      min-width: 17px; height: 17px; padding: 0 3px;
+      background: var(--magenta); border: 2px solid var(--bg);
       border-radius: 10px;
-      padding: 0 3px;
       font-family: 'Urbanist', sans-serif;
-      font-size: .58rem; font-weight: 900;
-      color: #fff;
+      font-size: .58rem; font-weight: 900; color: #fff;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 10px rgba(255,0,255,.85);
-      pointer-events: none;
+      box-shadow: 0 0 10px rgba(255,0,255,.85); pointer-events: none;
       animation: badgePop .3s cubic-bezier(.36,.07,.19,.97) both;
     }
     @keyframes badgePop {
@@ -461,7 +424,7 @@
   <div class="topbar">
     <span class="topbar-logo">KINETIC</span>
     <span class="topbar-title">Likes</span>
-    <div class="topbar-count" id="topbarCount" style="display:none">
+    <div class="topbar-count" id="topbarCount">
       <i class="fa-solid fa-heart"></i>
       <span id="topbarNum">0</span>
     </div>
@@ -470,25 +433,22 @@
   <!-- SECTION LABEL -->
   <div class="section-label"><span>❤ Personas que te dieron like</span></div>
 
-  <!-- SKELETON PLACEHOLDERS (shown while loading) -->
-  <div id="skeletonGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:0 10px">
-    <div class="skel-card"></div>
-    <div class="skel-card"></div>
-    <div class="skel-card"></div>
-    <div class="skel-card"></div>
-    <div class="skel-card"></div>
-    <div class="skel-card"></div>
+  <!-- SKELETON -->
+  <div id="skeletonGrid">
+    <div class="skel-card"></div><div class="skel-card"></div>
+    <div class="skel-card"></div><div class="skel-card"></div>
+    <div class="skel-card"></div><div class="skel-card"></div>
   </div>
 
-  <!-- LIKES GRID (populated by JS) -->
-  <div id="likesGrid" style="display:none"></div>
+  <!-- LIKES GRID -->
+  <div id="likesGrid"></div>
 
   <!-- EMPTY STATE -->
   <div id="emptyState">
     <div class="empty-icon-wrap">💔</div>
     <div class="empty-title">Sin likes todavía</div>
-    <div class="empty-sub">Aún no tienes likes acumulados.<br/>¡Sigue interactuando en el Radar!</div>
-    <a class="empty-cta" href="index.html">
+    <div class="empty-sub">Aún no tienes likes.<br/>¡Sigue interactuando en el Radar!</div>
+    <a class="empty-cta" href="radar.html">
       <i class="fa-solid fa-location-crosshairs"></i> Ir al Radar
     </a>
   </div>
@@ -507,7 +467,7 @@
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <a class="nav-item" href="index.html">
+  <a class="nav-item" href="radar.html">
     <i class="fa-solid fa-location-crosshairs"></i>
     <span>Radar</span>
   </a>
@@ -525,368 +485,468 @@
   </a>
 </nav>
 
-<!-- ══════════════════════════════════════════
-     FIREBASE SDK v10 modular CDN
-══════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════
+     ÚNICO <script type="module"> — Firebase SDK v10.14.1
+══════════════════════════════════════════════════════ -->
 <script type="module">
-import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, get, onValue, off, query, orderByChild }
-  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-/* ─────────────────────────────────
-   CONFIG
-───────────────────────────────── */
-const firebaseConfig = {
-  apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-  authDomain:        "kinetic-app-67ae5.firebaseapp.com",
-  databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-  projectId:         "kinetic-app-67ae5",
-  storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
-  messagingSenderId: "825570718975",
-  appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-};
+  /* ── A) IMPORTS — v10.14.1 ── */
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getDatabase, ref, get, onValue, off }
+    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-const firebaseApp = initializeApp(firebaseConfig);
-const auth        = getAuth(firebaseApp);
-const db          = getDatabase(firebaseApp);
+  /* ── B) CONFIGURACIÓN FIREBASE ── */
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
+    authDomain:        "kinetic-app-67ae5.firebaseapp.com",
+    databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
+    projectId:         "kinetic-app-67ae5",
+    storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
+    messagingSenderId: "825570718975",
+    appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
+  };
 
-/* ─────────────────────────────────
-   STATE
-───────────────────────────────── */
-let currentUser     = null;
-let likesUnsub      = null;   // unsubscribe handle for recibidos listener
-let notifUnsub      = null;   // unsubscribe handle for chats listener
-let renderVersion   = 0;      // used to discard stale async batches
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getDatabase(app);
 
-/* ─────────────────────────────────
-   TOAST
-───────────────────────────────── */
-let _toastTimer = null;
-function showToast(msg, isError = false) {
-  const el = document.getElementById('toast');
-  el.textContent = isError ? `⚠  ${msg}` : `✓  ${msg}`;
-  el.style.borderColor = isError ? 'rgba(255,34,85,.55)' : 'rgba(138,43,226,.55)';
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
-}
+  /* ── C) SVG FALLBACK CYBERPUNK ──
+     Usado como innerHTML cuando no hay foto o la imagen falla.
+     Nunca deja un <img> roto ni un contenedor vacío.
+  ────────────────────────────────── */
+  const AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style="width:55%;height:55%;stroke:#ff00ff;stroke-width:1.5;
+           stroke-linecap:round;stroke-linejoin:round;">
+    <circle cx="12" cy="8" r="4"/>
+    <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+  </svg>`;
 
-/* ─────────────────────────────────
-   AUTH GATE
-───────────────────────────────── */
-function initAuth() {
+  /* ── D) ESTADO DEL MÓDULO ── */
+  let currentUser   = null;   // usuario autenticado
+  let likesUnsub    = null;   // unsubscribe del listener recibidos/
+  let chatsUnsub    = null;   // unsubscribe del listener chats/
+  let renderVersion = 0;      // guard contra renders obsoletos
+
+  /* ── E) REFS DOM ── */
+  const $skeleton    = document.getElementById('skeletonGrid');
+  const $grid        = document.getElementById('likesGrid');
+  const $empty       = document.getElementById('emptyState');
+  const $authGate    = document.getElementById('authGate');
+  const $topbarCount = document.getElementById('topbarCount');
+  const $topbarNum   = document.getElementById('topbarNum');
+  const $toast       = document.getElementById('toast');
+  const $navChatIcon = document.getElementById('navChatIcon');
+  const $navChats    = document.getElementById('navChats');
+
+  /* ── F) HELPERS ── */
+
+  /** Escapa texto para inserción segura en HTML */
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /** Valida si una cadena es una URL HTTP/S real y usable */
+  function isValidUrl(raw) {
+    if (typeof raw !== 'string') return false;
+    const t = raw.trim();
+    return t.length > 12 && /^https?:\/\/.{5,}/.test(t);
+  }
+
+  /**
+   * Primera foto válida de un perfil.
+   * Compatible con TODOS los esquemas del ecosistema Kinetic:
+   * album[], photos[], profilePic, foto.
+   */
+  function firstValidPhoto(data) {
+    if (!data || typeof data !== 'object') return null;
+    const sources = [
+      ...(Array.isArray(data.album)  ? data.album  : []),
+      ...(Array.isArray(data.photos) ? data.photos : []),
+      data.profilePic ? [data.profilePic] : [],
+      data.foto       ? [data.foto]        : [],
+    ].flat();
+    for (const u of sources) {
+      if (isValidUrl(u)) return u.trim();
+    }
+    return null;
+  }
+
+  /** Nombre seguro con fallback */
+  function resolveName(data) {
+    if (!data || typeof data !== 'object') return 'Usuario';
+    return (data.nombre || data.name || data.displayName || 'Usuario').trim() || 'Usuario';
+  }
+
+  /** Tiempo relativo legible */
+  function relTime(ts) {
+    if (!ts) return '';
+    const d = Date.now() - ts;
+    if (d < 60_000)      return 'ahora';
+    if (d < 3_600_000)   return `${Math.floor(d / 60_000)}m`;
+    if (d < 86_400_000)  return `${Math.floor(d / 3_600_000)}h`;
+    if (d < 604_800_000) return `${Math.floor(d / 86_400_000)}d`;
+    return new Date(ts).toLocaleDateString('es', { day: '2-digit', month: '2-digit' });
+  }
+
+  /* Toast de notificación */
+  let _toastTimer = null;
+  function showToast(msg, isError = false) {
+    $toast.textContent  = isError ? `⚠  ${msg}` : `✓  ${msg}`;
+    $toast.style.borderColor = isError
+      ? 'rgba(255,34,85,.55)'
+      : 'rgba(138,43,226,.55)';
+    $toast.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => $toast.classList.remove('show'), 3000);
+  }
+
+  /* Oculta los skeletons una sola vez */
+  function hideSkeleton() {
+    if ($skeleton) $skeleton.style.display = 'none';
+  }
+
+  /* ── G) AUTENTICACIÓN — punto de entrada ── */
   onAuthStateChanged(auth, user => {
     if (user) {
       currentUser = user;
-      hideSkeleton();          // keep skeleton until real data arrives
+      hideSkeleton();
       startLikesListener();
-      startNotifListener();
+      startChatsListener();
     } else {
       hideSkeleton();
-      document.getElementById('authGate').style.display = 'flex';
+      $authGate.style.display = 'flex';
     }
   });
-}
 
-/* ─────────────────────────────────
-   HIDE SKELETON
-───────────────────────────────── */
-function hideSkeleton() {
-  const sk = document.getElementById('skeletonGrid');
-  if (sk) sk.style.display = 'none';
-}
+  /* ── H) LISTENER EN TIEMPO REAL — recibidos/${miUid} ──
+     Schema: recibidos/{miUid}/{fanUid} = true | { ts: timestamp }
+  ────────────────────────────────────────────────────── */
+  function startLikesListener() {
+    const likesRef = ref(db, `recibidos/${currentUser.uid}`);
+    if (likesUnsub) off(likesRef);
 
-/* ─────────────────────────────────
-   LIKES REAL-TIME LISTENER
-   Node: recibidos/{miUid}
-   Schema assumed:
-     recibidos/{miUid}/{fanUid} = { ts: <timestamp> }
-───────────────────────────────── */
-function startLikesListener() {
-  if (likesUnsub) off(ref(db, `recibidos/${currentUser.uid}`));
+    likesUnsub = onValue(likesRef, async snap => {
+      const version = ++renderVersion; // guard contra renders obsoletos
 
-  const likesRef = ref(db, `recibidos/${currentUser.uid}`);
+      hideSkeleton();
 
-  likesUnsub = onValue(likesRef, async snapshot => {
-    // Bump version so any in-flight previous render is discarded
-    const version = ++renderVersion;
-
-    hideSkeleton();
-
-    if (!snapshot.exists()) {
-      showEmptyState();
-      return;
-    }
-
-    // Collect { fanUid, ts } entries
-    const entries = [];
-    snapshot.forEach(child => {
-      const val = child.val();
-      entries.push({
-        fanUid: child.key,
-        ts: (typeof val === 'object' && val !== null && val.ts) ? val.ts : (typeof val === 'number' ? val : 0)
-      });
-    });
-
-    // Sort newest first
-    entries.sort((a, b) => b.ts - a.ts);
-
-    // Update topbar count immediately
-    updateTopbarCount(entries.length);
-
-    // Fetch all user profiles concurrently — no sequential blocking
-    let profiles;
-    try {
-      profiles = await fetchProfilesBatch(entries.map(e => e.fanUid));
-    } catch (err) {
-      showToast('Error al cargar perfiles.', true);
-      console.error('[fetchProfilesBatch]', err);
-      return;
-    }
-
-    // Guard: discard if a newer render has started
-    if (version !== renderVersion) return;
-
-    // Merge ts back in
-    const cards = entries.map(e => ({
-      ...profiles[e.fanUid],
-      uid: e.fanUid,
-      ts:  e.ts
-    }));
-
-    renderGrid(cards);
-  }, err => {
-    hideSkeleton();
-    showToast('Error al escuchar likes.', true);
-    console.error('[likesListener]', err);
-  });
-}
-
-/* ─────────────────────────────────
-   BATCH PROFILE FETCH
-   Returns a map: { uid: profileData }
-   Uses Promise.allSettled so one
-   missing user never blocks others.
-───────────────────────────────── */
-async function fetchProfilesBatch(uids) {
-  const results = await Promise.allSettled(
-    uids.map(uid => get(ref(db, `users/${uid}`)))
-  );
-
-  const map = {};
-  results.forEach((result, i) => {
-    const uid = uids[i];
-    if (result.status === 'fulfilled' && result.value.exists()) {
-      map[uid] = result.value.val();
-    } else {
-      // Fallback so the card still renders with minimal info
-      map[uid] = { uid, nombre: 'Usuario', name: 'Usuario', album: [], photos: [] };
-    }
-  });
-  return map;
-}
-
-/* ─────────────────────────────────
-   RENDER GRID
-───────────────────────────────── */
-function renderGrid(cards) {
-  const grid = document.getElementById('likesGrid');
-  const empty = document.getElementById('emptyState');
-
-  if (!cards || cards.length === 0) {
-    grid.style.display = 'none';
-    empty.style.display = 'flex';
-    return;
-  }
-
-  empty.style.display  = 'none';
-  grid.style.display   = 'grid';
-  grid.innerHTML       = '';
-
-  cards.forEach((card, idx) => {
-    const el = buildCard(card, idx);
-    grid.appendChild(el);
-  });
-}
-
-/* ─────────────────────────────────
-   BUILD SINGLE CARD
-───────────────────────────────── */
-function buildCard(data, idx) {
-  const uid    = data.uid;
-  const name   = data.nombre || data.name || 'Desconocido';
-  const age    = data.edad   || data.age  || '';
-  const online = data.online === true;
-  const gender = data.genero || data.gender || '';
-
-  // Photo: check both 'album' (perfil.html convention) and 'photos' (index.html convention)
-  const photoUrl = getFirstPhoto(data);
-
-  const card = document.createElement('div');
-  card.className = 'like-card';
-  card.style.animationDelay = `${Math.min(idx * 0.04, 0.6)}s`;
-
-  const photoHTML = photoUrl
-    ? `<img class="card-photo" src="${escHtml(photoUrl)}" alt="${escHtml(name)}"
-           loading="lazy"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-       <div class="card-photo-ph" style="display:none">👤</div>`
-    : `<div class="card-photo-ph">👤</div>`;
-
-  const onlineHTML = online
-    ? `<div class="card-online" title="En línea"></div>` : '';
-
-  const metaLine = [age ? `${age} años` : '', gender].filter(Boolean).join(' · ');
-
-  card.innerHTML = `
-    ${photoHTML}
-    <div class="card-overlay"></div>
-    ${onlineHTML}
-    <div class="card-heart">❤</div>
-    <div class="card-info">
-      <div class="card-name">${escHtml(name)}</div>
-      ${metaLine ? `<div class="card-meta">${escHtml(metaLine)}</div>` : ''}
-    </div>
-    ${data.ts ? `<div class="card-ts">${formatRelTime(data.ts)}</div>` : ''}
-  `;
-
-  card.addEventListener('click', () => openProfile(uid));
-  return card;
-}
-
-/* ─────────────────────────────────
-   OPEN PROFILE  →  perfil-detalle.html
-───────────────────────────────── */
-function openProfile(uid) {
-  try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
-  window.location.href = 'perfil-detalle.html';
-}
-
-/* ─────────────────────────────────
-   EMPTY STATE
-───────────────────────────────── */
-function showEmptyState() {
-  document.getElementById('likesGrid').style.display = 'none';
-  document.getElementById('emptyState').style.display = 'flex';
-  updateTopbarCount(0);
-}
-
-/* ─────────────────────────────────
-   TOPBAR COUNT
-───────────────────────────────── */
-function updateTopbarCount(n) {
-  const wrap = document.getElementById('topbarCount');
-  const num  = document.getElementById('topbarNum');
-  if (n > 0) {
-    num.textContent = n;
-    wrap.style.display = 'flex';
-  } else {
-    wrap.style.display = 'none';
-  }
-}
-
-/* ─────────────────────────────────
-   GLOBAL NOTIFICATIONS — chats node
-   Strategy A: chats/{id}.lastInfo.unreadTarget === miUid
-   Strategy B: messages with unread===true & senderId !== miUid
-───────────────────────────────── */
-function startNotifListener() {
-  if (!currentUser) return;
-  const chatsRef  = ref(db, 'chats');
-  const iconEl    = document.getElementById('navChatIcon');
-  const navItem   = document.getElementById('navChats');
-
-  if (notifUnsub) off(chatsRef);
-
-  notifUnsub = onValue(chatsRef, snapshot => {
-    let pending = 0;
-
-    snapshot.forEach(chatSnap => {
-      const chat = chatSnap.val();
-      if (!chat) return;
-
-      // Strategy A — fast path
-      if (chat.lastInfo?.unreadTarget === currentUser.uid) {
-        pending++;
+      if (!snap.exists()) {
+        showEmpty();
         return;
       }
 
-      // Strategy B — scan participants + messages
-      const parts = chat.participants || {};
-      if (!parts[currentUser.uid]) return;
-
-      const msgs = chat.messages || {};
-      let hasUnread = false;
-      Object.values(msgs).forEach(m => {
-        if (m?.senderId !== currentUser.uid && m?.unread === true) {
-          hasUnread = true;
-        }
+      /* Recopilar entradas { fanUid, ts } */
+      const entries = [];
+      snap.forEach(child => {
+        const val = child.val();
+        let ts = 0;
+        if (val && typeof val === 'object' && val.ts) ts = val.ts;
+        else if (typeof val === 'number') ts = val;
+        entries.push({ fanUid: child.key, ts });
       });
-      if (hasUnread) pending++;
+
+      /* Ordenar más reciente primero */
+      entries.sort((a, b) => b.ts - a.ts);
+
+      /* Actualizar contador del topbar de inmediato */
+      updateTopbarCount(entries.length);
+
+      /* Cargar todos los perfiles en paralelo */
+      let profiles;
+      try {
+        profiles = await fetchProfilesBatch(entries.map(e => e.fanUid));
+      } catch (err) {
+        console.error('[Kinetic - likes] Error fetchProfilesBatch:', err);
+        showToast('Error al cargar perfiles.', true);
+        return;
+      }
+
+      /* Guard: descartar si llegó un render más nuevo */
+      if (version !== renderVersion) return;
+
+      /* Mezclar ts en el perfil */
+      const cards = entries.map(e => ({
+        ...profiles[e.fanUid],
+        uid: e.fanUid,
+        ts : e.ts
+      }));
+
+      renderGrid(cards);
+
+    }, err => {
+      console.error('[Kinetic - likes] Error listener recibidos:', err);
+      hideSkeleton();
+      showToast('Error al escuchar likes.', true);
     });
+  }
 
-    updateNavBadge(pending, iconEl, navItem);
+  /* ── I) CARGA BATCH DE PERFILES ──
+     Usa Promise.allSettled para que un perfil faltante
+     no bloquee el resto. Fallback seguro si no existe.
+  ────────────────────────────────── */
+  async function fetchProfilesBatch(uids) {
+    const results = await Promise.allSettled(
+      uids.map(uid => get(ref(db, `users/${uid}`)))
+    );
+    const map = {};
+    results.forEach((res, i) => {
+      const uid = uids[i];
+      if (res.status === 'fulfilled' && res.value.exists()) {
+        map[uid] = res.value.val();
+      } else {
+        /* Fallback: la tarjeta se renderiza sin foto con nombre por defecto */
+        map[uid] = { uid, nombre: 'Usuario', album: [], photos: [] };
+        if (res.status === 'rejected') {
+          console.error(`[Kinetic - likes] No se pudo cargar users/${uid}:`, res.reason);
+        }
+      }
+    });
+    return map;
+  }
+
+  /* ── J) RENDERIZAR GRID ── */
+  function renderGrid(cards) {
+    if (!cards || cards.length === 0) {
+      showEmpty();
+      return;
+    }
+
+    $empty.style.display = 'none';
+    $grid.style.display  = 'grid';
+    $grid.innerHTML      = '';
+
+    const fragment = document.createDocumentFragment();
+    cards.forEach((card, idx) => {
+      fragment.appendChild(buildCard(card, idx));
+    });
+    $grid.appendChild(fragment);
+  }
+
+  /* ── K) CONSTRUIR TARJETA INDIVIDUAL ── */
+  function buildCard(data, idx) {
+    const uid      = data.uid || '';
+    const name     = resolveName(data);
+    const age      = data.edad || data.age || null;
+    const gender   = data.genero || data.gender || null;
+    const online   = data.online === true;
+    const photoUrl = firstValidPhoto(data);
+    const time     = relTime(data.ts);
+
+    const card = document.createElement('div');
+    card.className = 'like-card';
+    card.style.animationDelay = `${Math.min(idx * 0.04, 0.6)}s`;
+
+    /* ── Foto o SVG placeholder ────────────────────
+       Si hay URL válida → <img> con onerror que
+       reemplaza el nodo con el SVG cyberpunk.
+       Si no hay foto → SVG directo, sin petición de red.
+    ─────────────────────────────────────────────── */
+    if (photoUrl) {
+      const img     = document.createElement('img');
+      img.className = 'card-photo';
+      img.src       = photoUrl;
+      img.alt       = name;
+      img.loading   = 'lazy';
+      /* onerror: reemplaza el <img> con la capa placeholder + SVG */
+      img.addEventListener('error', () => {
+        img.remove();
+        const ph = document.createElement('div');
+        ph.className = 'card-photo-ph';
+        ph.innerHTML = AVATAR_SVG;
+        card.insertBefore(ph, card.firstChild);
+      });
+      card.appendChild(img);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 'card-photo-ph';
+      ph.innerHTML = AVATAR_SVG;
+      card.appendChild(ph);
+    }
+
+    /* Overlay degradado */
+    const overlay = document.createElement('div');
+    overlay.className = 'card-overlay';
+    card.appendChild(overlay);
+
+    /* Indicador online */
+    if (online) {
+      const dot = document.createElement('div');
+      dot.className = 'card-online';
+      dot.title     = 'En línea';
+      card.appendChild(dot);
+    }
+
+    /* Badge de corazón */
+    const heart = document.createElement('div');
+    heart.className   = 'card-heart';
+    heart.textContent = '❤';
+    card.appendChild(heart);
+
+    /* Info: nombre + meta */
+    const info = document.createElement('div');
+    info.className = 'card-info';
+
+    const nameEl = document.createElement('div');
+    nameEl.className   = 'card-name';
+    nameEl.textContent = name; // textContent → anti-XSS
+
+    info.appendChild(nameEl);
+
+    /* Línea de meta: edad · género */
+    const metaParts = [
+      age    ? `${age} años`  : null,
+      gender ? String(gender) : null
+    ].filter(Boolean);
+
+    if (metaParts.length > 0) {
+      const meta = document.createElement('div');
+      meta.className   = 'card-meta';
+      meta.textContent = metaParts.join(' · ');
+      info.appendChild(meta);
+    }
+
+    card.appendChild(info);
+
+    /* Timestamp */
+    if (time) {
+      const ts = document.createElement('div');
+      ts.className   = 'card-ts';
+      ts.textContent = time;
+      card.appendChild(ts);
+    }
+
+    /* Click → perfil-detalle.html */
+    card.addEventListener('click', () => openProfile(uid));
+
+    return card;
+  }
+
+  /* ── L) ABRIR PERFIL ── */
+  function openProfile(uid) {
+    if (!uid) return;
+    try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
+    window.location.href = `perfil-detalle.html?id=${encodeURIComponent(uid)}`;
+  }
+
+  /* ── M) ESTADO VACÍO ── */
+  function showEmpty() {
+    $grid.style.display  = 'none';
+    $empty.style.display = 'flex';
+    updateTopbarCount(0);
+  }
+
+  /* ── N) ACTUALIZAR CONTADOR TOPBAR ── */
+  function updateTopbarCount(n) {
+    if (n > 0) {
+      $topbarNum.textContent   = n;
+      $topbarCount.style.display = 'flex';
+    } else {
+      $topbarCount.style.display = 'none';
+    }
+  }
+
+  /* ── O) BADGE GLOBAL DE MENSAJES SIN LEER ──
+     Listener en tiempo real sobre el nodo chats/.
+     Estrategia A: lastInfo.unreadTarget === miUid  (fast path)
+     Estrategia B: scan messages[].unread === true  (fallback)
+
+     BLINDAJE ANTIFREEZES:
+     · Valida que sala exista y sea objeto antes de acceder a propiedades
+     · Nunca accede a .lastInfo sin verificar que existe
+  ──────────────────────────────────────────── */
+  function startChatsListener() {
+    if (!currentUser) return;
+
+    const chatsRef = ref(db, 'chats');
+    if (chatsUnsub) off(chatsRef);
+
+    chatsUnsub = onValue(chatsRef, snap => {
+      /* Guard: el usuario puede haber cerrado sesión */
+      if (!currentUser) return;
+
+      let pending = 0;
+
+      if (snap.exists()) {
+        snap.forEach(chatSnap => {
+          /* ── Capa 1: la sala existe y es objeto ── */
+          const sala = chatSnap.val();
+          if (!sala || typeof sala !== 'object') return;
+
+          /* ── Capa 2: verificar membresía ── */
+          const inId    = chatSnap.key.split('_').includes(currentUser.uid);
+          const inParts = sala.participants?.[currentUser.uid] === true;
+          if (!inId && !inParts) return;
+
+          /* ── Capa 3A: lastInfo (fast path) ── */
+          if (sala.lastInfo
+              && typeof sala.lastInfo === 'object'
+              && sala.lastInfo.unreadTarget === currentUser.uid) {
+            pending++;
+            return;
+          }
+
+          /* ── Capa 3B: scan de mensajes (fallback) ── */
+          const msgs = sala.messages;
+          if (!msgs || typeof msgs !== 'object') return;
+          const hasUnread = Object.values(msgs).some(m =>
+            m && typeof m === 'object'
+            && m.senderId !== currentUser.uid
+            && m.unread === true
+          );
+          if (hasUnread) pending++;
+        });
+      }
+
+      updateNavBadge(pending);
+
+    }, err => {
+      console.error('[Kinetic - likes] Error listener chats:', err);
+    });
+  }
+
+  /* ── P) ACTUALIZAR BADGE EN NAV ── */
+  function updateNavBadge(count) {
+    /* Limpiar badge anterior */
+    $navChats.querySelectorAll('.badge-counter').forEach(b => b.remove());
+
+    if (count > 0) {
+      $navChatIcon.classList.add('has-notif');
+      const badge = document.createElement('div');
+      badge.className   = 'badge-counter';
+      badge.textContent = count > 9 ? '9+' : String(count);
+      $navChats.appendChild(badge);
+    } else {
+      $navChatIcon.classList.remove('has-notif');
+    }
+  }
+
+  /* ── Q) LIMPIEZA DE LISTENERS AL SALIR ──
+     Previene memory leaks y listeners huérfanos
+     que consumen ancho de banda en segundo plano.
+  ────────────────────────────────────────── */
+  window.addEventListener('pagehide', () => {
+    try {
+      if (currentUser && likesUnsub) {
+        off(ref(db, `recibidos/${currentUser.uid}`));
+      }
+    } catch (err) {
+      console.error('[Kinetic - likes] Error limpiando likesUnsub:', err);
+    }
+    try {
+      if (chatsUnsub) {
+        off(ref(db, 'chats'));
+      }
+    } catch (err) {
+      console.error('[Kinetic - likes] Error limpiando chatsUnsub:', err);
+    }
   });
-}
 
-/* ─────────────────────────────────
-   UPDATE NAV BADGE
-───────────────────────────────── */
-function updateNavBadge(count, iconEl, navItemEl) {
-  // Remove stale badge
-  navItemEl.querySelectorAll('.badge-counter').forEach(b => b.remove());
-
-  if (count > 0) {
-    iconEl.classList.add('has-notif');
-    const badge = document.createElement('div');
-    badge.className  = 'badge-counter';
-    badge.textContent = count > 9 ? '9+' : String(count);
-    navItemEl.appendChild(badge);
-  } else {
-    iconEl.classList.remove('has-notif');
-  }
-}
-
-/* ─────────────────────────────────
-   HELPERS
-───────────────────────────────── */
-function getFirstPhoto(data) {
-  if (Array.isArray(data.album) && data.album.length > 0) {
-    return data.album.find(u => u && u.trim()) || '';
-  }
-  if (Array.isArray(data.photos) && data.photos.length > 0) {
-    return data.photos.find(u => u && u.trim()) || '';
-  }
-  return '';
-}
-
-function escHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,  '&amp;')
-    .replace(/</g,  '&lt;')
-    .replace(/>/g,  '&gt;')
-    .replace(/"/g,  '&quot;')
-    .replace(/'/g,  '&#39;');
-}
-
-function formatRelTime(ts) {
-  if (!ts) return '';
-  const diff = Date.now() - ts;
-  if (diff < 60_000)        return 'ahora';
-  if (diff < 3_600_000)     return `${Math.floor(diff / 60_000)}m`;
-  if (diff < 86_400_000)    return `${Math.floor(diff / 3_600_000)}h`;
-  if (diff < 604_800_000)   return `${Math.floor(diff / 86_400_000)}d`;
-  return new Date(ts).toLocaleDateString('es', { day: '2-digit', month: '2-digit' });
-}
-
-/* ─────────────────────────────────
-   BOOT
-───────────────────────────────── */
-initAuth();
 </script>
 </body>
 </html>
