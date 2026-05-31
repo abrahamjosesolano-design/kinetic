@@ -15,7 +15,7 @@
 
   <style>
     /* ═══════════════════════════════════════
-       TOKENS
+       DESIGN TOKENS
     ═══════════════════════════════════════ */
     :root {
       --bg:        #0d0616;
@@ -327,7 +327,7 @@
       .logo-ring { width: 64px; height: 64px; }
       .logo-icon { font-size: 1.7rem; }
       .app-title { font-size: 1.75rem; }
-      .app-desc { display: none; }
+      .app-desc  { display: none; }
       #page { gap: 18px; padding-top: 18px; }
     }
     @media (max-width: 360px) {
@@ -429,10 +429,9 @@
         <label>Género</label>
         <select id="regGenero">
           <option value="">Selecciona tu género</option>
-          <option value="Masculino">Masculino</option>
-          <option value="Femenino">Femenino</option>
-          <option value="No binario">No binario</option>
-          <option value="Otro">Otro</option>
+          <option value="male">Masculino</option>
+          <option value="female">Femenino</option>
+          <option value="other">No binario / Otro</option>
         </select>
       </div>
 
@@ -442,7 +441,7 @@
           <option value="">¿A quién buscas?</option>
           <option value="Hombres">Hombres</option>
           <option value="Mujeres">Mujeres</option>
-          <option value="Todos">Todos</option>
+          <option value="all">Todos</option>
         </select>
       </div>
 
@@ -490,28 +489,23 @@
 </div><!-- /page -->
 
 <!-- ═══════════════════════════════════════════════
-     ÚNICO <script type="module"> — todo el JS aquí
+     ÚNICO <script type="module"> — SDK v10.14.1
 ═══════════════════════════════════════════════ -->
 <script type="module">
 
-/* ── 1. IMPORTACIONES CORRECTAS DESDE CDN v10.7.1 ── */
+/* ── FIREBASE SDK v10.14.1 ── */
 import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getDatabase, ref, set }
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-/* ── 2. CONFIGURACIÓN REAL DE FIREBASE ──────────────
-   Todas las propiedades presentes. authDomain correcto.
-   initializeApp recibe el objeto completo.
-─────────────────────────────────────────────────── */
+/* ── FIREBASE CONFIG — todas las propiedades presentes ── */
 const firebaseConfig = {
   apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
   authDomain:        "kinetic-app-67ae5.firebaseapp.com",
@@ -526,72 +520,60 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getDatabase(app);
 
-/* ── 3. RUTA DE DESTINO TRAS AUTENTICACIÓN ──────────
-   radar.html es la pantalla principal del radar de Kinetic.
-   Sin barra inicial — ruta relativa compatible con GitHub Pages.
-─────────────────────────────────────────────────── */
+/* ── DESTINO TRAS AUTENTICACIÓN ──
+   radar.html — pantalla principal de Kinetic.
+   Sin barra inicial → compatible con GitHub Pages.
+─────────────────────────────────────────────── */
 const HOME = "radar.html";
 
-/* ── 4. PERSISTENCIA DE SESIÓN ──────────────────────
-   Si el usuario ya está logueado al cargar index.html,
-   se le redirige inmediatamente a HOME.
-   Si no hay sesión activa, se oculta el loading y se
-   muestra el formulario.
-─────────────────────────────────────────────────── */
-onAuthStateChanged(auth, (user) => {
+/* ─────────────────────────────────────────
+   PERSISTENCIA DE SESIÓN
+   Si ya hay sesión activa al cargar index.html
+   → redirigir de inmediato a HOME.
+   Si no hay sesión → ocultar loading y mostrar form.
+───────────────────────────────────────── */
+onAuthStateChanged(auth, user => {
   if (user) {
-    // Sesión activa — redirigir sin añadir al historial
     window.location.replace(HOME);
   } else {
-    // Sin sesión — mostrar UI de autenticación
-    document.getElementById("loadingScreen").classList.add("hidden");
+    document.getElementById('loadingScreen').classList.add('hidden');
   }
 });
 
-/* ── 5. HELPERS ─────────────────────────────────── */
+/* ─────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────── */
 
-/** Traduce códigos de error de Firebase a mensajes en español */
+/** Traduce códigos de error Firebase → español */
 function parseFirebaseError(code) {
   const map = {
-    "auth/email-already-in-use":
-      "Este correo ya tiene una cuenta registrada.",
-    "auth/invalid-email":
-      "El formato del correo no es válido.",
-    "auth/weak-password":
-      "La contraseña es muy débil (mínimo 6 caracteres).",
-    "auth/user-not-found":
-      "No existe una cuenta con ese correo.",
-    "auth/wrong-password":
-      "Contraseña incorrecta. Intenta de nuevo.",
-    "auth/invalid-credential":
-      "Correo o contraseña incorrectos.",
-    "auth/too-many-requests":
-      "Demasiados intentos fallidos. Espera unos minutos.",
-    "auth/network-request-failed":
-      "Sin conexión a internet. Revisa tu red.",
-    "auth/auth-domain-config-required":
-      "Error de configuración de dominio. Contacta al soporte.",
-    "auth/operation-not-allowed":
-      "Este método de inicio de sesión no está habilitado.",
-    "auth/user-disabled":
-      "Esta cuenta ha sido deshabilitada.",
+    'auth/email-already-in-use':    'Este correo ya tiene una cuenta registrada.',
+    'auth/invalid-email':           'El formato del correo no es válido.',
+    'auth/weak-password':           'La contraseña es muy débil (mínimo 6 caracteres).',
+    'auth/user-not-found':          'No existe una cuenta con ese correo.',
+    'auth/wrong-password':          'Contraseña incorrecta. Intenta de nuevo.',
+    'auth/invalid-credential':      'Correo o contraseña incorrectos.',
+    'auth/too-many-requests':       'Demasiados intentos fallidos. Espera unos minutos.',
+    'auth/network-request-failed':  'Sin conexión a internet. Revisa tu red.',
+    'auth/auth-domain-config-required': 'Error de configuración de dominio.',
+    'auth/operation-not-allowed':   'Este método de inicio de sesión no está habilitado.',
+    'auth/user-disabled':           'Esta cuenta ha sido deshabilitada.',
   };
   return map[code] || `Error inesperado (${code}). Intenta de nuevo.`;
 }
 
 /** Muestra un error visible en el formulario */
-function showError(errorBoxId, msgSpanId, message) {
-  const box = document.getElementById(errorBoxId);
-  document.getElementById(msgSpanId).textContent = message;
-  box.classList.add("show");
+function showError(boxId, spanId, message) {
+  document.getElementById(spanId).textContent = message;
+  document.getElementById(boxId).classList.add('show');
 }
 
 /** Limpia el error visible */
-function clearError(errorBoxId) {
-  document.getElementById(errorBoxId).classList.remove("show");
+function clearError(boxId) {
+  document.getElementById(boxId).classList.remove('show');
 }
 
-/** Pone un botón en estado cargando / restaura su estado */
+/** Cambia el estado del botón a cargando o restaura */
 function setButtonLoading(btnId, loading, defaultHTML) {
   const btn = document.getElementById(btnId);
   btn.disabled = loading;
@@ -600,130 +582,167 @@ function setButtonLoading(btnId, loading, defaultHTML) {
     : defaultHTML;
 }
 
-/** Toast de confirmación breve */
+/** Toast de confirmación */
 let _toastTimer = null;
 function showToast(msg) {
-  const el = document.getElementById("toast");
+  const el = document.getElementById('toast');
   el.textContent = msg;
-  el.classList.add("show");
+  el.classList.add('show');
   clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove("show"), 3500);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
-/* ── 6. TAB SWITCHER ─────────────────────────────── */
-window.switchTab = function (tab) {
-  const isLogin = tab === "login";
-  document.getElementById("tabLogin").classList.toggle("active", isLogin);
-  document.getElementById("tabRegister").classList.toggle("active", !isLogin);
-  document.getElementById("panelLogin").classList.toggle("active", isLogin);
-  document.getElementById("panelRegister").classList.toggle("active", !isLogin);
-  clearError("loginError");
-  clearError("regError");
+/* ─────────────────────────────────────────
+   TAB SWITCHER
+───────────────────────────────────────── */
+window.switchTab = function(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('panelLogin').classList.toggle('active', isLogin);
+  document.getElementById('panelRegister').classList.toggle('active', !isLogin);
+  clearError('loginError');
+  clearError('regError');
 };
 
-/* ── 7. PASSWORD VISIBILITY TOGGLE ──────────────── */
-window.togglePass = function (inputId, btn) {
+/* ─────────────────────────────────────────
+   TOGGLE VISIBILIDAD CONTRASEÑA
+───────────────────────────────────────── */
+window.togglePass = function(inputId, btn) {
   const input = document.getElementById(inputId);
-  const icon  = btn.querySelector("i");
-  const show  = input.type === "password";
-  input.type       = show ? "text" : "password";
-  icon.className   = show ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+  const icon  = btn.querySelector('i');
+  const show  = input.type === 'password';
+  input.type     = show ? 'text' : 'password';
+  icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
 };
 
-/* ── 8. LOGIN ────────────────────────────────────── */
-window.handleLogin = async function () {
-  clearError("loginError");
+/* ─────────────────────────────────────────
+   LOGIN
+───────────────────────────────────────── */
+window.handleLogin = async function() {
+  clearError('loginError');
 
-  const email    = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPass").value;
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
 
   // Validación cliente
-  if (!email)    { showError("loginError","loginErrorMsg","Ingresa tu correo electrónico."); return; }
-  if (!password) { showError("loginError","loginErrorMsg","Ingresa tu contraseña."); return; }
+  if (!email)    { showError('loginError', 'loginErrorMsg', 'Ingresa tu correo electrónico.'); return; }
+  if (!password) { showError('loginError', 'loginErrorMsg', 'Ingresa tu contraseña.'); return; }
 
-  setButtonLoading("btnLogin", true, '<i class="fa-solid fa-bolt"></i> ENTRAR');
+  setButtonLoading('btnLogin', true, '<i class="fa-solid fa-bolt"></i> ENTRAR');
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged detecta la sesión y redirige a HOME
+    // onAuthStateChanged detecta la sesión nueva y redirige a HOME
   } catch (err) {
-    showError("loginError", "loginErrorMsg", parseFirebaseError(err.code));
-    setButtonLoading("btnLogin", false, '<i class="fa-solid fa-bolt"></i> ENTRAR');
+    console.error('[Kinetic - index] Error login:', err);
+    showError('loginError', 'loginErrorMsg', parseFirebaseError(err.code));
+    setButtonLoading('btnLogin', false, '<i class="fa-solid fa-bolt"></i> ENTRAR');
   }
 };
 
-/* ── 9. REGISTER ─────────────────────────────────── */
-window.handleRegister = async function () {
-  clearError("regError");
+/* ─────────────────────────────────────────
+   REGISTER
+   1. createUserWithEmailAndPassword
+   2. set() perfil en users/${uid}         (nodo privado completo)
+   3. set() perfil en radar_public/${uid}  (nodo público para el Radar)
+   4. onAuthStateChanged → redirige a HOME
+───────────────────────────────────────── */
+window.handleRegister = async function() {
+  clearError('regError');
 
-  const nombre   = document.getElementById("regNombre").value.trim();
-  const edadRaw  = document.getElementById("regEdad").value;
-  const genero   = document.getElementById("regGenero").value;
-  const busca    = document.getElementById("regBusca").value;
-  const email    = document.getElementById("regEmail").value.trim();
-  const password = document.getElementById("regPass").value;
+  const nombre   = document.getElementById('regNombre').value.trim();
+  const edadRaw  = document.getElementById('regEdad').value;
+  const genero   = document.getElementById('regGenero').value;
+  const busca    = document.getElementById('regBusca').value;
+  const email    = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPass').value;
 
-  // Validación cliente — mensajes específicos por campo
-  if (!nombre)  { showError("regError","regErrorMsg","Ingresa tu nombre o nickname."); return; }
+  // Validación cliente
+  if (!nombre)  { showError('regError', 'regErrorMsg', 'Ingresa tu nombre o nickname.'); return; }
   if (!edadRaw || parseInt(edadRaw) < 18) {
-    showError("regError","regErrorMsg","Debes tener al menos 18 años para registrarte."); return;
+    showError('regError', 'regErrorMsg', 'Debes tener al menos 18 años para registrarte.'); return;
   }
-  if (!genero)  { showError("regError","regErrorMsg","Selecciona tu género."); return; }
-  if (!busca)   { showError("regError","regErrorMsg","Indica a quién buscas."); return; }
-  if (!email)   { showError("regError","regErrorMsg","Ingresa tu correo electrónico."); return; }
+  if (!genero)  { showError('regError', 'regErrorMsg', 'Selecciona tu género.'); return; }
+  if (!busca)   { showError('regError', 'regErrorMsg', 'Indica a quién buscas.'); return; }
+  if (!email)   { showError('regError', 'regErrorMsg', 'Ingresa tu correo electrónico.'); return; }
   if (password.length < 6) {
-    showError("regError","regErrorMsg","La contraseña debe tener al menos 6 caracteres."); return;
+    showError('regError', 'regErrorMsg', 'La contraseña debe tener al menos 6 caracteres.'); return;
   }
 
   const edad = parseInt(edadRaw, 10);
+  const today = new Date().toISOString().split('T')[0];
 
-  setButtonLoading("btnRegister", true, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
+  setButtonLoading('btnRegister', true, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
 
   try {
-    // 9a. Crear cuenta en Firebase Auth
+    // 1. Crear cuenta en Firebase Auth
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     const uid        = credential.user.uid;
 
-    // 9b. Guardar perfil básico en Realtime Database bajo users/${uid}
-    //     set() es atómico — si falla lanza excepción capturada abajo
-    await set(ref(db, `users/${uid}`), {
+    // Perfil completo — nodo privado (users/)
+    const userData = {
       uid,
+      name:          nombre,
       nombre,
+      age:           edad,
       edad,
+      gender:        genero,   // 'male' | 'female' | 'other'
       genero,
+      interestedIn:  busca,
       busca,
       email,
-      rol:         "user",
-      bio:         "",
-      album:       [],
-      photos:      [],
-      online:      true,
-      modoExpress: false,
-      lat:         null,
-      lng:         null,
-      createdAt:   Date.now()
-    });
+      bio:           '',
+      album:         [],
+      photos:        [],
+      profilePic:    '',
+      online:        true,
+      modoExpress:   false,
+      premium:       false,
+      lat:           null,
+      lng:           null,
+      dailyViews:    0,
+      lastResetDate: today,
+      createdAt:     Date.now()
+    };
 
-    // 9c. Toast de bienvenida (brevísimo — la redirección llega en ms)
-    showToast(`¡Bienvenido/a, ${nombre}! Redirigiendo… 🚀`);
+    // Perfil público optimizado — nodo radar_public/
+    const publicData = {
+      uid,
+      name:       nombre,
+      age:        edad,
+      gender:     genero,
+      profilePic: '',
+      album:      [],
+      online:     true
+    };
 
-    // 9d. onAuthStateChanged detecta la nueva sesión y redirige a HOME automáticamente
+    // 2. Escritura paralela en ambos nodos (atómica vía Promise.all)
+    await Promise.all([
+      set(ref(db, `users/${uid}`),        userData),
+      set(ref(db, `radar_public/${uid}`), publicData)
+    ]);
+
+    showToast(`¡Bienvenido/a, ${nombre}! Entrando… 🚀`);
+    // 3. onAuthStateChanged detecta la sesión y redirige a HOME
 
   } catch (err) {
-    // Error visible en pantalla — nunca congela el flujo
-    showError("regError", "regErrorMsg", parseFirebaseError(err.code));
-    setButtonLoading("btnRegister", false, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
+    console.error('[Kinetic - index] Error registro:', err);
+    showError('regError', 'regErrorMsg', parseFirebaseError(err.code));
+    setButtonLoading('btnRegister', false, '<i class="fa-solid fa-user-plus"></i> CREAR CUENTA');
   }
 };
 
-/* ── 10. ENTER KEY SUPPORT ───────────────────────── */
-document.addEventListener("keydown", (e) => {
-  if (e.key !== "Enter") return;
-  const loginActive = document.getElementById("panelLogin").classList.contains("active");
+/* ─────────────────────────────────────────
+   SOPORTE TECLA ENTER
+───────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const loginActive = document.getElementById('panelLogin').classList.contains('active');
   if (loginActive) {
-    if (!document.getElementById("btnLogin").disabled) handleLogin();
+    if (!document.getElementById('btnLogin').disabled) handleLogin();
   } else {
-    if (!document.getElementById("btnRegister").disabled) handleRegister();
+    if (!document.getElementById('btnRegister').disabled) handleRegister();
   }
 });
 
