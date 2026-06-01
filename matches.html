@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0616" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Kinetic · Matches</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    :root {
+      --bg:        #0d0616;
+      --bg-s:      #12091f;
+      --bg-card:   #160c28;
+      --purple:    #8a2be2;
+      --purple-hi: #a020f0;
+      --magenta:   #ff00ff;
+      --cyan:      #00ffff;
+      --green:     #39ff14;
+      --gold:      #ffd700;
+      --text:      #ede0ff;
+      --text-2:    #9880bc;
+      --text-3:    #52406e;
+      --border:    rgba(138,43,226,.2);
+      --nav-h:     66px;
+      --r:         14px;
+      --r-sm:      9px;
+      --grad:      linear-gradient(135deg,#8a2be2 0%,#ff00ff 100%);
+      --grad-gold: linear-gradient(135deg,#ffd700 0%,#ff8c00 100%);
+      --glow-p:    0 0 18px rgba(138,43,226,.6);
+      --glow-m:    0 0 16px rgba(255,0,255,.65);
+      --glow-gold: 0 0 18px rgba(255,215,0,.5);
+      --sb:        env(safe-area-inset-bottom,0px);
+      --st:        env(safe-area-inset-top,0px);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      height:100%;background:var(--bg);color:var(--text);
+      font-family:'Urbanist',sans-serif;font-size:16px;
+      -webkit-font-smoothing:antialiased;overflow-x:hidden;
+    }
+    ::-webkit-scrollbar{width:3px}
+    ::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px}
+    body::before{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:
+        repeating-linear-gradient(0deg,  transparent,transparent 39px,rgba(138,43,226,.032) 40px),
+        repeating-linear-gradient(90deg, transparent,transparent 39px,rgba(138,43,226,.032) 40px);
+    }
+    body::after{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 70% 44% at 10%  5%, rgba(138,43,226,.18) 0%,transparent 65%),
+        radial-gradient(ellipse 55% 36% at 88% 90%,rgba(255,0,255,.12)  0%,transparent 60%),
+        radial-gradient(ellipse 40% 28% at 50% 50%,rgba(255,215,0,.04)  0%,transparent 70%);
+    }
+
+    /* ── PAGE ── */
+    #page{
+      position:relative;z-index:1;min-height:100vh;
+      display:flex;flex-direction:column;
+      padding-bottom:calc(var(--nav-h)+20px);
+    }
+
+    /* ── TOP BAR ── */
+    .topbar{
+      position:sticky;top:0;z-index:100;
+      height:calc(var(--st) + 56px);padding-top:var(--st);
+      display:flex;align-items:center;justify-content:space-between;padding-inline:18px;
+      background:rgba(13,6,22,.95);backdrop-filter:blur(24px);
+      border-bottom:1px solid rgba(255,215,0,.12);flex-shrink:0;
+    }
+    .topbar-logo{
+      font-family:'Orbitron',monospace;font-size:1.18rem;font-weight:900;letter-spacing:.18em;
+      background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;filter:drop-shadow(0 0 7px rgba(138,43,226,.7));
+    }
+    .topbar-center{
+      font-family:'Orbitron',monospace;font-size:.62rem;font-weight:700;
+      letter-spacing:.22em;text-transform:uppercase;
+      background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .topbar-count{
+      font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;
+      color:var(--gold);letter-spacing:.06em;
+    }
+
+    /* ── HERO BANNER ── */
+    .match-hero{
+      margin:16px 16px 0;padding:20px;
+      background:linear-gradient(135deg,rgba(138,43,226,.15) 0%,rgba(255,215,0,.08) 100%);
+      border:1px solid rgba(255,215,0,.2);border-radius:var(--r);
+      display:flex;align-items:center;gap:16px;
+      backdrop-filter:blur(14px);
+    }
+    .hero-emoji{font-size:2.8rem;flex-shrink:0;filter:drop-shadow(0 0 10px rgba(255,215,0,.5))}
+    .hero-text{}
+    .hero-title{
+      font-family:'Orbitron',monospace;font-size:.85rem;font-weight:900;
+      letter-spacing:.08em;color:var(--gold);margin-bottom:4px;
+    }
+    .hero-sub{font-size:.82rem;color:var(--text-2);line-height:1.55}
+
+    /* ── SECTION LABEL ── */
+    .section-label{
+      display:flex;align-items:center;gap:10px;padding:16px 16px 10px;
+    }
+    .section-label::before,.section-label::after{content:'';flex:1;height:1px}
+    .section-label::before{background:linear-gradient(90deg,transparent,rgba(255,215,0,.3))}
+    .section-label::after {background:linear-gradient(90deg,rgba(255,215,0,.3),transparent)}
+    .section-label span{
+      font-family:'Orbitron',monospace;font-size:.56rem;font-weight:700;
+      letter-spacing:.22em;text-transform:uppercase;color:var(--gold);white-space:nowrap;
+    }
+
+    /* ── MATCHES GRID ── */
+    #matchesGrid{
+      display:none;grid-template-columns:repeat(2,1fr);
+      gap:10px;padding:0 16px;
+    }
+    @media(min-width:480px){#matchesGrid{grid-template-columns:repeat(3,1fr)}}
+    @media(min-width:720px){#matchesGrid{grid-template-columns:repeat(4,1fr)}}
+
+    /* ── MATCH CARD ── */
+    .match-card{
+      position:relative;border-radius:var(--r);overflow:hidden;
+      background:var(--bg-card);cursor:pointer;
+      border:1px solid rgba(255,215,0,.15);
+      transition:transform .18s,border-color .2s,box-shadow .2s;
+      animation:cardIn .3s ease both;-webkit-tap-highlight-color:transparent;
+    }
+    @keyframes cardIn{from{opacity:0;transform:scale(.88) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .match-card:hover{
+      transform:scale(1.03) translateY(-3px);
+      border-color:rgba(255,215,0,.5);
+      box-shadow:var(--glow-gold),0 8px 28px rgba(255,215,0,.12);z-index:2;
+    }
+    .match-card:active{transform:scale(.97)}
+
+    /* Foto */
+    .mc-photo-wrap{
+      position:relative;width:100%;aspect-ratio:1;overflow:hidden;
+      background:linear-gradient(160deg,#1a0f2e 0%,#0d0616 100%);
+    }
+    .mc-photo{width:100%;height:100%;object-fit:cover;display:block}
+    .mc-photo-ph{
+      width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+    }
+    .mc-photo-ph svg{width:55%;height:55%}
+
+    /* Overlay degradado */
+    .mc-overlay{
+      position:absolute;inset:0;
+      background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 50%,transparent 100%);
+      pointer-events:none;
+    }
+
+    /* Badge match */
+    .mc-match-badge{
+      position:absolute;top:8px;right:8px;
+      padding:3px 9px;border-radius:99px;
+      background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5);
+      font-size:.62rem;font-weight:800;color:var(--gold);
+      box-shadow:0 0 10px rgba(255,215,0,.3);
+    }
+
+    /* Online dot */
+    .mc-online{
+      position:absolute;top:8px;left:8px;
+      width:10px;height:10px;border-radius:50%;
+      background:var(--green);border:2px solid rgba(13,6,22,.8);
+      box-shadow:0 0 7px var(--green);
+    }
+
+    /* Info */
+    .mc-info{
+      padding:10px 12px 12px;
+    }
+    .mc-name{
+      font-size:.9rem;font-weight:800;color:var(--text);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;
+    }
+    .mc-meta{
+      font-family:'Orbitron',monospace;font-size:.5rem;font-weight:600;
+      color:var(--text-3);letter-spacing:.05em;margin-bottom:10px;
+    }
+
+    /* Botones de acción en la card */
+    .mc-actions{display:flex;gap:6px}
+    .mc-btn{
+      flex:1;padding:7px 4px;border-radius:8px;border:none;
+      font-family:'Urbanist',sans-serif;font-size:.72rem;font-weight:700;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;
+      transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent;
+    }
+    .mc-btn:active{transform:scale(.93)}
+    .mc-btn-chat{
+      background:var(--grad);color:#fff;box-shadow:0 2px 10px rgba(138,43,226,.35);
+    }
+    .mc-btn-chat:hover{box-shadow:var(--glow-m)}
+    .mc-btn-perfil{
+      background:rgba(138,43,226,.12);border:1px solid rgba(138,43,226,.3);
+      color:var(--purple-hi);
+    }
+    .mc-btn-perfil:hover{background:rgba(138,43,226,.22)}
+
+    /* Tiempo del match */
+    .mc-time{
+      font-family:'Orbitron',monospace;font-size:.5rem;font-weight:600;
+      color:rgba(255,215,0,.5);text-align:right;margin-top:6px;
+    }
+
+    /* ── SKELETON ── */
+    #skeleton{
+      display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 16px;
+    }
+    @media(min-width:480px){#skeleton{grid-template-columns:repeat(3,1fr)}}
+    .skel-card{
+      border-radius:var(--r);overflow:hidden;
+      background:linear-gradient(90deg,rgba(138,43,226,.06) 0%,rgba(138,43,226,.13) 50%,rgba(138,43,226,.06) 100%);
+      background-size:200% 100%;animation:shimmer 1.5s infinite;
+      border:1px solid rgba(138,43,226,.08);
+    }
+    .skel-card-inner{display:flex;flex-direction:column}
+    .skel-photo{aspect-ratio:1}
+    .skel-info{padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+    .skel-line{height:10px;border-radius:5px;background:rgba(138,43,226,.1)}
+    @keyframes shimmer{to{background-position:-200% 0}}
+
+    /* ── EMPTY STATE ── */
+    #emptyState{
+      display:none;flex-direction:column;align-items:center;justify-content:center;
+      padding:60px 28px;gap:20px;text-align:center;
+    }
+    .empty-ring{
+      width:90px;height:90px;border-radius:50%;
+      background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.2);
+      display:flex;align-items:center;justify-content:center;font-size:2.5rem;
+      animation:emptyPulse 3s ease-in-out infinite;
+    }
+    @keyframes emptyPulse{
+      0%,100%{box-shadow:0 0 20px rgba(255,215,0,.1)}
+      50%    {box-shadow:0 0 40px rgba(255,215,0,.25)}
+    }
+    .empty-title{
+      font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;
+      letter-spacing:.06em;color:var(--text-2);
+    }
+    .empty-sub{font-size:.85rem;color:var(--text-3);line-height:1.6;max-width:270px}
+    .btn-neon{
+      display:inline-flex;align-items:center;gap:8px;padding:11px 24px;
+      background:rgba(138,43,226,.12);border:1px solid rgba(138,43,226,.3);
+      border-radius:22px;font-size:.82rem;font-weight:700;letter-spacing:.08em;
+      color:var(--purple-hi);text-decoration:none;transition:background .2s,box-shadow .2s;
+    }
+    .btn-neon:hover{background:rgba(138,43,226,.22);box-shadow:var(--glow-p)}
+
+    /* ── AUTH GATE ── */
+    #authGate{
+      display:none;flex-direction:column;align-items:center;justify-content:center;
+      min-height:60vh;gap:16px;text-align:center;padding:24px;
+    }
+
+    /* ── TOAST ── */
+    #toast{
+      position:fixed;bottom:calc(var(--nav-h)+14px);left:50%;
+      transform:translateX(-50%) translateY(8px);
+      background:rgba(18,9,31,.97);border:1px solid rgba(138,43,226,.5);
+      border-radius:var(--r-sm);padding:10px 18px;
+      font-size:.84rem;font-weight:600;color:var(--text);
+      box-shadow:var(--glow-p);backdrop-filter:blur(16px);
+      z-index:9999;white-space:nowrap;opacity:0;pointer-events:none;
+      transition:opacity .25s,transform .25s;
+    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* ── BOTTOM NAV ── */
+    nav.bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);
+      background:rgba(13,6,22,.97);backdrop-filter:blur(24px);
+      border-top:1px solid rgba(138,43,226,.16);
+      display:flex;align-items:stretch;z-index:200;padding-bottom:var(--sb);
+    }
+    .nav-item{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4px;cursor:pointer;position:relative;text-decoration:none;
+      transition:opacity .2s;-webkit-tap-highlight-color:transparent;
+    }
+    .nav-item:active{opacity:.6}
+    .nav-item i{font-size:1.2rem;color:var(--text-3);transition:color .25s,filter .25s,transform .25s}
+    .nav-item span{font-size:.59rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);transition:color .25s}
+    .nav-item.active i{color:var(--purple-hi);filter:drop-shadow(0 0 5px rgba(160,32,240,.85));transform:scale(1.18)}
+    .nav-item.active span{color:var(--purple-hi)}
+    .nav-item i.has-notif{
+      color:var(--magenta)!important;
+      filter:drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45))!important;
+      animation:navPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes navPulse{0%,100%{filter:drop-shadow(0 0 6px #ff00ff)}50%{filter:drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff)}}
+    .badge-counter{
+      position:absolute;top:8px;left:calc(50% + 4px);
+      min-width:17px;height:17px;padding:0 3px;
+      background:var(--magenta);border:2px solid var(--bg);border-radius:10px;
+      font-family:'Urbanist',sans-serif;font-size:.58rem;font-weight:900;color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 0 10px rgba(255,0,255,.9);pointer-events:none;
+      animation:badgeIn .3s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes badgeIn{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
+  </style>
+</head>
+<body>
+<div id="page">
+
+  <div class="topbar">
+    <span class="topbar-logo">KINETIC</span>
+    <span class="topbar-center">✨ Matches</span>
+    <span class="topbar-count" id="topCount"></span>
+  </div>
+
+  <div class="match-hero">
+    <div class="hero-emoji">💜</div>
+    <div class="hero-text">
+      <div class="hero-title">¡Conexión mutua!</div>
+      <div class="hero-sub">Estas personas también te dieron like.<br>¡Empieza a chatear con ellas!</div>
+    </div>
+  </div>
+
+  <div class="section-label"><span>✨ Tus matches</span></div>
+
+  <!-- SKELETON -->
+  <div id="skeleton">
+    <div class="skel-card"><div class="skel-card-inner"><div class="skel-photo"></div><div class="skel-info"><div class="skel-line" style="width:60%"></div><div class="skel-line" style="width:40%"></div></div></div></div>
+    <div class="skel-card"><div class="skel-card-inner"><div class="skel-photo"></div><div class="skel-info"><div class="skel-line" style="width:55%"></div><div class="skel-line" style="width:45%"></div></div></div></div>
+    <div class="skel-card"><div class="skel-card-inner"><div class="skel-photo"></div><div class="skel-info"><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:35%"></div></div></div></div>
+    <div class="skel-card"><div class="skel-card-inner"><div class="skel-photo"></div><div class="skel-info"><div class="skel-line" style="width:50%"></div><div class="skel-line" style="width:50%"></div></div></div></div>
+  </div>
+
+  <div id="matchesGrid"></div>
+
+  <div id="emptyState">
+    <div class="empty-ring">💫</div>
+    <div class="empty-title">Sin matches todavía</div>
+    <div class="empty-sub">Cuando alguien a quien le diste like también te dé like, aparecerá aquí.</div>
+    <a class="btn-neon" href="radar.html"><i class="fa-solid fa-location-crosshairs"></i> Explorar el Radar</a>
+  </div>
+
+  <div id="authGate" style="flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center;padding:24px">
+    <i class="fa-solid fa-lock" style="font-size:3rem;color:var(--purple);opacity:.5"></i>
+    <div style="font-family:'Orbitron',monospace;font-size:.9rem;color:var(--text-2)">Acceso restringido</div>
+    <a href="index.html" style="color:var(--purple-hi);font-weight:700;text-decoration:none">← Ir al inicio</a>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="radar.html"><i class="fa-solid fa-location-crosshairs"></i><span>Radar</span></a>
+  <a class="nav-item" href="chats.html" id="navChats"><i class="fa-solid fa-comment-dots" id="navChatIcon"></i><span>Chats</span></a>
+  <a class="nav-item active" href="matches.html"><i class="fa-solid fa-heart-pulse"></i><span>Matches</span></a>
+  <a class="nav-item" href="perfil.html"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
+</nav>
+
+<script type="module">
+  import { createClient }
+    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const SUPABASE_URL = 'https://qemnczuklcztdajyjblb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_HE46cLZtaukvcva6bdKLGg_gz8HRet3';
+  const supabase     = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none"
+    style="width:55%;height:55%;stroke:#ff00ff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;">
+    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>`;
+
+  let me         = null;
+  let realtimeCh = null;
+
+  function isUrl(v){ return typeof v==='string' && /^https?:\/\/.{5,}/.test(v.trim()); }
+  function firstPhoto(d){ if(!d) return null; return [d.avatar_url,...(d.photos||[])].find(isUrl)||null; }
+  function genderStr(g){ return g==='male'?'Hombre':g==='female'?'Mujer':g==='other'?'Otro':g||''; }
+  function relTime(ts){
+    if(!ts) return '';
+    const d=Date.now()-new Date(ts).getTime();
+    if(d<60000)     return 'ahora';
+    if(d<3600000)   return `${Math.floor(d/60000)}m`;
+    if(d<86400000)  return `${Math.floor(d/3600000)}h`;
+    if(d<604800000) return `${Math.floor(d/86400000)}d`;
+    return new Date(ts).toLocaleDateString('es',{day:'2-digit',month:'2-digit'});
+  }
+
+  let _tt=null;
+  function showToast(msg,err=false){
+    const el=document.getElementById('toast');
+    el.textContent=err?`⚠  ${msg}`:`✓  ${msg}`;
+    el.style.borderColor=err?'rgba(255,34,85,.5)':'rgba(138,43,226,.5)';
+    el.classList.add('show'); clearTimeout(_tt);
+    _tt=setTimeout(()=>el.classList.remove('show'),3000);
+  }
+  function hideSkeleton(){ const sk=document.getElementById('skeleton'); if(sk) sk.style.display='none'; }
+
+  /* ── AUTH ── */
+  const { data:{ session } } = await supabase.auth.getSession();
+  if(!session){
+    hideSkeleton();
+    document.getElementById('authGate').style.display='flex';
+  } else {
+    me=session.user;
+    await loadMatches();
+    subscribeRealtime();
+    loadUnreadBadge();
+  }
+
+  /* ══════════════════════════════════════════════
+     CARGAR MATCHES
+     Tabla matches: id, user1_id, user2_id, created_at
+     Join con profiles del otro usuario
+  ══════════════════════════════════════════════ */
+  async function loadMatches(){
+    hideSkeleton();
+    try {
+      const { data, error } = await supabase
+        .from('matches')
+        .select(`
+          id, created_at,
+          u1:user1_id(id,nombre,edad,gender,bio,avatar_url,photos,online),
+          u2:user2_id(id,nombre,edad,gender,bio,avatar_url,photos,online)
+        `)
+        .or(`user1_id.eq.${me.id},user2_id.eq.${me.id}`)
+        .order('created_at', { ascending:false });
+
+      if(error) throw error;
+
+      const matches = (data||[]).map(r => {
+        const other = r.u1?.id === me.id ? r.u2 : r.u1;
+        return { ...other, match_id:r.id, match_ts:r.created_at };
+      }).filter(m => m.id);
+
+      document.getElementById('topCount').textContent =
+        matches.length > 0 ? `${matches.length} match${matches.length!==1?'es':''}` : '';
+
+      renderGrid(matches);
+    } catch(err){
+      console.error('[Kinetic - matches]', err);
+      showToast('Error al cargar matches.', true);
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     REALTIME
+  ══════════════════════════════════════════════ */
+  function subscribeRealtime(){
+    if(realtimeCh) supabase.removeChannel(realtimeCh);
+    realtimeCh = supabase
+      .channel('matches-page')
+      .on('postgres_changes',
+        { event:'*', schema:'public', table:'matches' },
+        () => loadMatches()
+      ).subscribe();
+  }
+
+  /* ══════════════════════════════════════════════
+     RENDER GRID
+  ══════════════════════════════════════════════ */
+  function renderGrid(matches){
+    const grid = document.getElementById('matchesGrid');
+    if(!matches.length){
+      grid.style.display='none';
+      document.getElementById('emptyState').style.display='flex';
+      return;
+    }
+    document.getElementById('emptyState').style.display='none';
+    grid.style.display='grid';
+    grid.innerHTML='';
+    const frag=document.createDocumentFragment();
+    matches.forEach((m,i) => frag.appendChild(buildCard(m,i)));
+    grid.appendChild(frag);
+  }
+
+  /* ══════════════════════════════════════════════
+     BUILD CARD
+  ══════════════════════════════════════════════ */
+  function buildCard(data, idx){
+    const uid    = data.id;
+    const name   = data.nombre || 'Usuario';
+    const age    = data.edad   || null;
+    const gender = data.gender || null;
+    const online = data.online === true;
+    const photo  = firstPhoto(data);
+    const time   = relTime(data.match_ts);
+
+    const card=document.createElement('div');
+    card.className='match-card';
+    card.style.animationDelay=`${Math.min(idx*.06,.7)}s`;
+
+    /* Foto wrap */
+    const photoWrap=document.createElement('div');
+    photoWrap.className='mc-photo-wrap';
+
+    if(photo){
+      const img=document.createElement('img');
+      img.className='mc-photo'; img.src=photo; img.alt=name; img.loading='lazy';
+      img.onerror=()=>{ img.remove(); const ph=document.createElement('div'); ph.className='mc-photo-ph'; ph.innerHTML=AVATAR_SVG; photoWrap.insertBefore(ph,photoWrap.firstChild); };
+      photoWrap.appendChild(img);
+    } else {
+      const ph=document.createElement('div'); ph.className='mc-photo-ph'; ph.innerHTML=AVATAR_SVG;
+      photoWrap.appendChild(ph);
+    }
+
+    const ov=document.createElement('div'); ov.className='mc-overlay'; photoWrap.appendChild(ov);
+
+    /* Badge match */
+    const badge=document.createElement('div'); badge.className='mc-match-badge'; badge.textContent='✨ Match';
+    photoWrap.appendChild(badge);
+
+    /* Online */
+    if(online){ const dot=document.createElement('div'); dot.className='mc-online'; photoWrap.appendChild(dot); }
+    card.appendChild(photoWrap);
+
+    /* Info */
+    const info=document.createElement('div'); info.className='mc-info';
+    const nameEl=document.createElement('div'); nameEl.className='mc-name'; nameEl.textContent=name;
+    info.appendChild(nameEl);
+
+    const meta=document.createElement('div'); meta.className='mc-meta';
+    const parts=[age?`${age} años`:null, genderStr(gender)||null].filter(Boolean);
+    meta.textContent=parts.join(' · ') || 'Kinetic';
+    info.appendChild(meta);
+
+    /* Botones */
+    const acts=document.createElement('div'); acts.className='mc-actions';
+
+    const btnChat=document.createElement('button'); btnChat.className='mc-btn mc-btn-chat';
+    btnChat.innerHTML='<i class="fa-solid fa-comment"></i> Chat';
+    btnChat.onclick=e=>{ e.stopPropagation(); openChat(uid); };
+
+    const btnPerfil=document.createElement('button'); btnPerfil.className='mc-btn mc-btn-perfil';
+    btnPerfil.innerHTML='<i class="fa-solid fa-user"></i>';
+    btnPerfil.onclick=e=>{ e.stopPropagation(); openProfile(uid); };
+
+    acts.appendChild(btnChat); acts.appendChild(btnPerfil);
+    info.appendChild(acts);
+
+    if(time){ const t=document.createElement('div'); t.className='mc-time'; t.textContent=`Match hace ${time}`; info.appendChild(t); }
+    card.appendChild(info);
+
+    /* Click en la card → perfil */
+    card.addEventListener('click', () => openProfile(uid));
+    return card;
+  }
+
+  function openChat(uid){
+    try{ localStorage.setItem('selected_user_id', uid); }catch(_){}
+    window.location.href=`chat-interno.html?id=${encodeURIComponent(uid)}`;
+  }
+  function openProfile(uid){
+    try{ localStorage.setItem('selected_user_id', uid); }catch(_){}
+    window.location.href=`perfil-detalle.html?id=${encodeURIComponent(uid)}`;
+  }
+
+  /* ── BADGE ── */
+  async function loadUnreadBadge(){
+    try {
+      const { count }=await supabase.from('chats').select('id',{count:'exact',head:true}).eq('unread_for',me.id);
+      const n=count||0;
+      const iconEl=document.getElementById('navChatIcon');
+      const navItem=document.getElementById('navChats');
+      navItem.querySelectorAll('.badge-counter').forEach(b=>b.remove());
+      if(n>0){ iconEl.classList.add('has-notif'); const b=document.createElement('div'); b.className='badge-counter'; b.textContent=n>9?'9+':String(n); navItem.appendChild(b); }
+      else iconEl.classList.remove('has-notif');
+    }catch(e){}
+  }
+
+  window.addEventListener('pagehide', ()=>{ if(realtimeCh) supabase.removeChannel(realtimeCh); });
+</script>
+</body>
+</html>
