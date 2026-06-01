@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0616" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Kinetic · Notificaciones</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    :root {
+      --bg:        #0d0616;
+      --bg-s:      #12091f;
+      --bg-card:   #160c28;
+      --bg-row:    #12091f;
+      --bg-row-hi: #1a0f2e;
+      --purple:    #8a2be2;
+      --purple-hi: #a020f0;
+      --magenta:   #ff00ff;
+      --cyan:      #00ffff;
+      --green:     #39ff14;
+      --gold:      #ffd700;
+      --red:       #ff4466;
+      --text:      #ede0ff;
+      --text-2:    #9880bc;
+      --text-3:    #52406e;
+      --border:    rgba(138,43,226,.18);
+      --nav-h:     66px;
+      --r:         14px;
+      --r-sm:      9px;
+      --grad:      linear-gradient(135deg,#8a2be2 0%,#ff00ff 100%);
+      --glow-p:    0 0 16px rgba(138,43,226,.55);
+      --glow-m:    0 0 14px rgba(255,0,255,.65);
+      --sb:        env(safe-area-inset-bottom,0px);
+      --st:        env(safe-area-inset-top,0px);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      height:100%;background:var(--bg);color:var(--text);
+      font-family:'Urbanist',sans-serif;font-size:16px;
+      -webkit-font-smoothing:antialiased;overflow-x:hidden;
+    }
+    ::-webkit-scrollbar{width:3px}
+    ::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px}
+    body::before{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:
+        repeating-linear-gradient(0deg,  transparent,transparent 39px,rgba(138,43,226,.03) 40px),
+        repeating-linear-gradient(90deg, transparent,transparent 39px,rgba(138,43,226,.03) 40px);
+    }
+    body::after{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 65% 42% at 10% 5%,  rgba(138,43,226,.16) 0%,transparent 65%),
+        radial-gradient(ellipse 50% 34% at 88% 90%, rgba(255,0,255,.10) 0%,transparent 60%);
+    }
+
+    /* ── PAGE ── */
+    #page{
+      position:relative;z-index:1;min-height:100vh;
+      display:flex;flex-direction:column;
+      padding-bottom:calc(var(--nav-h)+16px);
+      max-width:640px;margin:0 auto;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar{
+      position:sticky;top:0;z-index:100;
+      height:calc(var(--st)+56px);padding-top:var(--st);
+      display:flex;align-items:center;justify-content:space-between;padding-inline:18px;
+      background:rgba(13,6,22,.95);backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);flex-shrink:0;
+    }
+    .topbar-logo{
+      font-family:'Orbitron',monospace;font-size:1.18rem;font-weight:900;letter-spacing:.18em;
+      background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;filter:drop-shadow(0 0 7px rgba(138,43,226,.7));
+    }
+    .topbar-center{
+      font-family:'Orbitron',monospace;font-size:.62rem;font-weight:700;
+      letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);
+    }
+    /* Botón marcar todo como leído */
+    .topbar-action{
+      font-size:.72rem;font-weight:700;color:var(--purple-hi);
+      background:none;border:none;cursor:pointer;
+      padding:5px 10px;border-radius:8px;
+      transition:background .2s;-webkit-tap-highlight-color:transparent;
+    }
+    .topbar-action:hover{background:rgba(138,43,226,.12)}
+
+    /* ── FILTER TABS ── */
+    .filter-tabs{
+      display:flex;gap:6px;padding:12px 14px 0;overflow-x:auto;scrollbar-width:none;
+    }
+    .filter-tabs::-webkit-scrollbar{display:none}
+    .ftab{
+      flex-shrink:0;padding:7px 16px;border-radius:20px;
+      background:rgba(138,43,226,.1);border:1px solid rgba(138,43,226,.2);
+      font-family:'Urbanist',sans-serif;font-size:.78rem;font-weight:700;
+      color:var(--text-3);cursor:pointer;transition:all .2s;
+      -webkit-tap-highlight-color:transparent;white-space:nowrap;
+    }
+    .ftab.active{background:var(--grad);border-color:transparent;color:#fff;box-shadow:var(--glow-p)}
+    .ftab:not(.active):hover{background:rgba(138,43,226,.2);color:var(--text)}
+
+    /* ── SECTION DIVIDER ── */
+    .section-label{
+      display:flex;align-items:center;gap:10px;padding:14px 16px 8px;
+    }
+    .section-label::before,.section-label::after{content:'';flex:1;height:1px}
+    .section-label::before{background:linear-gradient(90deg,transparent,var(--border))}
+    .section-label::after {background:linear-gradient(90deg,var(--border),transparent)}
+    .section-label span{
+      font-family:'Orbitron',monospace;font-size:.54rem;font-weight:700;
+      letter-spacing:.2em;text-transform:uppercase;color:var(--text-3);white-space:nowrap;
+    }
+
+    /* ── NOTIF LIST ── */
+    #notifList{
+      display:flex;flex-direction:column;gap:4px;padding:0 10px;
+    }
+
+    /* ── NOTIF ROW ── */
+    .notif-row{
+      display:flex;align-items:center;gap:12px;
+      padding:12px 14px;border-radius:var(--r-sm);
+      background:var(--bg-row);border:1px solid rgba(138,43,226,.1);
+      cursor:pointer;transition:background .18s,border-color .2s,transform .15s;
+      animation:rowIn .25s ease both;position:relative;
+      -webkit-tap-highlight-color:transparent;
+    }
+    @keyframes rowIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .notif-row:hover{background:var(--bg-row-hi);border-color:rgba(138,43,226,.25);transform:translateX(2px)}
+    .notif-row:active{transform:scale(.99)}
+    .notif-row.unread{background:#1a0a2e;border-color:rgba(255,0,255,.18)}
+    .notif-row.unread::before{
+      content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+      width:3px;height:60%;border-radius:0 2px 2px 0;background:var(--magenta);
+    }
+
+    /* Avatar en la fila */
+    .notif-av{
+      flex-shrink:0;position:relative;width:48px;height:48px;
+    }
+    .notif-av-img{
+      width:100%;height:100%;border-radius:50%;object-fit:cover;
+      border:2px solid rgba(138,43,226,.3);background:var(--bg-card);display:block;
+    }
+    .notif-av-ph{
+      width:100%;height:100%;border-radius:50%;background:var(--bg-card);
+      display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+      border:2px solid rgba(138,43,226,.3);
+    }
+    /* Icono de tipo sobre el avatar */
+    .notif-type-icon{
+      position:absolute;bottom:-2px;right:-2px;
+      width:20px;height:20px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.65rem;border:2px solid var(--bg);
+    }
+    .nti-like   {background:#ff0055}
+    .nti-match  {background:#ffd700}
+    .nti-msg    {background:var(--purple)}
+    .nti-visit  {background:var(--cyan);color:#07071a}
+
+    /* Contenido */
+    .notif-body{flex:1;min-width:0}
+    .notif-title{
+      font-size:.88rem;font-weight:700;color:var(--text);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;
+    }
+    .notif-row.unread .notif-title{color:#fff}
+    .notif-sub{
+      font-size:.78rem;color:var(--text-3);margin-top:2px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;
+    }
+    .notif-row.unread .notif-sub{color:var(--text-2)}
+    .notif-time{
+      font-family:'Orbitron',monospace;font-size:.5rem;font-weight:600;
+      color:var(--text-3);margin-top:3px;letter-spacing:.04em;
+    }
+    .notif-row.unread .notif-time{color:rgba(255,0,255,.5)}
+
+    /* Punto unread a la derecha */
+    .notif-dot{
+      flex-shrink:0;width:8px;height:8px;border-radius:50%;
+      background:var(--magenta);box-shadow:0 0 6px var(--magenta);
+    }
+
+    /* ── SKELETON ── */
+    #skeleton{display:flex;flex-direction:column;gap:4px;padding:0 10px}
+    .skel-row{
+      display:flex;align-items:center;gap:12px;padding:12px 14px;
+      background:var(--bg-row);border:1px solid rgba(138,43,226,.08);border-radius:var(--r-sm);
+    }
+    .skel-av{width:48px;height:48px;border-radius:50%;flex-shrink:0}
+    .skel-lines{flex:1;display:flex;flex-direction:column;gap:7px}
+    .skel-line{border-radius:5px}
+    .skel-shimmer{
+      background:linear-gradient(90deg,rgba(138,43,226,.06) 0%,rgba(138,43,226,.14) 50%,rgba(138,43,226,.06) 100%);
+      background-size:200% 100%;animation:shimmer 1.5s infinite;
+    }
+    @keyframes shimmer{to{background-position:-200% 0}}
+
+    /* ── EMPTY ── */
+    #emptyState{
+      display:none;flex-direction:column;align-items:center;justify-content:center;
+      padding:70px 28px;gap:18px;text-align:center;
+    }
+    .empty-icon{
+      width:80px;height:80px;border-radius:50%;
+      background:rgba(138,43,226,.09);border:1px solid rgba(138,43,226,.22);
+      display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+      animation:iconPulse 3s ease-in-out infinite;
+    }
+    @keyframes iconPulse{0%,100%{box-shadow:0 0 20px rgba(138,43,226,.12)}50%{box-shadow:0 0 40px rgba(138,43,226,.28)}}
+    .empty-title{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;letter-spacing:.06em;color:var(--text-2)}
+    .empty-sub{font-size:.84rem;color:var(--text-3);line-height:1.6;max-width:260px}
+
+    /* ── TOAST ── */
+    #toast{
+      position:fixed;bottom:calc(var(--nav-h)+14px);left:50%;
+      transform:translateX(-50%) translateY(8px);
+      background:rgba(18,9,31,.97);border:1px solid rgba(138,43,226,.5);
+      border-radius:var(--r-sm);padding:10px 18px;
+      font-size:.84rem;font-weight:600;color:var(--text);
+      box-shadow:var(--glow-p);backdrop-filter:blur(16px);
+      z-index:9999;white-space:nowrap;opacity:0;pointer-events:none;
+      transition:opacity .25s,transform .25s;
+    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* ── BOTTOM NAV ── */
+    nav.bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);
+      background:rgba(13,6,22,.97);backdrop-filter:blur(24px);
+      border-top:1px solid rgba(138,43,226,.16);
+      display:flex;align-items:stretch;z-index:200;padding-bottom:var(--sb);
+    }
+    .nav-item{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4px;cursor:pointer;position:relative;text-decoration:none;
+      transition:opacity .2s;-webkit-tap-highlight-color:transparent;
+    }
+    .nav-item:active{opacity:.6}
+    .nav-item i{font-size:1.2rem;color:var(--text-3);transition:color .25s,filter .25s,transform .25s}
+    .nav-item span{font-size:.59rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);transition:color .25s}
+    .nav-item.active i{color:var(--purple-hi);filter:drop-shadow(0 0 5px rgba(160,32,240,.85));transform:scale(1.18)}
+    .nav-item.active span{color:var(--purple-hi)}
+    .nav-item i.has-notif{
+      color:var(--magenta)!important;
+      filter:drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45))!important;
+      animation:navPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes navPulse{0%,100%{filter:drop-shadow(0 0 6px #ff00ff)}50%{filter:drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff)}}
+    .badge-counter{
+      position:absolute;top:8px;left:calc(50% + 4px);
+      min-width:17px;height:17px;padding:0 3px;
+      background:var(--magenta);border:2px solid var(--bg);border-radius:10px;
+      font-family:'Urbanist',sans-serif;font-size:.58rem;font-weight:900;color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 0 10px rgba(255,0,255,.9);pointer-events:none;
+      animation:badgeIn .3s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes badgeIn{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
+  </style>
+</head>
+<body>
+<div id="page">
+
+  <div class="topbar">
+    <span class="topbar-logo">KINETIC</span>
+    <span class="topbar-center">Actividad</span>
+    <button class="topbar-action" id="btnMarkAll">Marcar todo ✓</button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filter-tabs">
+    <div class="ftab active" data-filter="all">🔔 Todo</div>
+    <div class="ftab" data-filter="like">❤ Likes</div>
+    <div class="ftab" data-filter="match">✨ Matches</div>
+    <div class="ftab" data-filter="message">💬 Mensajes</div>
+    <div class="ftab" data-filter="visit">👁 Visitas</div>
+  </div>
+
+  <div class="section-label"><span id="sectionLbl">🔔 Actividad reciente</span></div>
+
+  <!-- SKELETON -->
+  <div id="skeleton">
+    <div class="skel-row"><div class="skel-av skel-shimmer"></div><div class="skel-lines"><div class="skel-line skel-shimmer" style="height:13px;width:55%"></div><div class="skel-line skel-shimmer" style="height:10px;width:75%"></div><div class="skel-line skel-shimmer" style="height:9px;width:30%"></div></div></div>
+    <div class="skel-row"><div class="skel-av skel-shimmer"></div><div class="skel-lines"><div class="skel-line skel-shimmer" style="height:13px;width:45%"></div><div class="skel-line skel-shimmer" style="height:10px;width:68%"></div><div class="skel-line skel-shimmer" style="height:9px;width:25%"></div></div></div>
+    <div class="skel-row"><div class="skel-av skel-shimmer"></div><div class="skel-lines"><div class="skel-line skel-shimmer" style="height:13px;width:60%"></div><div class="skel-line skel-shimmer" style="height:10px;width:50%"></div><div class="skel-line skel-shimmer" style="height:9px;width:35%"></div></div></div>
+    <div class="skel-row"><div class="skel-av skel-shimmer"></div><div class="skel-lines"><div class="skel-line skel-shimmer" style="height:13px;width:50%"></div><div class="skel-line skel-shimmer" style="height:10px;width:80%"></div><div class="skel-line skel-shimmer" style="height:9px;width:28%"></div></div></div>
+  </div>
+
+  <div id="notifList"></div>
+
+  <div id="emptyState">
+    <div class="empty-icon">🔔</div>
+    <div class="empty-title">Sin actividad</div>
+    <div class="empty-sub" id="emptySub">No tienes notificaciones nuevas. ¡Sigue explorando el Radar!</div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="radar.html"><i class="fa-solid fa-location-crosshairs"></i><span>Radar</span></a>
+  <a class="nav-item" href="chats.html" id="navChats"><i class="fa-solid fa-comment-dots" id="navChatIcon"></i><span>Chats</span></a>
+  <a class="nav-item active" href="notificaciones.html"><i class="fa-solid fa-bell"></i><span>Actividad</span></a>
+  <a class="nav-item" href="perfil.html"><i class="fa-solid fa-user"></i><span>Perfil</span></a>
+</nav>
+
+<script type="module">
+  import { createClient }
+    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const SUPABASE_URL = 'https://qemnczuklcztdajyjblb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_HE46cLZtaukvcva6bdKLGg_gz8HRet3';
+  const supabase     = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none"
+    style="width:65%;height:65%;stroke:#ff00ff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;">
+    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>`;
+
+  let me          = null;
+  let allNotifs   = [];   // todas las notificaciones cargadas
+  let activeFilter = 'all';
+  let realtimeCh  = null;
+
+  /* ── HELPERS ── */
+  function isUrl(v){ return typeof v==='string' && /^https?:\/\/.{5,}/.test(v.trim()); }
+  function firstPhoto(d){ if(!d) return null; return [d.avatar_url,...(d.photos||[])].find(isUrl)||null; }
+  function relTime(ts){
+    if(!ts) return '';
+    const d=Date.now()-new Date(ts).getTime();
+    if(d<60000)     return 'ahora';
+    if(d<3600000)   return `${Math.floor(d/60000)}m`;
+    if(d<86400000)  return `${Math.floor(d/3600000)}h`;
+    if(d<604800000) return `${Math.floor(d/86400000)}d`;
+    return new Date(ts).toLocaleDateString('es',{day:'2-digit',month:'short'});
+  }
+
+  let _tt=null;
+  function showToast(msg,err=false){
+    const el=document.getElementById('toast');
+    el.textContent=err?`⚠  ${msg}`:`✓  ${msg}`;
+    el.style.borderColor=err?'rgba(255,34,85,.5)':'rgba(138,43,226,.5)';
+    el.classList.add('show'); clearTimeout(_tt);
+    _tt=setTimeout(()=>el.classList.remove('show'),3000);
+  }
+  function hideSkeleton(){ const s=document.getElementById('skeleton'); if(s) s.style.display='none'; }
+
+  /* ── TIPOS DE NOTIFICACIÓN ── */
+  const TYPE_META = {
+    like:    { icon:'❤', color:'#ff0055', label:'te dio like', title: n => `${n} te dio like` },
+    match:   { icon:'✨', color:'#ffd700', label:'¡Match!',    title: n => `¡Match con ${n}!` },
+    message: { icon:'💬', color:'#8a2be2', label:'te escribió',title: n => `${n} te escribió` },
+    visit:   { icon:'👁', color:'#00ffff', label:'vio tu perfil',title: n => `${n} vio tu perfil` },
+  };
+
+  /* ── AUTH ── */
+  const { data:{ session } } = await supabase.auth.getSession();
+  if(!session){ window.location.replace('index.html'); }
+  me = session.user;
+
+  await loadNotifications();
+  subscribeRealtime();
+  loadUnreadBadge();
+
+  /* ── FILTROS ── */
+  document.querySelectorAll('.ftab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeFilter = tab.dataset.filter || 'all';
+      const labels = {
+        all:'🔔 Actividad reciente', like:'❤ Likes recibidos',
+        match:'✨ Tus matches', message:'💬 Mensajes nuevos', visit:'👁 Visitas al perfil',
+      };
+      const emptySubs = {
+        all:'No tienes notificaciones nuevas.', like:'Nadie te ha dado like todavía.',
+        match:'Aún no tienes matches.', message:'No tienes mensajes nuevos.', visit:'Nadie ha visto tu perfil todavía.',
+      };
+      document.getElementById('sectionLbl').textContent  = labels[activeFilter];
+      document.getElementById('emptySub').textContent    = emptySubs[activeFilter];
+      renderList();
+    });
+  });
+
+  /* ── MARCAR TODO ── */
+  document.getElementById('btnMarkAll').addEventListener('click', async () => {
+    await supabase.from('notifications')
+      .update({ read: true })
+      .eq('user_id', me.id).eq('read', false);
+    allNotifs = allNotifs.map(n => ({ ...n, read:true }));
+    renderList();
+    showToast('Todo marcado como leído ✓');
+  });
+
+  /* ══════════════════════════════════════════════
+     CARGAR NOTIFICACIONES
+     Tabla `notifications`:
+       id, user_id (destinatario), actor_id (quien generó),
+       type ('like'|'match'|'message'|'visit'),
+       ref_id (id del like/match/mensaje/perfil),
+       read boolean default false,
+       created_at timestamptz
+
+     Join con profiles del actor para nombre + foto.
+  ══════════════════════════════════════════════ */
+  async function loadNotifications(){
+    hideSkeleton();
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select(`
+          id, type, ref_id, read, created_at,
+          actor:actor_id(id,nombre,avatar_url,photos,online)
+        `)
+        .eq('user_id', me.id)
+        .order('created_at', { ascending:false })
+        .limit(80);
+
+      if(error) throw error;
+      allNotifs = data || [];
+      renderList();
+    } catch(err){
+      console.error('[Kinetic - notificaciones]', err);
+      hideSkeleton();
+      showToast('Error al cargar notificaciones.', true);
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     REALTIME
+  ══════════════════════════════════════════════ */
+  function subscribeRealtime(){
+    if(realtimeCh) supabase.removeChannel(realtimeCh);
+    realtimeCh = supabase
+      .channel('notifs-page')
+      .on('postgres_changes',
+        { event:'INSERT', schema:'public', table:'notifications', filter:`user_id=eq.${me.id}` },
+        async payload => {
+          /* Enriquecer con perfil del actor */
+          const notif = payload.new;
+          if(!notif) return;
+          const { data:actor } = await supabase
+            .from('profiles').select('id,nombre,avatar_url,photos,online')
+            .eq('id', notif.actor_id).single();
+          allNotifs.unshift({ ...notif, actor });
+          renderList();
+          /* Vibrar en móvil si está disponible */
+          if(navigator.vibrate) navigator.vibrate([60,30,60]);
+        }
+      )
+      .subscribe();
+  }
+
+  /* ══════════════════════════════════════════════
+     RENDER LISTA
+  ══════════════════════════════════════════════ */
+  function renderList(){
+    const list  = document.getElementById('notifList');
+    const empty = document.getElementById('emptyState');
+
+    /* Filtrar */
+    let filtered = allNotifs;
+    if(activeFilter !== 'all') filtered = allNotifs.filter(n => n.type === activeFilter);
+
+    if(!filtered.length){
+      list.innerHTML='';
+      empty.style.display='flex';
+      return;
+    }
+
+    empty.style.display='none';
+    list.innerHTML='';
+
+    /* Agrupar por día */
+    let lastDay = '';
+    const frag  = document.createDocumentFragment();
+
+    filtered.forEach((notif, idx) => {
+      const day = new Date(notif.created_at).toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'});
+      if(day !== lastDay){
+        lastDay = day;
+        const sep = document.createElement('div');
+        sep.className='section-label';
+        sep.innerHTML=`<span>${day.charAt(0).toUpperCase()+day.slice(1)}</span>`;
+        frag.appendChild(sep);
+      }
+      frag.appendChild(buildRow(notif, idx));
+    });
+    list.appendChild(frag);
+  }
+
+  /* ══════════════════════════════════════════════
+     BUILD ROW
+  ══════════════════════════════════════════════ */
+  function buildRow(notif, idx){
+    const actor   = notif.actor || {};
+    const name    = actor.nombre || 'Alguien';
+    const photo   = firstPhoto(actor);
+    const meta    = TYPE_META[notif.type] || TYPE_META.like;
+    const unread  = !notif.read;
+    const time    = relTime(notif.created_at);
+
+    const row = document.createElement('div');
+    row.className = 'notif-row' + (unread?' unread':'');
+    row.style.animationDelay = `${Math.min(idx*.04,.6)}s`;
+
+    /* Avatar */
+    const avWrap=document.createElement('div'); avWrap.className='notif-av';
+    if(photo){
+      const img=document.createElement('img'); img.className='notif-av-img';
+      img.src=photo; img.alt=name; img.loading='lazy';
+      img.onerror=()=>{ img.remove(); const ph=document.createElement('div'); ph.className='notif-av-ph'; ph.innerHTML='👤'; avWrap.insertBefore(ph,avWrap.firstChild); };
+      avWrap.appendChild(img);
+    } else {
+      const ph=document.createElement('div'); ph.className='notif-av-ph'; ph.textContent='👤';
+      avWrap.appendChild(ph);
+    }
+    /* Icono de tipo */
+    const typeIco=document.createElement('div');
+    typeIco.className=`notif-type-icon nti-${notif.type}`;
+    typeIco.textContent=meta.icon;
+    avWrap.appendChild(typeIco);
+    row.appendChild(avWrap);
+
+    /* Body */
+    const body=document.createElement('div'); body.className='notif-body';
+    const title=document.createElement('div'); title.className='notif-title';
+    title.textContent=meta.title(name);
+    body.appendChild(title);
+
+    /* Subtítulo según tipo */
+    let subText='';
+    if(notif.type==='message' && notif.preview) subText=notif.preview;
+    else if(notif.type==='like')    subText='Toca para ver su perfil';
+    else if(notif.type==='match')   subText='¡Ya pueden chatear!';
+    else if(notif.type==='visit')   subText='Vio tu perfil recientemente';
+
+    if(subText){
+      const sub=document.createElement('div'); sub.className='notif-sub'; sub.textContent=subText;
+      body.appendChild(sub);
+    }
+
+    const timeEl=document.createElement('div'); timeEl.className='notif-time'; timeEl.textContent=time;
+    body.appendChild(timeEl);
+    row.appendChild(body);
+
+    /* Punto unread */
+    if(unread){
+      const dot=document.createElement('div'); dot.className='notif-dot'; row.appendChild(dot);
+    }
+
+    /* Click → marcar leído + navegar */
+    row.addEventListener('click', async () => {
+      if(unread){
+        await supabase.from('notifications').update({ read:true }).eq('id', notif.id);
+        notif.read=true; row.classList.remove('unread');
+        row.querySelector('.notif-dot')?.remove();
+      }
+      navigateToNotif(notif, actor.id);
+    });
+
+    return row;
+  }
+
+  /* ══════════════════════════════════════════════
+     NAVEGACIÓN DESDE NOTIFICACIÓN
+  ══════════════════════════════════════════════ */
+  function navigateToNotif(notif, actorId){
+    if(!actorId) return;
+    try{ localStorage.setItem('selected_user_id', actorId); }catch(_){}
+
+    switch(notif.type){
+      case 'message':
+        window.location.href=`chat-interno.html?id=${encodeURIComponent(actorId)}`;
+        break;
+      case 'match':
+        window.location.href='matches.html';
+        break;
+      default:
+        window.location.href=`perfil-detalle.html?id=${encodeURIComponent(actorId)}`;
+    }
+  }
+
+  /* ── BADGE CHATS ── */
+  async function loadUnreadBadge(){
+    try {
+      const { count }=await supabase.from('chats').select('id',{count:'exact',head:true}).eq('unread_for',me.id);
+      const n=count||0;
+      const iconEl=document.getElementById('navChatIcon');
+      const navItem=document.getElementById('navChats');
+      navItem.querySelectorAll('.badge-counter').forEach(b=>b.remove());
+      if(n>0){
+        iconEl.classList.add('has-notif');
+        const b=document.createElement('div'); b.className='badge-counter'; b.textContent=n>9?'9+':String(n);
+        navItem.appendChild(b);
+      } else iconEl.classList.remove('has-notif');
+    }catch(e){}
+  }
+
+  window.addEventListener('pagehide',()=>{ if(realtimeCh) supabase.removeChannel(realtimeCh); });
+</script>
+
+<!--
+═══════════════════════════════════════════════════════════
+  SQL PARA SUPABASE — tabla notifications
+
+  create table notifications (
+    id         uuid primary key default gen_random_uuid(),
+    user_id    uuid references profiles(id) on delete cascade,   -- destinatario
+    actor_id   uuid references profiles(id) on delete cascade,   -- quien generó la notif
+    type       text check (type in ('like','match','message','visit')),
+    ref_id     uuid,          -- id del like/match/mensaje relacionado
+    preview    text,          -- preview del mensaje (solo type=message)
+    read       boolean default false,
+    created_at timestamptz default now()
+  );
+
+  create index idx_notifs_user on notifications(user_id, created_at desc);
+  alter table notifications enable row level security;
+  create policy "Solo el dueño puede ver y editar" on notifications
+    for all using (auth.uid() = user_id);
+
+  -- Habilitar realtime
+  alter publication supabase_realtime add table notifications;
+
+  -- Función para insertar notificación automáticamente al dar like:
+  create or replace function notify_on_like()
+  returns trigger language plpgsql security definer as $$
+  begin
+    insert into notifications(user_id, actor_id, type, ref_id)
+    values (new.receiver_id, new.sender_id, 'like', new.id)
+    on conflict do nothing;
+    return new;
+  end; $$;
+
+  create trigger trg_notify_like
+    after insert on likes
+    for each row execute function notify_on_like();
+
+  -- Función para notificación de match:
+  create or replace function notify_on_match()
+  returns trigger language plpgsql security definer as $$
+  begin
+    insert into notifications(user_id, actor_id, type, ref_id)
+    values
+      (new.user1_id, new.user2_id, 'match', new.id),
+      (new.user2_id, new.user1_id, 'match', new.id)
+    on conflict do nothing;
+    return new;
+  end; $$;
+
+  create trigger trg_notify_match
+    after insert on matches
+    for each row execute function notify_on_match();
+
+  -- Función para notificación de mensaje:
+  create or replace function notify_on_message()
+  returns trigger language plpgsql security definer as $$
+  declare
+    v_other uuid;
+  begin
+    select case when user1_id = new.sender_id then user2_id else user1_id end
+    into v_other from chats where id = new.chat_id;
+
+    insert into notifications(user_id, actor_id, type, ref_id, preview)
+    values (v_other, new.sender_id, 'message', new.id,
+            left(new.content, 60))
+    on conflict do nothing;
+    return new;
+  end; $$;
+
+  create trigger trg_notify_message
+    after insert on messages
+    for each row execute function notify_on_message();
+═══════════════════════════════════════════════════════════
+-->
+</body>
+</html>
