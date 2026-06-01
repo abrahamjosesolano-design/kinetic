@@ -5,24 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0d0616" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Kinetic · Radar</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap"
-        rel="stylesheet" />
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
-    /* ══════════════════════════════════════════════
-       DESIGN TOKENS
-    ══════════════════════════════════════════════ */
     :root {
       --bg:          #0d0616;
       --bg-s:        #12091f;
       --bg-card:     #12091f;
-      --bg-card-hi:  #1a0d2e;
       --purple:      #8a2be2;
       --purple-hi:   #a020f0;
       --magenta:     #ff00ff;
@@ -37,436 +32,305 @@
       --topbar-h:    56px;
       --r:           12px;
       --r-sm:        8px;
-      --grad:        linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
-      --grad-card:   linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.3) 55%, transparent 100%);
+      --grad:        linear-gradient(135deg,#8a2be2 0%,#ff00ff 100%);
+      --grad-card:   linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.3) 55%,transparent 100%);
       --glow-p:      0 0 18px rgba(138,43,226,.55);
       --glow-m:      0 0 14px rgba(255,0,255,.65);
+      --st:          env(safe-area-inset-top,0px);
+      --sb:          env(safe-area-inset-bottom,0px);
     }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Urbanist', sans-serif;
-      font-size: 16px;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      height:100%;background:var(--bg);color:var(--text);
+      font-family:'Urbanist',sans-serif;font-size:16px;
+      -webkit-font-smoothing:antialiased;overflow-x:hidden;
     }
+    ::-webkit-scrollbar{width:3px}
+    ::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px}
 
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
-
-    /* ── ATMOSPHERE ── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    body::before{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       background-image:
-        repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.033) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.033) 40px);
+        repeating-linear-gradient(0deg,  transparent,transparent 39px,rgba(138,43,226,.033) 40px),
+        repeating-linear-gradient(90deg, transparent,transparent 39px,rgba(138,43,226,.033) 40px);
     }
-    body::after {
-      content: '';
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    body::after{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       background:
-        radial-gradient(ellipse 65% 42% at 10%  5%,  rgba(138,43,226,.16) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 34% at 88% 90%, rgba(255,0,255,.10)  0%, transparent 60%),
-        radial-gradient(ellipse 38% 26% at 65% 12%, rgba(0,255,255,.06)  0%, transparent 55%);
+        radial-gradient(ellipse 65% 42% at 10%  5%, rgba(138,43,226,.16) 0%,transparent 65%),
+        radial-gradient(ellipse 50% 34% at 88% 90%,rgba(255,0,255,.10)  0%,transparent 60%);
     }
 
-    /* ══════════════════════════════════════════════
-       PAGE WRAPPER
-    ══════════════════════════════════════════════ */
-    #page {
-      position: relative; z-index: 1;
-      min-height: 100vh;
-      display: flex; flex-direction: column;
-      padding-bottom: calc(var(--nav-h) + 12px);
+    /* ── PAGE ── */
+    #page{
+      position:relative;z-index:1;min-height:100vh;
+      display:flex;flex-direction:column;
+      padding-bottom:calc(var(--nav-h) + 12px);
     }
 
-    /* ══════════════════════════════════════════════
-       TOP BAR
-    ══════════════════════════════════════════════ */
-    .topbar {
-      position: sticky; top: 0; z-index: 100;
-      height: var(--topbar-h);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 18px;
-      background: rgba(13,6,22,.95);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+    /* ── TOP BAR ── */
+    .topbar{
+      position:sticky;top:0;z-index:100;
+      height:var(--topbar-h);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 18px;
+      background:rgba(13,6,22,.95);backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);flex-shrink:0;
     }
-    .topbar-logo {
-      font-family: 'Orbitron', monospace;
-      font-size: 1.22rem; font-weight: 900; letter-spacing: .18em;
-      background: var(--grad);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 8px rgba(138,43,226,.75));
+    .topbar-logo{
+      font-family:'Orbitron',monospace;font-size:1.22rem;font-weight:900;letter-spacing:.18em;
+      background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;filter:drop-shadow(0 0 8px rgba(138,43,226,.75));
     }
-    .topbar-center {
-      font-family: 'Orbitron', monospace;
-      font-size: .58rem; font-weight: 700;
-      letter-spacing: .24em; text-transform: uppercase;
-      color: var(--text-3);
+    .topbar-center{
+      font-family:'Orbitron',monospace;font-size:.58rem;font-weight:700;
+      letter-spacing:.24em;text-transform:uppercase;color:var(--text-3);
     }
-    /* Live users pill */
-    .topbar-pill {
-      display: none;
-      align-items: center; gap: 6px;
-      padding: 5px 12px;
-      background: rgba(57,255,20,.08);
-      border: 1px solid rgba(57,255,20,.2);
-      border-radius: 20px;
-      font-family: 'Orbitron', monospace;
-      font-size: .6rem; font-weight: 700;
-      color: var(--green); letter-spacing: .06em;
+    .topbar-pill{
+      display:none;align-items:center;gap:6px;padding:5px 12px;
+      background:rgba(57,255,20,.08);border:1px solid rgba(57,255,20,.2);
+      border-radius:20px;font-family:'Orbitron',monospace;
+      font-size:.6rem;font-weight:700;color:var(--green);letter-spacing:.06em;
     }
-    .live-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 6px var(--green);
-      animation: livePulse 1.8s ease-in-out infinite;
+    .live-dot{
+      width:7px;height:7px;border-radius:50%;background:var(--green);
+      box-shadow:0 0 6px var(--green);animation:livePulse 1.8s ease-in-out infinite;
     }
-    @keyframes livePulse {
-      0%,100% { box-shadow: 0 0 4px var(--green); }
-      50%     { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
+    @keyframes livePulse{
+      0%,100%{box-shadow:0 0 4px var(--green)}
+      50%    {box-shadow:0 0 12px var(--green),0 0 4px #fff}
     }
 
-    /* ══════════════════════════════════════════════
-       FILTER CHIPS
-    ══════════════════════════════════════════════ */
-    .filter-bar {
-      display: flex; gap: 8px; align-items: center;
-      padding: 12px 14px 0;
-      overflow-x: auto; scrollbar-width: none;
+    /* ── GEO BAR ── */
+    #geoBar{
+      display:none;align-items:center;gap:10px;
+      margin:10px 14px 0;padding:9px 14px;
+      background:rgba(0,255,255,.07);border:1px solid rgba(0,255,255,.22);
+      border-radius:10px;font-size:.78rem;color:var(--cyan);font-weight:600;
     }
-    .filter-bar::-webkit-scrollbar { display: none; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 14px;
-      background: rgba(138,43,226,.1);
-      border: 1px solid rgba(138,43,226,.22);
-      border-radius: 20px;
-      font-family: 'Urbanist', sans-serif;
-      font-size: .78rem; font-weight: 700; letter-spacing: .04em;
-      color: var(--text-3); cursor: pointer; white-space: nowrap;
-      flex-shrink: 0;
-      transition: all .2s;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
+    #geoBar i{font-size:.9rem;flex-shrink:0}
+    #geoBar button{
+      margin-left:auto;padding:5px 12px;
+      background:rgba(0,255,255,.15);border:1px solid rgba(0,255,255,.35);
+      border-radius:8px;color:var(--cyan);font-family:inherit;
+      font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;
+      transition:background .2s;
     }
-    .chip.active {
-      background: var(--grad);
-      border-color: transparent; color: #fff;
-      box-shadow: var(--glow-p);
+    #geoBar button:hover{background:rgba(0,255,255,.28)}
+
+    /* ── FILTER CHIPS ── */
+    .filter-bar{
+      display:flex;gap:8px;align-items:center;
+      padding:12px 14px 0;overflow-x:auto;scrollbar-width:none;
     }
-    .chip:not(.active):hover {
-      background: rgba(138,43,226,.2);
-      border-color: var(--purple-hi);
-      color: var(--text);
+    .filter-bar::-webkit-scrollbar{display:none}
+    .chip{
+      display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+      background:rgba(138,43,226,.1);border:1px solid rgba(138,43,226,.22);
+      border-radius:20px;font-family:'Urbanist',sans-serif;
+      font-size:.78rem;font-weight:700;letter-spacing:.04em;
+      color:var(--text-3);cursor:pointer;white-space:nowrap;flex-shrink:0;
+      transition:all .2s;user-select:none;-webkit-tap-highlight-color:transparent;
+    }
+    .chip.active{background:var(--grad);border-color:transparent;color:#fff;box-shadow:var(--glow-p)}
+    .chip:not(.active):hover{background:rgba(138,43,226,.2);border-color:var(--purple-hi);color:var(--text)}
+
+    /* ── SECTION DIVIDER ── */
+    .section-label{
+      display:flex;align-items:center;gap:10px;padding:14px 16px 10px;
+    }
+    .section-label::before,.section-label::after{content:'';flex:1;height:1px}
+    .section-label::before{background:linear-gradient(90deg,transparent,rgba(255,0,255,.28))}
+    .section-label::after {background:linear-gradient(90deg,rgba(255,0,255,.28),transparent)}
+    .section-label span{
+      font-family:'Orbitron',monospace;font-size:.55rem;font-weight:700;
+      letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);white-space:nowrap;
     }
 
-    /* ══════════════════════════════════════════════
-       SECTION DIVIDER
-    ══════════════════════════════════════════════ */
-    .section-label {
-      display: flex; align-items: center; gap: 10px;
-      padding: 14px 16px 10px;
+    /* ── RADAR GRID ── */
+    #radarGrid{
+      display:none;grid-template-columns:repeat(3,1fr);
+      gap:6px;padding:0 10px;
     }
-    .section-label::before,
-    .section-label::after { content: ''; flex: 1; height: 1px; }
-    .section-label::before { background: linear-gradient(90deg, transparent, rgba(255,0,255,.28)); }
-    .section-label::after  { background: linear-gradient(90deg, rgba(255,0,255,.28), transparent); }
-    .section-label span {
-      font-family: 'Orbitron', monospace;
-      font-size: .55rem; font-weight: 700;
-      letter-spacing: .22em; text-transform: uppercase;
-      color: var(--text-3); white-space: nowrap;
-    }
-
-    /* ══════════════════════════════════════════════
-       RADAR GRID
-    ══════════════════════════════════════════════ */
-    #radarGrid {
-      display: none;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      padding: 0 10px;
-    }
-    @media (min-width: 480px)  { #radarGrid { grid-template-columns: repeat(4, 1fr); } }
-    @media (min-width: 680px)  { #radarGrid { grid-template-columns: repeat(5, 1fr); } }
-    @media (min-width: 900px)  { #radarGrid { grid-template-columns: repeat(6, 1fr); } }
-    @media (min-width: 1100px) { #radarGrid { grid-template-columns: repeat(7, 1fr); } }
+    @media(min-width:480px) {#radarGrid{grid-template-columns:repeat(4,1fr)}}
+    @media(min-width:680px) {#radarGrid{grid-template-columns:repeat(5,1fr)}}
+    @media(min-width:900px) {#radarGrid{grid-template-columns:repeat(6,1fr)}}
 
     /* ── CARD ── */
-    .radar-card {
-      position: relative;
-      aspect-ratio: 3 / 4;
-      border-radius: var(--r);
-      overflow: hidden;
-      cursor: pointer;
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
-      transition: transform .18s cubic-bezier(.25,.46,.45,.94), border-color .2s, box-shadow .2s;
-      animation: cardIn .3s ease both;
-      -webkit-tap-highlight-color: transparent;
+    .radar-card{
+      position:relative;aspect-ratio:3/4;border-radius:var(--r);overflow:hidden;
+      cursor:pointer;background:var(--bg-card);border:1px solid var(--border-card);
+      transition:transform .18s cubic-bezier(.25,.46,.45,.94),border-color .2s,box-shadow .2s;
+      animation:cardIn .3s ease both;-webkit-tap-highlight-color:transparent;
     }
-    @keyframes cardIn {
-      from { opacity: 0; transform: scale(.88) translateY(10px); }
-      to   { opacity: 1; transform: scale(1)   translateY(0); }
+    @keyframes cardIn{
+      from{opacity:0;transform:scale(.88) translateY(10px)}
+      to  {opacity:1;transform:scale(1)   translateY(0)}
     }
-    .radar-card:hover {
-      transform: scale(1.04) translateY(-3px);
-      border-color: rgba(255,0,255,.45);
-      box-shadow: 0 8px 28px rgba(255,0,255,.18), var(--glow-m);
-      z-index: 2;
+    .radar-card:hover{
+      transform:scale(1.04) translateY(-3px);
+      border-color:rgba(255,0,255,.45);
+      box-shadow:0 8px 28px rgba(255,0,255,.18),var(--glow-m);z-index:2;
     }
-    .radar-card:active { transform: scale(.97); }
+    .radar-card:active{transform:scale(.97)}
 
-    /* Foto */
-    .card-photo {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover; display: block;
+    .card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+    .card-avatar-ph{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(160deg,#1a0f2e 0%,#0d0616 100%);
     }
-    .card-avatar-ph {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(160deg, #1a0f2e 0%, #0d0616 100%);
-    }
-    .card-avatar-ph svg { width: 55%; height: 55%; max-width: 80px; }
+    .card-avatar-ph svg{width:55%;height:55%;max-width:80px}
+    .card-grad{position:absolute;inset:0;background:var(--grad-card);pointer-events:none}
 
-    /* Overlay */
-    .card-grad {
-      position: absolute; inset: 0;
-      background: var(--grad-card);
-      pointer-events: none;
+    .card-online{
+      position:absolute;top:7px;left:7px;width:9px;height:9px;border-radius:50%;
+      background:var(--green);border:2px solid rgba(13,6,22,.8);
+      box-shadow:0 0 7px var(--green);animation:greenPulse 2s ease-in-out infinite;
+    }
+    @keyframes greenPulse{
+      0%,100%{box-shadow:0 0 5px var(--green)}
+      50%    {box-shadow:0 0 12px var(--green),0 0 4px #fff}
     }
 
-    /* Online dot */
-    .card-online {
-      position: absolute; top: 7px; left: 7px;
-      width: 9px; height: 9px; border-radius: 50%;
-      background: var(--green);
-      border: 2px solid rgba(13,6,22,.8);
-      box-shadow: 0 0 7px var(--green);
-      animation: greenPulse 2s ease-in-out infinite;
-    }
-    @keyframes greenPulse {
-      0%,100% { box-shadow: 0 0 5px var(--green); }
-      50%     { box-shadow: 0 0 12px var(--green), 0 0 4px #fff; }
+    .card-badge{
+      position:absolute;top:7px;right:7px;padding:2px 8px;
+      background:rgba(13,6,22,.65);border:1px solid rgba(255,0,255,.3);
+      border-radius:8px;font-family:'Orbitron',monospace;
+      font-size:.52rem;font-weight:700;letter-spacing:.06em;
+      color:rgba(255,0,255,.85);backdrop-filter:blur(4px);
     }
 
-    /* Gender badge */
-    .card-badge {
-      position: absolute; top: 7px; right: 7px;
-      padding: 2px 8px;
-      background: rgba(13,6,22,.65);
-      border: 1px solid rgba(255,0,255,.3);
-      border-radius: 8px;
-      font-family: 'Orbitron', monospace;
-      font-size: .52rem; font-weight: 700; letter-spacing: .06em;
-      color: rgba(255,0,255,.85);
-      backdrop-filter: blur(4px);
+    /* liked stamp */
+    .card-liked-stamp{
+      position:absolute;top:7px;left:7px;
+      width:28px;height:28px;border-radius:50%;
+      background:rgba(255,0,255,.85);
+      display:flex;align-items:center;justify-content:center;
+      font-size:.8rem;box-shadow:0 0 10px rgba(255,0,255,.6);
+      pointer-events:none;
     }
 
-    /* Info area — nombre + meta + distancia */
-    .card-info {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 8px 8px 7px; z-index: 1;
+    .card-info{position:absolute;bottom:0;left:0;right:0;padding:8px 8px 7px;z-index:1}
+    .card-name{
+      font-size:.78rem;font-weight:800;color:#fff;line-height:1.2;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      text-shadow:0 1px 6px rgba(0,0,0,.9);
     }
-    .card-name {
-      font-size: .78rem; font-weight: 800;
-      color: #fff; line-height: 1.2;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      text-shadow: 0 1px 6px rgba(0,0,0,.9);
+    .card-meta{
+      font-family:'Orbitron',monospace;font-size:.5rem;font-weight:600;
+      color:rgba(255,255,255,.5);margin-top:2px;letter-spacing:.05em;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
-    .card-meta {
-      font-family: 'Orbitron', monospace;
-      font-size: .5rem; font-weight: 600;
-      color: rgba(255,255,255,.5);
-      margin-top: 2px; letter-spacing: .05em;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .card-age-accent { color: rgba(255,0,255,.75); }
+    .card-age-accent{color:rgba(255,0,255,.75)}
 
-    /* ── DISTANCIA ─────────────────────────────────
-       Badge de distancia — parte inferior derecha
-       de la tarjeta. Diseño neón cian para diferenciarse
-       del badge de género (fucsia).
-    ──────────────────────────────────────────────── */
-    .card-dist {
-      position: absolute; bottom: 7px; right: 7px;
-      display: flex; align-items: center; gap: 4px;
-      padding: 2px 7px;
-      background: rgba(0,255,255,.12);
-      border: 1px solid rgba(0,255,255,.35);
-      border-radius: 8px;
-      font-family: 'Orbitron', monospace;
-      font-size: .5rem; font-weight: 700; letter-spacing: .06em;
-      color: var(--cyan);
-      backdrop-filter: blur(4px);
-      pointer-events: none;
+    .card-dist{
+      position:absolute;bottom:7px;right:7px;
+      display:flex;align-items:center;gap:4px;padding:2px 7px;
+      background:rgba(0,255,255,.12);border:1px solid rgba(0,255,255,.35);
+      border-radius:8px;font-family:'Orbitron',monospace;
+      font-size:.5rem;font-weight:700;letter-spacing:.06em;
+      color:var(--cyan);backdrop-filter:blur(4px);pointer-events:none;
     }
-    .card-dist i { font-size: .52rem; opacity: .8; }
 
-    /* ══════════════════════════════════════════════
-       SKELETON
-    ══════════════════════════════════════════════ */
-    #skeleton {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px; padding: 0 10px;
+    /* ── SKELETON ── */
+    #skeleton{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 10px;
     }
-    @media (min-width: 480px) { #skeleton { grid-template-columns: repeat(4, 1fr); } }
-    @media (min-width: 680px) { #skeleton { grid-template-columns: repeat(5, 1fr); } }
-    .skel-card {
-      aspect-ratio: 3 / 4; border-radius: var(--r);
-      background: linear-gradient(90deg,
-        rgba(138,43,226,.05) 0%,
-        rgba(138,43,226,.13) 50%,
-        rgba(138,43,226,.05) 100%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border: 1px solid rgba(138,43,226,.08);
+    @media(min-width:480px){#skeleton{grid-template-columns:repeat(4,1fr)}}
+    @media(min-width:680px){#skeleton{grid-template-columns:repeat(5,1fr)}}
+    .skel-card{
+      aspect-ratio:3/4;border-radius:var(--r);
+      background:linear-gradient(90deg,
+        rgba(138,43,226,.05) 0%,rgba(138,43,226,.13) 50%,rgba(138,43,226,.05) 100%);
+      background-size:200% 100%;animation:shimmer 1.5s infinite;
+      border:1px solid rgba(138,43,226,.08);
     }
-    @keyframes shimmer { to { background-position: -200% 0; } }
+    @keyframes shimmer{to{background-position:-200% 0}}
 
-    /* ══════════════════════════════════════════════
-       EMPTY / AUTH STATES
-    ══════════════════════════════════════════════ */
-    .state-wrap {
-      display: none;
-      flex-direction: column; align-items: center; justify-content: center;
-      padding: 70px 28px; gap: 18px; text-align: center;
+    /* ── STATES ── */
+    .state-wrap{
+      display:none;flex-direction:column;align-items:center;justify-content:center;
+      padding:70px 28px;gap:18px;text-align:center;
     }
-    .state-wrap.show { display: flex; }
-    .state-icon {
-      width: 80px; height: 80px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
-      background: rgba(138,43,226,.09);
-      border: 1px solid rgba(138,43,226,.22);
-      animation: iconPulse 3s ease-in-out infinite;
+    .state-wrap.show{display:flex}
+    .state-icon{
+      width:80px;height:80px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+      background:rgba(138,43,226,.09);border:1px solid rgba(138,43,226,.22);
+      animation:iconPulse 3s ease-in-out infinite;
     }
-    @keyframes iconPulse {
-      0%,100% { box-shadow: 0 0 20px rgba(138,43,226,.12); }
-      50%     { box-shadow: 0 0 40px rgba(138,43,226,.28); }
+    @keyframes iconPulse{
+      0%,100%{box-shadow:0 0 20px rgba(138,43,226,.12)}
+      50%    {box-shadow:0 0 40px rgba(138,43,226,.28)}
     }
-    .state-title {
-      font-family: 'Orbitron', monospace;
-      font-size: .9rem; font-weight: 700; letter-spacing: .06em; color: var(--text-2);
+    .state-title{
+      font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;
+      letter-spacing:.06em;color:var(--text-2);
     }
-    .state-sub  { font-size: .84rem; color: var(--text-3); line-height: 1.6; max-width: 260px; }
-    .btn-neon {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 22px;
-      background: rgba(255,0,255,.1);
-      border: 1px solid rgba(255,0,255,.3); border-radius: 22px;
-      font-size: .82rem; font-weight: 700; letter-spacing: .08em;
-      color: var(--magenta); text-decoration: none;
-      transition: background .2s, box-shadow .2s;
+    .state-sub{font-size:.84rem;color:var(--text-3);line-height:1.6;max-width:260px}
+    .btn-neon{
+      display:inline-flex;align-items:center;gap:8px;padding:10px 22px;
+      background:rgba(255,0,255,.1);border:1px solid rgba(255,0,255,.3);
+      border-radius:22px;font-size:.82rem;font-weight:700;letter-spacing:.08em;
+      color:var(--magenta);text-decoration:none;transition:background .2s,box-shadow .2s;
     }
-    .btn-neon:hover { background: rgba(255,0,255,.18); box-shadow: var(--glow-m); }
+    .btn-neon:hover{background:rgba(255,0,255,.18);box-shadow:var(--glow-m)}
 
-    /* Pill de geo permiso */
-    #geoBar {
-      display: none;
-      align-items: center; gap: 10px;
-      margin: 10px 14px 0;
-      padding: 9px 14px;
-      background: rgba(0,255,255,.07);
-      border: 1px solid rgba(0,255,255,.22);
-      border-radius: 10px;
-      font-size: .78rem; color: var(--cyan); font-weight: 600;
+    /* ── BOTTOM NAV ── */
+    nav.bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);
+      background:rgba(13,6,22,.97);backdrop-filter:blur(24px);
+      border-top:1px solid rgba(138,43,226,.16);
+      display:flex;align-items:stretch;z-index:200;
+      padding-bottom:var(--sb);
     }
-    #geoBar i { font-size: .9rem; flex-shrink: 0; }
-    #geoBar button {
-      margin-left: auto;
-      padding: 5px 12px;
-      background: rgba(0,255,255,.15);
-      border: 1px solid rgba(0,255,255,.35);
-      border-radius: 8px;
-      color: var(--cyan); font-family: inherit;
-      font-size: .72rem; font-weight: 700;
-      cursor: pointer; white-space: nowrap;
-      transition: background .2s;
+    .nav-item{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4px;cursor:pointer;position:relative;text-decoration:none;
+      transition:opacity .2s;-webkit-tap-highlight-color:transparent;
     }
-    #geoBar button:hover { background: rgba(0,255,255,.28); }
+    .nav-item:active{opacity:.6}
+    .nav-item i{font-size:1.22rem;color:var(--text-3);transition:color .25s,filter .25s,transform .25s}
+    .nav-item span{font-size:.59rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);transition:color .25s}
+    .nav-item.active i{color:var(--purple-hi);filter:drop-shadow(0 0 5px rgba(160,32,240,.85));transform:scale(1.18)}
+    .nav-item.active span{color:var(--purple-hi)}
+    .nav-item i.has-notif{
+      color:var(--magenta)!important;
+      filter:drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45))!important;
+      animation:navPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes navPulse{
+      0%,100%{filter:drop-shadow(0 0 6px #ff00ff)}
+      50%    {filter:drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff)}
+    }
+    .badge-counter{
+      position:absolute;top:8px;left:calc(50% + 4px);
+      min-width:17px;height:17px;padding:0 3px;
+      background:var(--magenta);border:2px solid var(--bg);border-radius:10px;
+      font-family:'Urbanist',sans-serif;font-size:.58rem;font-weight:900;color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 0 10px rgba(255,0,255,.9);pointer-events:none;
+      animation:badgeIn .3s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes badgeIn{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
 
-    /* ══════════════════════════════════════════════
-       BOTTOM NAV
-    ══════════════════════════════════════════════ */
-    nav.bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: var(--nav-h);
-      background: rgba(13,6,22,.97);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border-top: 1px solid rgba(138,43,226,.16);
-      display: flex; align-items: stretch;
-      z-index: 200;
-      padding-bottom: env(safe-area-inset-bottom, 0);
+    /* ── TOAST ── */
+    #toast{
+      position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;
+      transform:translateX(-50%) translateY(8px);
+      background:rgba(18,9,31,.97);border:1px solid rgba(138,43,226,.5);
+      border-radius:var(--r-sm);padding:10px 18px;
+      font-size:.84rem;font-weight:600;color:var(--text);
+      box-shadow:var(--glow-p);backdrop-filter:blur(16px);
+      z-index:9999;white-space:nowrap;opacity:0;pointer-events:none;
+      transition:opacity .25s,transform .25s;
     }
-    .nav-item {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 4px; cursor: pointer; position: relative;
-      text-decoration: none; transition: opacity .2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .nav-item:active { opacity: .6; }
-    .nav-item i {
-      font-size: 1.22rem; color: var(--text-3);
-      transition: color .25s, filter .25s, transform .25s;
-    }
-    .nav-item span {
-      font-size: .59rem; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--text-3); transition: color .25s;
-    }
-    .nav-item.active i {
-      color: var(--purple-hi);
-      filter: drop-shadow(0 0 5px rgba(160,32,240,.85));
-      transform: scale(1.18);
-    }
-    .nav-item.active span { color: var(--purple-hi); }
-    .nav-item i.has-notif {
-      color: var(--magenta) !important;
-      filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px rgba(255,0,255,.45)) !important;
-      animation: navPulse 2.2s ease-in-out infinite;
-    }
-    @keyframes navPulse {
-      0%,100% { filter: drop-shadow(0 0 6px #ff00ff); }
-      50%     { filter: drop-shadow(0 0 14px #ff00ff) drop-shadow(0 0 4px #fff); }
-    }
-    .badge-counter {
-      position: absolute; top: 8px; left: calc(50% + 4px);
-      min-width: 17px; height: 17px; padding: 0 3px;
-      background: var(--magenta);
-      border: 2px solid var(--bg); border-radius: 10px;
-      font-family: 'Urbanist', sans-serif;
-      font-size: .58rem; font-weight: 900; color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 10px rgba(255,0,255,.9);
-      pointer-events: none;
-      animation: badgeIn .3s cubic-bezier(.36,.07,.19,.97) both;
-    }
-    @keyframes badgeIn {
-      from { transform: scale(0); }
-      70%  { transform: scale(1.2); }
-      to   { transform: scale(1); }
-    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   </style>
 </head>
 <body>
-
 <div id="page">
 
-  <!-- TOP BAR -->
   <div class="topbar">
     <span class="topbar-logo">KINETIC</span>
     <span class="topbar-center">Radar</span>
@@ -476,26 +340,23 @@
     </div>
   </div>
 
-  <!-- BARRA DE SOLICITUD DE GEOLOCALIZACIÓN -->
   <div id="geoBar">
     <i class="fa-solid fa-location-dot"></i>
     <span>Activa tu ubicación para ver distancias</span>
     <button id="geoBtn">Activar</button>
   </div>
 
-  <!-- FILTER CHIPS -->
   <div class="filter-bar" id="filterBar">
     <div class="chip active" data-filter="all">🌐 Todos</div>
     <div class="chip" data-filter="online">🟢 En línea</div>
-    <div class="chip" data-filter="hombre">♂ Hombres</div>
-    <div class="chip" data-filter="mujer">♀ Mujeres</div>
-    <div class="chip" data-filter="otro">✦ Otro</div>
+    <div class="chip" data-filter="male">♂ Hombres</div>
+    <div class="chip" data-filter="female">♀ Mujeres</div>
+    <div class="chip" data-filter="other">✦ Otro</div>
+    <div class="chip" data-filter="express">⚡ Express</div>
   </div>
 
-  <!-- SECTION DIVIDER -->
   <div class="section-label"><span>📡 Personas cerca de ti</span></div>
 
-  <!-- SKELETON -->
   <div id="skeleton">
     <div class="skel-card"></div><div class="skel-card"></div>
     <div class="skel-card"></div><div class="skel-card"></div>
@@ -504,17 +365,14 @@
     <div class="skel-card"></div>
   </div>
 
-  <!-- RADAR GRID -->
   <div id="radarGrid"></div>
 
-  <!-- EMPTY STATE -->
   <div class="state-wrap" id="emptyState">
     <div class="state-icon">📡</div>
     <div class="state-title">Sin resultados</div>
-    <div class="state-sub">No encontramos usuarios con este filtro. ¡Prueba otra categoría!</div>
+    <div class="state-sub">No encontramos usuarios con este filtro.</div>
   </div>
 
-  <!-- AUTH GATE -->
   <div class="state-wrap" id="authGate">
     <div class="state-icon" style="background:rgba(255,0,85,.07);border-color:rgba(255,0,85,.2)">
       <i class="fa-solid fa-lock" style="font-size:2rem;color:#ff4466"></i>
@@ -524,57 +382,35 @@
     <a class="btn-neon" href="index.html">← Ir al inicio</a>
   </div>
 
-</div><!-- /page -->
+</div>
 
-<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <a class="nav-item active" href="radar.html">
-    <i class="fa-solid fa-location-crosshairs"></i>
-    <span>Radar</span>
+    <i class="fa-solid fa-location-crosshairs"></i><span>Radar</span>
   </a>
   <a class="nav-item" href="chats.html" id="navChats">
-    <i class="fa-solid fa-comment-dots" id="navChatIcon"></i>
-    <span>Chats</span>
+    <i class="fa-solid fa-comment-dots" id="navChatIcon"></i><span>Chats</span>
   </a>
   <a class="nav-item" href="likes.html">
-    <i class="fa-solid fa-heart"></i>
-    <span>Likes</span>
+    <i class="fa-solid fa-heart"></i><span>Likes</span>
   </a>
   <a class="nav-item" href="perfil.html">
-    <i class="fa-solid fa-user"></i>
-    <span>Perfil</span>
+    <i class="fa-solid fa-user"></i><span>Perfil</span>
   </a>
 </nav>
 
-<!-- ════════════════════════════════════════════════
-     ÚNICO <script type="module"> — SDK v10.14.1
-════════════════════════════════════════════════ -->
+<div id="toast"></div>
+
 <script type="module">
+  import { createClient }
+    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-  /* ── A) IMPORTS ── */
-  import { initializeApp }
-    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-  import { getDatabase, ref, get, update, onValue, off }
-    from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  /* ── CONFIG ── */
+  const SUPABASE_URL = 'https://qemnczuklcztdajyjblb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_HE46cLZtaukvcva6bdKLGg_gz8HRet3';
+  const supabase     = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  /* ── B) CONFIG FIREBASE ── */
-  const firebaseConfig = {
-    apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-    authDomain:        "kinetic-app-67ae5.firebaseapp.com",
-    databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-    projectId:         "kinetic-app-67ae5",
-    storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
-    messagingSenderId: "825570718975",
-    appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-  };
-
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getDatabase(app);
-
-  /* ── C) SVG FALLBACK ── */
+  /* ── SVG FALLBACK ── */
   const AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none"
     style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;
            background:#12091f;border-radius:50%;">
@@ -582,261 +418,267 @@
     <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
   </svg>`;
 
-  /* ── D) ESTADO DEL MÓDULO ── */
-  let me           = null;   // usuario autenticado
-  let allUsers     = {};     // mapa uid → perfil
+  /* ── ESTADO ── */
+  let me           = null;   // perfil del usuario actual
+  let allUsers     = [];     // array de perfiles del radar
+  let likedSet     = new Set(); // uids a los que ya di like
   let activeFilter = 'all';
-  let myLat        = null;   // latitud del usuario actual
-  let myLng        = null;   // longitud del usuario actual
-  let geoWatchId   = null;   // ID del watchPosition
-  let usersUnsub   = null;
-  let chatsUnsub   = null;
+  let myLat        = null;
+  let myLng        = null;
+  let realtimeCh   = null;   // canal realtime de Supabase
+  let unreadCount  = 0;
 
-  /* ── E) REFS DOM ── */
+  /* ── REFS DOM ── */
   const $skeleton = document.getElementById('skeleton');
   const $grid     = document.getElementById('radarGrid');
   const $empty    = document.getElementById('emptyState');
   const $authGate = document.getElementById('authGate');
   const $livePill = document.getElementById('livePill');
   const $geoBar   = document.getElementById('geoBar');
-  const $geoBtn   = document.getElementById('geoBtn');
 
-  /* ── F) HELPERS ── */
-
-  const esc = s => String(s ?? '')
+  /* ══════════════════════════════════════════════
+     HELPERS
+  ══════════════════════════════════════════════ */
+  const esc = s => String(s??'')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
   function isValidUrl(raw) {
     if (typeof raw !== 'string') return false;
-    const t = raw.trim();
-    return t.length > 12 && /^https?:\/\/.{5,}/.test(t);
+    return raw.trim().length > 12 && /^https?:\/\/.{5,}/.test(raw.trim());
   }
 
-  function firstValidPhoto(data) {
+  function firstPhoto(data) {
     if (!data) return null;
-    const sources = [
-      ...(Array.isArray(data.album)  ? data.album  : []),
+    const srcs = [
+      data.avatar_url,
       ...(Array.isArray(data.photos) ? data.photos : []),
-      data.profilePic ? [data.profilePic] : [],
-      data.foto       ? [data.foto]        : [],
-    ].flat();
-    for (const u of sources) { if (isValidUrl(u)) return u.trim(); }
+    ];
+    for (const u of srcs) { if (isValidUrl(u)) return u.trim(); }
     return null;
   }
 
-  function genderKey(g) {
-    if (!g) return 'otro';
-    const l = String(g).toLowerCase();
-    if (l.includes('masc') || l.includes('hombre') || l === 'm' || l === 'male')   return 'hombre';
-    if (l.includes('fem')  || l.includes('mujer')  || l === 'f' || l === 'female') return 'mujer';
-    return 'otro';
-  }
-
   function genderLabel(g) {
-    const k = genderKey(g);
-    if (k === 'hombre') return '♂';
-    if (k === 'mujer')  return '♀';
+    if (g === 'male')   return '♂';
+    if (g === 'female') return '♀';
     return '✦';
   }
 
-  /* ══════════════════════════════════════════════════
-     G) CÁLCULO DE DISTANCIA
-     Fórmula de Haversine — precisa para distancias
-     cortas (metros) y largas (kilómetros).
-     Devuelve un string legible:
-       < 1 000 m  → "850m"
-       ≥ 1 000 m  → "1.2km"
-  ══════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════
+     HAVERSINE — distancia entre dos coords (km)
+     Usada como fallback si PostGIS no devuelve
+     la columna `distance_km`.
+  ══════════════════════════════════════════════ */
   function haversineKm(lat1, lng1, lat2, lng2) {
-    const R  = 6371;                          // radio tierra en km
+    const R  = 6371;
     const dL = (lat2 - lat1) * Math.PI / 180;
     const dG = (lng2 - lng1) * Math.PI / 180;
-    const a  = Math.sin(dL / 2) ** 2
-             + Math.cos(lat1 * Math.PI / 180)
-             * Math.cos(lat2 * Math.PI / 180)
-             * Math.sin(dG / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const a  = Math.sin(dL/2)**2
+             + Math.cos(lat1*Math.PI/180)
+             * Math.cos(lat2*Math.PI/180)
+             * Math.sin(dG/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  /**
-   * Devuelve "350m", "1.2km", "24km" o null si no hay datos.
-   * @param {number|null} lat2
-   * @param {number|null} lng2
-   */
-  function formatDistance(lat2, lng2) {
-    if (myLat == null || myLng == null) return null;
-    if (lat2  == null || lng2  == null) return null;
-    const km = haversineKm(myLat, myLng, lat2, lng2);
-    if (km < 1) {
-      const m = Math.round(km * 1000);
-      return `${m}m`;
-    }
-    if (km < 10) return `${km.toFixed(1)}km`;
+  function fmtDist(km) {
+    if (km == null) return null;
+    if (km < 1)   return `${Math.round(km*1000)}m`;
+    if (km < 10)  return `${km.toFixed(1)}km`;
     return `${Math.round(km)}km`;
   }
 
-  /* ══════════════════════════════════════════════════
-     H) GEOLOCALIZACIÓN
-     · Intenta obtener posición al cargar (silencioso)
-     · Si se deniega o no está disponible, muestra la
-       geoBar para que el usuario la active manualmente
-     · Al obtener posición: guarda en myLat/myLng,
-       actualiza el nodo users/${me.uid} en Firebase,
-       y re-renderiza para mostrar distancias
-  ══════════════════════════════════════════════════ */
-  function initGeolocation(silent = true) {
-    if (!('geolocation' in navigator)) {
-      if (!silent) $geoBar.style.display = 'none';
-      return;
-    }
-
-    const opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 };
-
-    navigator.geolocation.getCurrentPosition(
-      pos => onGeoSuccess(pos, true),
-      err => {
-        console.warn('[Kinetic - radar] Geo denegada:', err.message);
-        if (!silent) {
-          // El usuario pulsó el botón pero aún denegó
-          $geoBar.style.display = 'none';
-        } else {
-          // Carga inicial: mostrar barra de invitación
-          $geoBar.style.display = 'flex';
-        }
-      },
-      opts
-    );
+  /* ══════════════════════════════════════════════
+     TOAST
+  ══════════════════════════════════════════════ */
+  let _tt = null;
+  function showToast(msg, isErr=false) {
+    const el = document.getElementById('toast');
+    el.textContent = isErr ? `⚠  ${msg}` : `✓  ${msg}`;
+    el.style.borderColor = isErr ? 'rgba(255,34,85,.55)' : 'rgba(138,43,226,.5)';
+    el.classList.add('show');
+    clearTimeout(_tt);
+    _tt = setTimeout(() => el.classList.remove('show'), 3000);
   }
-
-  function onGeoSuccess(pos, updateFirebase) {
-    myLat = pos.coords.latitude;
-    myLng = pos.coords.longitude;
-    $geoBar.style.display = 'none';
-
-    // Actualizar ubicación en Firebase para que otros la vean
-    if (updateFirebase && me) {
-      update(ref(db, `users/${me.uid}`), { lat: myLat, lng: myLng })
-        .catch(err => console.error('[Kinetic - radar] Error guardando geo:', err));
-    }
-
-    // Re-renderizar con distancias
-    renderGrid();
-  }
-
-  /* Botón "Activar" en la geoBar */
-  $geoBtn.addEventListener('click', () => {
-    initGeolocation(false);
-  });
-
-  /* ══════════════════════════════════════════════════
-     I) AUTENTICACIÓN
-  ══════════════════════════════════════════════════ */
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      me = user;
-      hideSkeleton();
-      initGeolocation(true);     // intento silencioso al arrancar
-      startUsersListener();
-      startChatsListener();
-      wireFilters();
-    } else {
-      hideSkeleton();
-      $authGate.classList.add('show');
-    }
-  });
 
   function hideSkeleton() {
     if ($skeleton) $skeleton.style.display = 'none';
   }
 
-  /* ══════════════════════════════════════════════════
-     J) LISTENER USUARIOS EN TIEMPO REAL
-        Lee users/ + radar_public/ y fusiona.
-  ══════════════════════════════════════════════════ */
-  function startUsersListener() {
-    const usersRef = ref(db, 'users');
-    if (usersUnsub) off(usersRef);
+  /* ══════════════════════════════════════════════
+     AUTENTICACIÓN
+  ══════════════════════════════════════════════ */
+  const { data: { session } } = await supabase.auth.getSession();
 
-    usersUnsub = onValue(usersRef, async snap => {
-      allUsers = {};
+  if (!session) {
+    hideSkeleton();
+    $authGate.classList.add('show');
+  } else {
+    /* Cargar perfil propio */
+    const { data: myProfile } = await supabase
+      .from('profiles').select('*').eq('id', session.user.id).single();
+    me = myProfile || { id: session.user.id };
 
-      if (snap.exists()) {
-        snap.forEach(child => {
-          const uid  = child.key;
-          if (uid === me.uid) return;
-          const data = child.val();
-          if (data) allUsers[uid] = { uid, ...data };
-        });
-      }
+    /* Marcar usuario como online */
+    await supabase.from('profiles')
+      .update({ online: true })
+      .eq('id', me.id);
 
-      /* Complementar con radar_public/ */
-      try {
-        const pubSnap = await get(ref(db, 'radar_public'));
-        if (pubSnap.exists()) {
-          pubSnap.forEach(child => {
-            const uid  = child.key;
-            if (uid === me.uid) return;
-            const data = child.val();
-            if (!data) return;
-            if (!allUsers[uid]) {
-              allUsers[uid] = { uid, ...data };
-            } else {
-              allUsers[uid] = { ...data, ...allUsers[uid] };
-            }
-          });
-        }
-      } catch (err) {
-        console.error('[Kinetic - radar] Error leyendo radar_public:', err);
-      }
+    /* Cargar likes enviados para mostrar stamp en el radar */
+    await loadMyLikes();
 
-      renderGrid();
+    /* Geolocalización (silenciosa al inicio) */
+    initGeo(true);
 
-    }, err => {
-      console.error('[Kinetic - radar] Error listener users:', err);
-      hideSkeleton();
-    });
+    /* Cargar usuarios del radar */
+    await loadRadar();
+
+    /* Suscribirse a cambios en tiempo real */
+    subscribeRealtime();
+
+    /* Badge de mensajes sin leer */
+    loadUnreadBadge();
+
+    /* Filtros */
+    wireFilters();
   }
 
-  /* ══════════════════════════════════════════════════
-     K) RENDER DEL GRID
-  ══════════════════════════════════════════════════ */
-  function renderGrid() {
-    let users = Object.values(allUsers);
+  /* ══════════════════════════════════════════════
+     LIKES PROPIOS — para marcar cards ya likeadas
+  ══════════════════════════════════════════════ */
+  async function loadMyLikes() {
+    if (!me) return;
+    const { data } = await supabase
+      .from('likes')
+      .select('receiver_id')
+      .eq('sender_id', me.id);
+    if (data) data.forEach(r => likedSet.add(r.receiver_id));
+  }
 
-    /* Filtro activo */
-    if      (activeFilter === 'online') users = users.filter(u => u.online === true);
-    else if (activeFilter === 'hombre') users = users.filter(u => genderKey(u.genero || u.gender) === 'hombre');
-    else if (activeFilter === 'mujer')  users = users.filter(u => genderKey(u.genero || u.gender) === 'mujer');
-    else if (activeFilter === 'otro')   users = users.filter(u => genderKey(u.genero || u.gender) === 'otro');
+  /* ══════════════════════════════════════════════
+     CARGA PRINCIPAL DEL RADAR
 
-    /* Ordenar: online primero, luego por distancia (si disponible), luego nombre */
-    users.sort((a, b) => {
-      if (a.online && !b.online) return -1;
-      if (!a.online && b.online) return 1;
+     Estrategia de geo:
+     1. Si tenemos lat/lng  → llamar a la función
+        RPC `nearby_profiles` (PostGIS) que ordena
+        por distancia real en la DB.
+     2. Si no hay geo        → query simple a la
+        tabla profiles sin orden geo.
 
-      // Si tenemos geo, ordenar por distancia ascendente
+     La función RPC debe existir en Supabase:
+     (SQL al final del archivo como comentario)
+  ══════════════════════════════════════════════ */
+  async function loadRadar() {
+    hideSkeleton();
+
+    try {
+      let users = [];
+
       if (myLat != null && myLng != null) {
-        const dA = (a.lat != null && a.lng != null)
-          ? haversineKm(myLat, myLng, a.lat, a.lng) : Infinity;
-        const dB = (b.lat != null && b.lng != null)
-          ? haversineKm(myLat, myLng, b.lat, b.lng) : Infinity;
-        if (dA !== dB) return dA - dB;
+        /* ── QUERY CON GEO (PostGIS RPC) ── */
+        const { data, error } = await supabase.rpc('nearby_profiles', {
+          p_lat:        myLat,
+          p_lng:        myLng,
+          p_limit:      100,
+          p_exclude_id: me.id,
+        });
+
+        if (error) throw error;
+        users = data || [];
+
+      } else {
+        /* ── QUERY SIN GEO ── */
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id,nombre,edad,gender,bio,avatar_url,photos,online,modo_express,lat,lng')
+          .neq('id', me.id)
+          .order('online', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (error) throw error;
+        users = data || [];
       }
 
-      const na = (a.nombre || a.name || '').toLowerCase();
-      const nb = (b.nombre || b.name || '').toLowerCase();
-      return na.localeCompare(nb);
+      allUsers = users;
+      renderGrid();
+
+    } catch (err) {
+      console.error('[Kinetic - radar] Error cargando usuarios:', err);
+      hideSkeleton();
+      showToast('Error al cargar el Radar.', true);
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     REALTIME — escucha INSERT/UPDATE en profiles
+     Cuando un usuario nuevo se registra o actualiza
+     su estado online, el Radar se refresca.
+  ══════════════════════════════════════════════ */
+  function subscribeRealtime() {
+    if (realtimeCh) supabase.removeChannel(realtimeCh);
+
+    realtimeCh = supabase
+      .channel('radar-profiles')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        async (payload) => {
+          /* Ignorar cambios propios */
+          if (payload.new?.id === me?.id) return;
+
+          /* Actualizar o añadir el perfil en allUsers */
+          const updated = payload.new;
+          const idx = allUsers.findIndex(u => u.id === updated.id);
+          if (idx >= 0) {
+            allUsers[idx] = { ...allUsers[idx], ...updated };
+          } else if (payload.eventType === 'INSERT') {
+            allUsers.unshift(updated);
+          }
+
+          renderGrid();
+          updateLivePill();
+        }
+      )
+      .subscribe();
+  }
+
+  /* ══════════════════════════════════════════════
+     RENDER GRID
+  ══════════════════════════════════════════════ */
+  function renderGrid() {
+    let users = [...allUsers];
+
+    /* Aplicar filtro activo */
+    switch (activeFilter) {
+      case 'online':  users = users.filter(u => u.online === true); break;
+      case 'male':    users = users.filter(u => u.gender === 'male'); break;
+      case 'female':  users = users.filter(u => u.gender === 'female'); break;
+      case 'other':   users = users.filter(u => u.gender === 'other'); break;
+      case 'express': users = users.filter(u => u.modo_express === true); break;
+    }
+
+    /* Calcular distancia con haversine si tenemos geo pero la RPC
+       no devolvió distance_km (fallback seguro) */
+    if (myLat != null && myLng != null) {
+      users = users.map(u => {
+        if (u.distance_km == null && u.lat != null && u.lng != null) {
+          u = { ...u, distance_km: haversineKm(myLat, myLng, u.lat, u.lng) };
+        }
+        return u;
+      });
+    }
+
+    /* Ordenar: online primero → distancia → nombre */
+    users.sort((a, b) => {
+      if (a.online && !b.online) return -1;
+      if (!a.online && b.online) return  1;
+      const da = a.distance_km ?? Infinity;
+      const db = b.distance_km ?? Infinity;
+      if (da !== db) return da - db;
+      return (a.nombre || '').localeCompare(b.nombre || '');
     });
 
-    /* Pill de en-línea */
-    const onlineCount = Object.values(allUsers).filter(u => u.online === true).length;
-    if (onlineCount > 0) {
-      document.getElementById('liveCount').textContent = onlineCount;
-      $livePill.style.display = 'flex';
-    } else {
-      $livePill.style.display = 'none';
-    }
+    updateLivePill();
 
     if (users.length === 0) {
       $grid.style.display = 'none';
@@ -846,83 +688,81 @@
 
     $empty.classList.remove('show');
     $grid.style.display = 'grid';
-    $grid.innerHTML     = '';
+    $grid.innerHTML = '';
 
-    const fragment = document.createDocumentFragment();
-    users.forEach((data, idx) => {
-      fragment.appendChild(buildCard(data, idx));
-    });
-    $grid.appendChild(fragment);
+    const frag = document.createDocumentFragment();
+    users.forEach((u, idx) => frag.appendChild(buildCard(u, idx)));
+    $grid.appendChild(frag);
   }
 
-  /* ══════════════════════════════════════════════════
-     L) CONSTRUIR TARJETA INDIVIDUAL
-  ══════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════
+     BUILD CARD
+  ══════════════════════════════════════════════ */
   function buildCard(data, idx) {
-    const uid      = data.uid;
-    const name     = data.nombre || data.name   || 'Desconocido';
-    const age      = data.edad   || data.age    || null;
-    const gender   = data.genero || data.gender || null;
+    const uid      = data.id;
+    const name     = data.nombre || 'Desconocido';
+    const age      = data.edad   || null;
+    const gender   = data.gender || null;
     const online   = data.online === true;
-    const photoUrl = firstValidPhoto(data);
-
-    /* ── Calcular distancia ── */
-    const distStr  = formatDistance(
-      data.lat  ?? data.latitude  ?? null,
-      data.lng  ?? data.longitude ?? null
-    );
+    const express  = data.modo_express === true;
+    const photoUrl = firstPhoto(data);
+    const distKm   = data.distance_km ?? null;
+    const distStr  = fmtDist(distKm);
+    const liked    = likedSet.has(uid);
 
     const card = document.createElement('div');
     card.className = 'radar-card';
     card.style.animationDelay = `${Math.min(idx * 0.035, 0.7)}s`;
 
-    /* Foto o SVG placeholder */
+    /* Foto */
     if (photoUrl) {
-      const img   = document.createElement('img');
-      img.className = 'card-photo';
-      img.alt       = name;
-      img.loading   = 'lazy';
-      img.src       = photoUrl;
+      const img = document.createElement('img');
+      img.className = 'card-photo'; img.alt = name;
+      img.loading = 'lazy'; img.src = photoUrl;
       img.addEventListener('error', () => {
         img.remove();
         const ph = document.createElement('div');
-        ph.className = 'card-avatar-ph';
-        ph.innerHTML = AVATAR_SVG;
+        ph.className = 'card-avatar-ph'; ph.innerHTML = AVATAR_SVG;
         card.insertBefore(ph, card.firstChild);
       });
       card.appendChild(img);
     } else {
       const ph = document.createElement('div');
-      ph.className = 'card-avatar-ph';
-      ph.innerHTML = AVATAR_SVG;
+      ph.className = 'card-avatar-ph'; ph.innerHTML = AVATAR_SVG;
       card.appendChild(ph);
     }
 
-    /* Overlay degradado */
+    /* Overlay */
     const grad = document.createElement('div');
     grad.className = 'card-grad';
     card.appendChild(grad);
 
-    /* Indicador online */
+    /* Online dot */
     if (online) {
       const dot = document.createElement('div');
       dot.className = 'card-online';
       card.appendChild(dot);
     }
 
-    /* Badge de género */
-    if (gender) {
-      const badge = document.createElement('div');
-      badge.className   = 'card-badge';
-      badge.textContent = genderLabel(gender);
-      card.appendChild(badge);
+    /* Badge género / express */
+    if (express) {
+      const b = document.createElement('div');
+      b.className = 'card-badge'; b.textContent = '⚡';
+      card.appendChild(b);
+    } else if (gender) {
+      const b = document.createElement('div');
+      b.className = 'card-badge'; b.textContent = genderLabel(gender);
+      card.appendChild(b);
     }
 
-    /* ── Badge de distancia ──────────────────────────
-       Solo se pinta si tenemos la ubicación del usuario
-       actual Y la del perfil visitado.
-       Ejemplos: "350m", "1.2km", "24km"
-    ─────────────────────────────────────────────── */
+    /* Liked stamp */
+    if (liked) {
+      const stamp = document.createElement('div');
+      stamp.className = 'card-liked-stamp'; stamp.textContent = '💜';
+      card.appendChild(stamp);
+    }
+
+    /* Distancia */
     if (distStr) {
       const dist = document.createElement('div');
       dist.className = 'card-dist';
@@ -930,13 +770,12 @@
       card.appendChild(dist);
     }
 
-    /* Info: nombre + meta */
+    /* Info */
     const info = document.createElement('div');
     info.className = 'card-info';
 
     const nameEl = document.createElement('div');
-    nameEl.className   = 'card-name';
-    nameEl.textContent = name;
+    nameEl.className = 'card-name'; nameEl.textContent = name;
     info.appendChild(nameEl);
 
     if (age || gender) {
@@ -944,14 +783,13 @@
       meta.className = 'card-meta';
       const parts = [];
       if (age)    parts.push(`<span class="card-age-accent">${esc(String(age))} años</span>`);
-      if (gender) parts.push(esc(gender));
+      if (gender) parts.push(esc(gender === 'male' ? 'Hombre' : gender === 'female' ? 'Mujer' : 'Otro'));
       meta.innerHTML = parts.join(' · ');
       info.appendChild(meta);
     }
-
     card.appendChild(info);
 
-    /* Click → perfil-detalle.html con ?id= ── */
+    /* Click → perfil-detalle */
     card.addEventListener('click', () => {
       try { localStorage.setItem('selected_user_id', uid); } catch(_) {}
       window.location.href = `perfil-detalle.html?id=${encodeURIComponent(uid)}`;
@@ -960,13 +798,61 @@
     return card;
   }
 
-  /* ══════════════════════════════════════════════════
-     M) CHIPS DE FILTRO
-  ══════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════
+     LIVE PILL — contador de usuarios online
+  ══════════════════════════════════════════════ */
+  function updateLivePill() {
+    const n = allUsers.filter(u => u.online === true).length;
+    if (n > 0) {
+      document.getElementById('liveCount').textContent = n;
+      $livePill.style.display = 'flex';
+    } else {
+      $livePill.style.display = 'none';
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     GEOLOCALIZACIÓN
+  ══════════════════════════════════════════════ */
+  function initGeo(silent = true) {
+    if (!('geolocation' in navigator)) {
+      if (!silent) $geoBar.style.display = 'none';
+      return;
+    }
+    const opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 };
+    navigator.geolocation.getCurrentPosition(
+      pos => onGeoSuccess(pos),
+      () => { if (!silent) $geoBar.style.display = 'none'; else $geoBar.style.display = 'flex'; },
+      opts
+    );
+  }
+
+  async function onGeoSuccess(pos) {
+    myLat = pos.coords.latitude;
+    myLng = pos.coords.longitude;
+    $geoBar.style.display = 'none';
+
+    /* Actualizar lat/lng en Supabase */
+    if (me) {
+      await supabase.from('profiles')
+        .update({ lat: myLat, lng: myLng })
+        .eq('id', me.id);
+    }
+
+    /* Recargar radar con distancias reales */
+    await loadRadar();
+  }
+
+  document.getElementById('geoBtn').addEventListener('click', () => initGeo(false));
+
+  /* ══════════════════════════════════════════════
+     FILTROS
+  ══════════════════════════════════════════════ */
   function wireFilters() {
     document.querySelectorAll('#filterBar .chip').forEach(chip => {
       chip.addEventListener('click', () => {
-        document.querySelectorAll('#filterBar .chip').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#filterBar .chip')
+          .forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         activeFilter = chip.dataset.filter || 'all';
         renderGrid();
@@ -974,81 +860,137 @@
     });
   }
 
-  /* ══════════════════════════════════════════════════
-     N) BADGE GLOBAL DE MENSAJES SIN LEER
-        4 capas de protección antifreezes
-  ══════════════════════════════════════════════════ */
-  function startChatsListener() {
-    const chatsRef = ref(db, 'chats');
-    if (chatsUnsub) off(chatsRef);
+  /* ══════════════════════════════════════════════
+     BADGE MENSAJES SIN LEER
+     Consulta la tabla `chats` buscando salas donde
+     unread_for = me.id
+  ══════════════════════════════════════════════ */
+  async function loadUnreadBadge() {
+    if (!me) return;
+    try {
+      const { count } = await supabase
+        .from('chats')
+        .select('id', { count: 'exact', head: true })
+        .eq('unread_for', me.id);
 
-    const $icon = document.getElementById('navChatIcon');
-    const $nav  = document.getElementById('navChats');
+      unreadCount = count || 0;
+      updateNavBadge(unreadCount);
+    } catch(e) {
+      console.error('[Kinetic - radar] Badge error:', e);
+    }
 
-    chatsUnsub = onValue(chatsRef, snap => {
-      if (!me) return;
-
-      let pending = 0;
-
-      if (snap.exists()) {
-        snap.forEach(chatSnap => {
-          /* Capa 1 — sala existe y es objeto */
-          const sala = chatSnap.val();
-          if (!sala || typeof sala !== 'object') return;
-
-          /* Capa 2 — verificar membresía */
-          const inId    = chatSnap.key.split('_').includes(me.uid);
-          const inParts = sala.participants?.[me.uid] === true;
-          if (!inId && !inParts) return;
-
-          /* Capa 3A — lastInfo fast path */
-          if (sala.lastInfo
-              && typeof sala.lastInfo === 'object'
-              && sala.lastInfo.unreadTarget === me.uid) {
-            pending++;
-            return;
-          }
-
-          /* Capa 3B — scan mensajes */
-          const msgs = sala.messages;
-          if (!msgs || typeof msgs !== 'object') return;
-          const hasUnread = Object.values(msgs).some(
-            m => m && typeof m === 'object'
-              && m.senderId !== me.uid
-              && m.unread === true
-          );
-          if (hasUnread) pending++;
-        });
-      }
-
-      updateNavBadge(pending, $icon, $nav);
-    }, err => {
-      console.error('[Kinetic - radar] Error listener chats:', err);
-    });
+    /* Suscribir realtime para chats */
+    supabase
+      .channel('radar-chats-badge')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'chats' },
+        async () => { await loadUnreadBadge(); }
+      )
+      .subscribe();
   }
 
-  function updateNavBadge(count, iconEl, navItemEl) {
-    navItemEl.querySelectorAll('.badge-counter').forEach(b => b.remove());
+  function updateNavBadge(count) {
+    const iconEl  = document.getElementById('navChatIcon');
+    const navItem = document.getElementById('navChats');
+    navItem.querySelectorAll('.badge-counter').forEach(b => b.remove());
     if (count > 0) {
       iconEl.classList.add('has-notif');
       const badge = document.createElement('div');
       badge.className   = 'badge-counter';
       badge.textContent = count > 9 ? '9+' : String(count);
-      navItemEl.appendChild(badge);
+      navItem.appendChild(badge);
     } else {
       iconEl.classList.remove('has-notif');
     }
   }
 
-  /* ══════════════════════════════════════════════════
-     O) LIMPIEZA DE LISTENERS AL SALIR
-  ══════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════
+     ONLINE = FALSE AL SALIR
+  ══════════════════════════════════════════════ */
   window.addEventListener('pagehide', () => {
-    try { if (usersUnsub) off(ref(db, 'users'));  } catch(e) { console.error('[Kinetic - radar]', e); }
-    try { if (chatsUnsub) off(ref(db, 'chats'));  } catch(e) { console.error('[Kinetic - radar]', e); }
-    try { if (geoWatchId != null) navigator.geolocation.clearWatch(geoWatchId); } catch(_) {}
+    if (me) {
+      navigator.sendBeacon(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${me.id}`,
+        JSON.stringify({ online: false })
+      );
+    }
+    if (realtimeCh) supabase.removeChannel(realtimeCh);
   });
 
 </script>
+
+<!--
+═══════════════════════════════════════════════════════════════
+  SQL PARA SUPABASE — ejecutar en el SQL Editor del proyecto
+
+  1. Habilitar extensión PostGIS (si no está ya activa):
+     create extension if not exists postgis;
+
+  2. Agregar columna de geometría al perfil:
+     alter table profiles
+       add column if not exists location geography(Point, 4326);
+
+     -- Trigger para mantener location sincronizada con lat/lng:
+     create or replace function sync_profile_location()
+     returns trigger language plpgsql as $$
+     begin
+       if new.lat is not null and new.lng is not null then
+         new.location := st_makepoint(new.lng, new.lat)::geography;
+       end if;
+       return new;
+     end; $$;
+
+     create trigger trg_sync_location
+       before insert or update of lat, lng on profiles
+       for each row execute function sync_profile_location();
+
+  3. Índice espacial para búsquedas rápidas:
+     create index if not exists idx_profiles_location
+       on profiles using gist(location);
+
+  4. Función RPC que el Radar llama:
+     create or replace function nearby_profiles(
+       p_lat        float8,
+       p_lng        float8,
+       p_limit      int     default 100,
+       p_exclude_id uuid    default null
+     )
+     returns table (
+       id           uuid,
+       nombre       text,
+       edad         integer,
+       gender       text,
+       bio          text,
+       avatar_url   text,
+       photos       text[],
+       online       boolean,
+       modo_express boolean,
+       lat          float8,
+       lng          float8,
+       distance_km  float8
+     )
+     language sql stable as $$
+       select
+         p.id, p.nombre, p.edad, p.gender, p.bio,
+         p.avatar_url, p.photos, p.online, p.modo_express,
+         p.lat, p.lng,
+         round(
+           (st_distance(
+             p.location,
+             st_makepoint(p_lng, p_lat)::geography
+           ) / 1000.0)::numeric, 2
+         )::float8 as distance_km
+       from profiles p
+       where
+         p.id        != coalesce(p_exclude_id, '00000000-0000-0000-0000-000000000000')
+         and p.location is not null
+       order by p.location <-> st_makepoint(p_lng, p_lat)::geography
+       limit p_limit;
+     $$;
+
+     -- Permisos para usuarios anónimos (lectura pública del radar):
+     grant execute on function nearby_profiles to anon, authenticated;
+═══════════════════════════════════════════════════════════════
+-->
 </body>
 </html>
