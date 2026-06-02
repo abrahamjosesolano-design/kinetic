@@ -614,7 +614,7 @@
       .from('profiles')
       .select('*')
       .eq('id', me.id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error al cargar perfil:", error);
