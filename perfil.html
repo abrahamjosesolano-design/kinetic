@@ -601,22 +601,36 @@
   }
   function hideLoading(){ document.getElementById('loadingOverlay').classList.add('hidden'); }
 
-  /* ── AUTH ── */
-  const { data:{ session } } = await supabase.auth.getSession();
-  if(!session){ window.location.replace('index.html'); }
-  me = session.user;
+  /* ── AUTH Y CARGAR PERFIL CORREGIDO ── */
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    window.location.replace('index.html');
+  } else {
+    me = session.user;
+    
+    // Solo si existe el usuario, consultamos los datos
+    const { data: prof, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', me.id)
+      .single();
 
-  /* ── CARGAR PERFIL ── */
-  const { data:prof } = await supabase
-    .from('profiles').select('*').eq('id', me.id).single();
-  userData = prof || { id:me.id };
+    if (error) {
+      console.error("Error al cargar perfil:", error);
+      // Intentamos crear el perfil si no existe para evitar errores
+      userData = { id: me.id };
+    } else {
+      userData = prof;
+    }
 
-  /* Marcar online */
-  await supabase.from('profiles').update({ online:true }).eq('id', me.id);
+    // Marcar online solo después de asegurar el ID
+    await supabase.from('profiles').update({ online: true }).eq('id', me.id);
 
-  populateUI(userData);
-  hideLoading();
-  loadUnreadBadge();
+    populateUI(userData);
+    hideLoading();
+    loadUnreadBadge();
+  }
 
   /* ══════════════════════════════════════════════
      POPULATE UI
