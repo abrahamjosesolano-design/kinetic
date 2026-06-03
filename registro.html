@@ -10,15 +10,10 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap"
-        rel="stylesheet" />
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
-    /* ═══════════════════════════════════════════════
-       DESIGN TOKENS
-    ═══════════════════════════════════════════════ */
     :root {
       --bg:        #0d0616;
       --bg-s:      #12091f;
@@ -37,465 +32,256 @@
       --border:    rgba(138,43,226,.22);
       --r:         14px;
       --r-sm:      10px;
-      --grad:      linear-gradient(135deg, #8a2be2 0%, #ff00ff 100%);
+      --grad:      linear-gradient(135deg,#8a2be2 0%,#ff00ff 100%);
       --glow-p:    0 0 20px rgba(138,43,226,.6);
       --glow-m:    0 0 18px rgba(255,0,255,.65);
-      --sb:        env(safe-area-inset-bottom, 0px);
-      --st:        env(safe-area-inset-top,    0px);
+      --sb:        env(safe-area-inset-bottom,0px);
+      --st:        env(safe-area-inset-top,0px);
     }
-
-    /* ═══════════════════════════════════════════════
-       RESET
-    ═══════════════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      min-height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Urbanist', sans-serif;
-      font-size: 16px;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-      overflow-y: auto;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      min-height:100%;background:var(--bg);color:var(--text);
+      font-family:'Urbanist',sans-serif;font-size:16px;
+      -webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-y:auto;
     }
-
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
-
-    /* ── ATMOSPHERE ── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    ::-webkit-scrollbar{width:3px}
+    ::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px}
+    body::before{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       background-image:
-        repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(138,43,226,.03) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(138,43,226,.03) 40px);
+        repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(138,43,226,.03) 40px),
+        repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(138,43,226,.03) 40px);
     }
-    body::after {
-      content: '';
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    body::after{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       background:
-        radial-gradient(ellipse 80% 50% at 18% 18%, rgba(138,43,226,.15) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 40% at 82% 82%, rgba(255,0,255,.10)  0%, transparent 60%),
-        radial-gradient(ellipse 45% 30% at 60% 10%, rgba(0,255,255,.07)  0%, transparent 55%);
+        radial-gradient(ellipse 80% 50% at 18% 18%,rgba(138,43,226,.15) 0%,transparent 65%),
+        radial-gradient(ellipse 60% 40% at 82% 82%,rgba(255,0,255,.10) 0%,transparent 60%);
     }
 
-    /* ═══════════════════════════════════════════════
-       PÁGINA
-    ═══════════════════════════════════════════════ */
-    .page {
-      position: relative; z-index: 1;
-      min-height: 100svh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: calc(var(--st) + 28px) 20px calc(var(--sb) + 36px);
-      gap: 24px;
+    /* ── LOADING ── */
+    #loadingOverlay{
+      position:fixed;inset:0;z-index:999;background:var(--bg);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+      transition:opacity .35s,visibility .35s;
+    }
+    #loadingOverlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .ld-logo{
+      font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;letter-spacing:.2em;
+      background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;filter:drop-shadow(0 0 12px rgba(138,43,226,.85));
+    }
+    .ld-spinner{
+      width:36px;height:36px;
+      border:3px solid rgba(138,43,226,.18);
+      border-top-color:var(--purple);border-right-color:var(--magenta);
+      border-radius:50%;animation:spin .75s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── PAGE ── */
+    .page{
+      position:relative;z-index:1;min-height:100svh;
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+      padding:calc(var(--st) + 28px) 20px calc(var(--sb) + 36px);gap:24px;
     }
 
-    /* ═══════════════════════════════════════════════
-       HERO / LOGO
-    ═══════════════════════════════════════════════ */
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
+    /* ── HERO ── */
+    .hero{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+    .logo-ring{
+      position:relative;width:76px;height:76px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .logo-ring::before{
+      content:'';position:absolute;inset:-3px;border-radius:50%;
+      background:conic-gradient(from 0deg,#ff00ff,#8a2be2,#00ffff,#ff00ff);
+      animation:ringRotate 3s linear infinite;
+    }
+    .logo-ring::after{
+      content:'';position:absolute;inset:2px;border-radius:50%;background:var(--bg);
+    }
+    @keyframes ringRotate{to{transform:rotate(360deg)}}
+    .logo-icon{
+      position:relative;z-index:2;font-size:1.9rem;
+      background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;filter:drop-shadow(0 0 10px rgba(255,0,255,.7));
+    }
+    .app-title{
+      font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;letter-spacing:.2em;
+      background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;filter:drop-shadow(0 0 12px rgba(138,43,226,.85));
+    }
+    .app-sub{
+      font-family:'Orbitron',monospace;font-size:.56rem;font-weight:700;
+      letter-spacing:.28em;text-transform:uppercase;color:var(--text-3);
     }
 
-    .logo-ring {
-      position: relative;
-      width: 76px; height: 76px;
-      display: flex; align-items: center; justify-content: center;
+    /* ── CARD ── */
+    .card{
+      width:100%;max-width:440px;
+      background:rgba(22,12,40,.88);border:1px solid var(--border);
+      border-radius:var(--r);padding:28px 22px 30px;
+      backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+      box-shadow:0 0 60px rgba(138,43,226,.12),inset 0 1px 0 rgba(255,255,255,.04);
     }
-    .logo-ring::before {
-      content: '';
-      position: absolute; inset: -3px; border-radius: 50%;
-      background: conic-gradient(from 0deg, #ff00ff, #8a2be2, #00ffff, #ff00ff);
-      animation: ringRotate 3s linear infinite;
-    }
-    .logo-ring::after {
-      content: '';
-      position: absolute; inset: 2px; border-radius: 50%;
-      background: var(--bg);
-    }
-    @keyframes ringRotate { to { transform: rotate(360deg); } }
-
-    .logo-icon {
-      position: relative; z-index: 2;
-      font-size: 1.9rem;
-      background: var(--grad);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 10px rgba(255,0,255,.7));
+    .card-title{
+      font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;
+      letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);
+      text-align:center;margin-bottom:22px;
     }
 
-    .app-title {
-      font-family: 'Orbitron', monospace;
-      font-size: 2rem; font-weight: 900; letter-spacing: .2em;
-      background: var(--grad);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 12px rgba(138,43,226,.85));
+    /* ── STEP BAR ── */
+    .step-bar{display:flex;gap:6px;margin-bottom:22px}
+    .step-seg{
+      flex:1;height:3px;border-radius:2px;background:rgba(138,43,226,.18);
+      transition:background .35s;
     }
-    .app-sub {
-      font-family: 'Orbitron', monospace;
-      font-size: .56rem; font-weight: 700;
-      letter-spacing: .28em; text-transform: uppercase;
-      color: var(--text-3);
+    .step-seg.done{background:var(--grad)}
+    .step-seg.active{
+      background:var(--magenta);box-shadow:0 0 8px rgba(255,0,255,.55);
+      animation:stepPulse 1.5s ease-in-out infinite;
     }
-
-    /* ═══════════════════════════════════════════════
-       TARJETA DEL FORMULARIO
-    ═══════════════════════════════════════════════ */
-    .card {
-      width: 100%;
-      max-width: 440px;
-      background: rgba(22,12,40,.88);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 28px 22px 30px;
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      box-shadow:
-        0 0 60px rgba(138,43,226,.12),
-        0 0 120px rgba(255,0,255,.07),
-        inset 0 1px 0 rgba(255,255,255,.04);
+    @keyframes stepPulse{
+      0%,100%{box-shadow:0 0 6px rgba(255,0,255,.5)}
+      50%    {box-shadow:0 0 14px rgba(255,0,255,.9)}
     }
 
-    /* Título dentro de la tarjeta */
-    .card-title {
-      font-family: 'Orbitron', monospace;
-      font-size: .68rem; font-weight: 700;
-      letter-spacing: .22em; text-transform: uppercase;
-      color: var(--text-3);
-      text-align: center;
-      margin-bottom: 22px;
+    /* ── FIELDS ── */
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+    .field label{
+      font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      color:var(--text-2);
+    }
+    .fw{position:relative;display:flex;align-items:center}
+    .fw .fi{
+      position:absolute;left:13px;color:var(--text-3);font-size:.9rem;pointer-events:none;
+    }
+    .fw input,.fw select,.fw textarea{
+      width:100%;background:var(--bg-input);border:1px solid rgba(138,43,226,.25);
+      border-radius:var(--r-sm);color:var(--text);font-family:'Urbanist',sans-serif;
+      font-size:.92rem;padding:11px 14px 11px 40px;outline:none;
+      -webkit-appearance:none;appearance:none;transition:border-color .2s,box-shadow .2s;
+    }
+    .fw textarea{resize:vertical;min-height:72px;line-height:1.55;padding-top:11px}
+    .fw input::placeholder,.fw textarea::placeholder{color:var(--text-3)}
+    .fw input:focus,.fw select:focus,.fw textarea:focus{
+      border-color:var(--purple-hi);box-shadow:0 0 0 3px rgba(138,43,226,.18);
+    }
+    .fw .eye{
+      position:absolute;right:12px;background:none;border:none;
+      color:var(--text-3);font-size:.9rem;cursor:pointer;padding:4px;
+      transition:color .2s;line-height:1;
+    }
+    .fw .eye:hover{color:var(--text-2)}
+    .fw .sarr{position:absolute;right:12px;color:var(--text-3);font-size:.72rem;pointer-events:none}
+    .fw select option{background:#1a0f2e;color:var(--text)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .grid2 .field{margin-bottom:0}
+
+    /* ── MSG BOX ── */
+    .msg-box{
+      display:none;align-items:center;gap:8px;padding:10px 13px;
+      border-radius:var(--r-sm);font-size:.81rem;font-weight:600;
+      line-height:1.45;margin-bottom:16px;
+    }
+    .msg-box.err{
+      display:flex;background:rgba(255,68,102,.12);
+      border:1px solid rgba(255,68,102,.34);color:var(--err);
+    }
+    .msg-box.ok{
+      display:flex;background:rgba(0,255,170,.09);
+      border:1px solid rgba(0,255,170,.28);color:var(--ok);
     }
 
-    /* ── PASO VISUAL ── */
-    .step-bar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 22px;
+    /* ── BOTONES ── */
+    .btn{
+      width:100%;padding:13px;border-radius:var(--r-sm);border:none;
+      background:var(--grad);color:#fff;
+      font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;letter-spacing:.12em;
+      cursor:pointer;box-shadow:var(--glow-p);
+      display:flex;align-items:center;justify-content:center;gap:9px;
+      position:relative;overflow:hidden;
+      transition:transform .15s,box-shadow .15s,opacity .2s;margin-top:4px;
     }
-    .step-seg {
-      flex: 1;
-      height: 3px;
-      border-radius: 2px;
-      background: rgba(138,43,226,.18);
-      transition: background .35s;
+    .btn::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(135deg,rgba(255,255,255,.14) 0%,transparent 55%);
+      pointer-events:none;
     }
-    .step-seg.done   { background: var(--grad); }
-    .step-seg.active {
-      background: var(--magenta);
-      box-shadow: 0 0 8px rgba(255,0,255,.55);
-      animation: stepPulse 1.5s ease-in-out infinite;
+    .btn:hover{transform:translateY(-1px);box-shadow:var(--glow-m)}
+    .btn:active{transform:scale(.98);opacity:.9}
+    .btn:disabled{opacity:.38;cursor:not-allowed;transform:none!important;box-shadow:none}
+    @keyframes spin2{to{transform:rotate(360deg)}}
+    .btn-ring{
+      width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);
+      border-top-color:#fff;border-radius:50%;animation:spin2 .7s linear infinite;flex-shrink:0;
     }
-    @keyframes stepPulse {
-      0%,100% { box-shadow: 0 0 6px rgba(255,0,255,.5); }
-      50%     { box-shadow: 0 0 14px rgba(255,0,255,.9); }
+    .btn-sec{
+      width:100%;padding:12px;border-radius:var(--r-sm);
+      border:1px solid rgba(138,43,226,.3);background:rgba(138,43,226,.08);
+      color:var(--purple-hi);font-family:'Urbanist',sans-serif;
+      font-size:.88rem;font-weight:700;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      margin-top:10px;transition:background .2s,border-color .2s;
     }
+    .btn-sec:hover{background:rgba(138,43,226,.18);border-color:var(--purple)}
 
-    /* ═══════════════════════════════════════════════
-       CAMPOS
-    ═══════════════════════════════════════════════ */
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
-    .field label {
-      font-size: .7rem; font-weight: 700;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--text-2);
-    }
+    /* ── FOOTER ── */
+    .footer{text-align:center;font-size:.72rem;color:var(--text-3);margin-top:16px;line-height:1.7}
+    .footer a{color:var(--cyan);text-decoration:none;font-weight:700;transition:color .2s}
+    .footer a:hover{color:var(--magenta)}
+    .terms{font-size:.7rem;color:var(--text-3);text-align:center;margin-top:14px;line-height:1.6}
+    .terms strong{color:var(--text-2)}
 
-    /* Wrapper del input con ícono */
-    .fw {
-      position: relative;
-      display: flex;
-      align-items: center;
+    /* ── TOAST ── */
+    #toast{
+      position:fixed;bottom:24px;left:50%;
+      transform:translateX(-50%) translateY(10px);
+      background:rgba(18,9,31,.97);border:1px solid rgba(138,43,226,.5);
+      border-radius:var(--r-sm);padding:10px 20px;
+      font-size:.84rem;font-weight:600;color:var(--text);
+      box-shadow:var(--glow-p);backdrop-filter:blur(16px);
+      z-index:9999;white-space:nowrap;opacity:0;pointer-events:none;
+      transition:opacity .25s,transform .25s;
     }
-    .fw .fi {
-      position: absolute; left: 13px;
-      color: var(--text-3); font-size: .9rem;
-      pointer-events: none;
-    }
-    .fw input,
-    .fw select,
-    .fw textarea {
-      width: 100%;
-      background: var(--bg-input);
-      border: 1px solid rgba(138,43,226,.25);
-      border-radius: var(--r-sm);
-      color: var(--text);
-      font-family: 'Urbanist', sans-serif;
-      font-size: .92rem;
-      padding: 11px 14px 11px 40px;
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .fw textarea {
-      resize: vertical;
-      min-height: 72px;
-      line-height: 1.55;
-      padding-top: 11px;
-    }
-    .fw input::placeholder,
-    .fw textarea::placeholder { color: var(--text-3); }
-    .fw input:focus,
-    .fw select:focus,
-    .fw textarea:focus {
-      border-color: var(--purple-hi);
-      box-shadow: 0 0 0 3px rgba(138,43,226,.18);
-    }
-
-    /* Toggle contraseña */
-    .fw .eye {
-      position: absolute; right: 12px;
-      background: none; border: none;
-      color: var(--text-3); font-size: .9rem;
-      cursor: pointer; padding: 4px;
-      transition: color .2s; line-height: 1;
-    }
-    .fw .eye:hover { color: var(--text-2); }
-
-    /* Flecha select custom */
-    .fw .sarr {
-      position: absolute; right: 12px;
-      color: var(--text-3); font-size: .72rem;
-      pointer-events: none;
-    }
-    .fw select {
-      background-image: none;
-      cursor: pointer;
-    }
-    .fw select option { background: #1a0f2e; color: var(--text); }
-
-    /* Grid 2 columnas */
-    .grid2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    .grid2 .field { margin-bottom: 0; }
-
-    /* ═══════════════════════════════════════════════
-       MENSAJE DE ERROR / ÉXITO
-    ═══════════════════════════════════════════════ */
-    .msg-box {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 13px;
-      border-radius: var(--r-sm);
-      font-size: .81rem; font-weight: 600;
-      line-height: 1.45;
-      margin-bottom: 16px;
-    }
-    .msg-box.err {
-      display: flex;
-      background: rgba(255,68,102,.12);
-      border: 1px solid rgba(255,68,102,.34);
-      color: var(--err);
-    }
-    .msg-box.ok {
-      display: flex;
-      background: rgba(0,255,170,.09);
-      border: 1px solid rgba(0,255,170,.28);
-      color: var(--ok);
-    }
-
-    /* ═══════════════════════════════════════════════
-       BOTÓN PRINCIPAL
-    ═══════════════════════════════════════════════ */
-    .btn {
-      width: 100%;
-      padding: 13px;
-      border-radius: var(--r-sm);
-      border: none;
-      background: var(--grad);
-      color: #fff;
-      font-family: 'Orbitron', monospace;
-      font-size: .78rem; font-weight: 700; letter-spacing: .12em;
-      cursor: pointer;
-      box-shadow: var(--glow-p);
-      display: flex; align-items: center; justify-content: center; gap: 9px;
-      position: relative; overflow: hidden;
-      transition: transform .15s, box-shadow .15s, opacity .2s;
-      margin-top: 4px;
-    }
-    .btn::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,.14) 0%, transparent 55%);
-      pointer-events: none;
-    }
-    .btn:hover  { transform: translateY(-1px); box-shadow: var(--glow-m); }
-    .btn:active { transform: scale(.98); opacity: .9; }
-    .btn:disabled {
-      opacity: .38; cursor: not-allowed;
-      transform: none !important; box-shadow: none;
-    }
-
-    /* Spinner dentro del botón */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .btn-ring {
-      width: 18px; height: 18px;
-      border: 2.5px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      flex-shrink: 0;
-    }
-
-    /* Botón secundario (volver) */
-    .btn-sec {
-      width: 100%;
-      padding: 12px;
-      border-radius: var(--r-sm);
-      border: 1px solid rgba(138,43,226,.3);
-      background: rgba(138,43,226,.08);
-      color: var(--purple-hi);
-      font-family: 'Urbanist', sans-serif;
-      font-size: .88rem; font-weight: 700;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      margin-top: 10px;
-      transition: background .2s, border-color .2s;
-    }
-    .btn-sec:hover {
-      background: rgba(138,43,226,.18);
-      border-color: var(--purple);
-    }
-
-    /* ═══════════════════════════════════════════════
-       PIE
-    ═══════════════════════════════════════════════ */
-    .footer {
-      text-align: center;
-      font-size: .72rem;
-      color: var(--text-3);
-      margin-top: 16px;
-      line-height: 1.7;
-    }
-    .footer a {
-      color: var(--cyan);
-      text-decoration: none;
-      font-weight: 700;
-      transition: color .2s;
-    }
-    .footer a:hover { color: var(--magenta); }
-
-    .terms {
-      font-size: .7rem; color: var(--text-3);
-      text-align: center;
-      margin-top: 14px; line-height: 1.6;
-    }
-    .terms strong { color: var(--text-2); }
-
-    /* ═══════════════════════════════════════════════
-       TOAST
-    ═══════════════════════════════════════════════ */
-    #toast {
-      position: fixed;
-      bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: rgba(18,9,31,.97);
-      border: 1px solid rgba(138,43,226,.5);
-      border-radius: var(--r-sm);
-      padding: 10px 20px;
-      font-size: .84rem; font-weight: 600; color: var(--text);
-      box-shadow: var(--glow-p); backdrop-filter: blur(16px);
-      z-index: 9999; white-space: nowrap;
-      opacity: 0; pointer-events: none;
-      transition: opacity .25s, transform .25s;
-    }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* ═══════════════════════════════════════════════
-       LOADING OVERLAY (verificar sesión al cargar)
-    ═══════════════════════════════════════════════ */
-    #loadingOverlay {
-      position: fixed; inset: 0; z-index: 999;
-      background: var(--bg);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 22px;
-      transition: opacity .35s, visibility .35s;
-    }
-    #loadingOverlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .ld-logo {
-      font-family: 'Orbitron', monospace;
-      font-size: 1.8rem; font-weight: 900; letter-spacing: .2em;
-      background: var(--grad);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 12px rgba(138,43,226,.85));
-    }
-    .ld-spinner {
-      width: 36px; height: 36px;
-      border: 3px solid rgba(138,43,226,.18);
-      border-top-color: var(--purple); border-right-color: var(--magenta);
-      border-radius: 50%;
-      animation: spin .75s linear infinite;
-    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   </style>
 </head>
 <body>
 
-  <!-- LOADING -->
   <div id="loadingOverlay">
     <div class="ld-logo">KINETIC</div>
     <div class="ld-spinner"></div>
   </div>
 
-  <!-- TOAST -->
   <div id="toast" role="alert" aria-live="assertive"></div>
 
-  <!-- PÁGINA -->
   <div class="page">
 
-    <!-- HERO -->
     <div class="hero">
-      <div class="logo-ring">
-        <span class="logo-icon">⚡</span>
-      </div>
+      <div class="logo-ring"><span class="logo-icon">⚡</span></div>
       <div class="app-title">KINETIC</div>
       <div class="app-sub">Crea tu cuenta</div>
     </div>
 
-    <!-- TARJETA -->
-    <div class="card" style="max-width:440px;width:100%">
-
+    <div class="card">
       <div class="card-title">Nuevo perfil</div>
 
-      <!-- Barra de pasos (visual) -->
       <div class="step-bar">
         <div class="step-seg active" id="seg1"></div>
         <div class="step-seg"        id="seg2"></div>
         <div class="step-seg"        id="seg3"></div>
       </div>
 
-      <!-- Mensaje de feedback -->
       <div class="msg-box" id="msgBox" role="alert"></div>
 
       <!-- ── PASO 1: identidad ── -->
       <div id="step1">
-
         <div class="field">
           <label for="fNombre">Nombre o Nick</label>
           <div class="fw">
             <i class="fa-solid fa-user fi"></i>
-            <input type="text" id="fNombre" placeholder="Tu nombre…"
-                   maxlength="40" autocomplete="nickname" />
+            <input type="text" id="fNombre" placeholder="Tu nombre…" maxlength="40" autocomplete="nickname" />
           </div>
         </div>
 
@@ -504,8 +290,7 @@
             <label for="fEdad">Edad</label>
             <div class="fw">
               <i class="fa-solid fa-cake-candles fi"></i>
-              <input type="number" id="fEdad" placeholder="25"
-                     min="18" max="80" inputmode="numeric" />
+              <input type="number" id="fEdad" placeholder="25" min="18" max="80" inputmode="numeric" />
             </div>
           </div>
           <div class="field">
@@ -529,8 +314,8 @@
             <i class="fa-solid fa-magnifying-glass fi"></i>
             <select id="fBusca">
               <option value="">¿A quién buscas?</option>
-              <option value="Hombres">Hombres</option>
-              <option value="Mujeres">Mujeres</option>
+              <option value="men">Hombres</option>
+              <option value="women">Mujeres</option>
               <option value="all">Todos</option>
             </select>
             <i class="fa-solid fa-chevron-down sarr"></i>
@@ -541,26 +326,22 @@
           <label for="fBio">Biografía <span style="color:var(--text-3);font-weight:400">(opcional)</span></label>
           <div class="fw" style="align-items:flex-start">
             <i class="fa-solid fa-pen-to-square fi" style="top:12px;position:absolute"></i>
-            <textarea id="fBio" placeholder="Cuéntanos algo sobre ti…"
-                      maxlength="200" rows="2"></textarea>
+            <textarea id="fBio" placeholder="Cuéntanos algo sobre ti…" maxlength="200" rows="2"></textarea>
           </div>
         </div>
 
         <button class="btn" id="btnStep1">
           <i class="fa-solid fa-arrow-right"></i> Continuar
         </button>
-
-      </div><!-- /step1 -->
+      </div>
 
       <!-- ── PASO 2: credenciales ── -->
       <div id="step2" style="display:none">
-
         <div class="field">
           <label for="fEmail">Correo electrónico</label>
           <div class="fw">
             <i class="fa-solid fa-envelope fi"></i>
-            <input type="email" id="fEmail" placeholder="tu@correo.com"
-                   autocomplete="email" inputmode="email" />
+            <input type="email" id="fEmail" placeholder="tu@correo.com" autocomplete="email" inputmode="email" />
           </div>
         </div>
 
@@ -568,10 +349,8 @@
           <label for="fPass">Contraseña</label>
           <div class="fw">
             <i class="fa-solid fa-lock fi"></i>
-            <input type="password" id="fPass" placeholder="Mínimo 6 caracteres"
-                   autocomplete="new-password" />
-            <button class="eye" type="button"
-                    data-t="fPass" aria-label="Mostrar contraseña">
+            <input type="password" id="fPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+            <button class="eye" type="button" data-t="fPass" aria-label="Mostrar contraseña">
               <i class="fa-regular fa-eye"></i>
             </button>
           </div>
@@ -581,10 +360,8 @@
           <label for="fPass2">Confirmar contraseña</label>
           <div class="fw">
             <i class="fa-solid fa-lock fi"></i>
-            <input type="password" id="fPass2" placeholder="Repite la contraseña"
-                   autocomplete="new-password" />
-            <button class="eye" type="button"
-                    data-t="fPass2" aria-label="Mostrar contraseña">
+            <input type="password" id="fPass2" placeholder="Repite la contraseña" autocomplete="new-password" />
+            <button class="eye" type="button" data-t="fPass2" aria-label="Mostrar contraseña">
               <i class="fa-regular fa-eye"></i>
             </button>
           </div>
@@ -597,75 +374,50 @@
         <button class="btn-sec" id="btnBack2">
           <i class="fa-solid fa-arrow-left"></i> Volver
         </button>
-
-      </div><!-- /step2 -->
+      </div>
 
       <!-- ── PASO 3: éxito ── -->
-      <div id="step3" style="display:none;text-align:center">
+      <div id="step3" style="display:none;text-align:center;padding:10px 0">
         <div style="font-size:3rem;margin-bottom:12px">🚀</div>
         <div style="font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;
                     background:var(--grad);-webkit-background-clip:text;
-                    -webkit-text-fill-color:transparent;background-clip:text;
-                    margin-bottom:10px">
+                    -webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px">
           ¡Cuenta creada!
         </div>
         <div style="font-size:.85rem;color:var(--text-2);line-height:1.6;margin-bottom:22px">
-          Bienvenido/a a Kinetic.<br>Redirigiendo al Radar…
+          Bienvenido/a a Kinetic.<br>Preparando tu perfil…
         </div>
         <div class="ld-spinner" style="margin:0 auto"></div>
       </div>
 
-      <!-- PIE -->
       <div class="footer" id="footerLink">
         ¿Ya tienes cuenta? <a href="index.html">Inicia sesión</a>
       </div>
-
       <p class="terms" id="termsText">
         Al registrarte aceptas los <strong>Términos de uso</strong>
         y la <strong>Política de privacidad</strong> de Kinetic.
       </p>
+    </div>
 
-    </div><!-- /card -->
+  </div>
 
-  </div><!-- /page -->
-
-  <!-- ══════════════════════════════════════════════════════
-       ÚNICO <script type="module"> — Firebase SDK v10.14.1
-  ══════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════
+       SUPABASE ÚNICAMENTE — sin ningún rastro de Firebase
+  ═══════════════════════════════════════════════════════ -->
   <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    /* ── A) IMPORTS ── */
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-    import { getDatabase, ref, set }
-      from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    /* ── CONFIG ── */
+    const SUPABASE_URL = 'https://qemnczuklcztdajyjblb.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_HE46cLZtaukvcva6bdKLGg_gz8HRet3';
+    const supabase     = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const HOME         = 'onboarding.html';
 
-    /* ── B) CONFIG FIREBASE ── */
-    const firebaseConfig = {
-      apiKey:            "AIzaSyCm3n10MaKkd7S8U3dtmfHmk_T556TQOoA",
-      authDomain:        "kinetic-app-67ae5.firebaseapp.com",
-      databaseURL:       "https://kinetic-app-67ae5-default-rtdb.firebaseio.com/",
-      projectId:         "kinetic-app-67ae5",
-      storageBucket:     "kinetic-app-67ae5.firebasestorage.app",
-      messagingSenderId: "825570718975",
-      appId:             "1:825570718975:web:cf8d9747a9f2e4ac0908ca"
-    };
+    /* ── ESTADO ── */
+    let dataPaso1   = {};
+    let registrando = false;
 
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = getDatabase(app);
-
-    /* ── C) RUTA DE DESTINO ── */
-    const HOME = "radar.html";    // sin barra → compatible GitHub Pages
-
-    /* ── D) ESTADO ── */
-    let registrando = false;       // bandera anti-doble-click
-    // Datos del paso 1 (se guardan al avanzar)
-    let dataPaso1 = {};
-
-    /* ── E) REFS DOM ── */
+    /* ── REFS ── */
     const $loading  = document.getElementById('loadingOverlay');
     const $msgBox   = document.getElementById('msgBox');
     const $step1    = document.getElementById('step1');
@@ -676,242 +428,215 @@
     const $seg1     = document.getElementById('seg1');
     const $seg2     = document.getElementById('seg2');
     const $seg3     = document.getElementById('seg3');
-    const $toast    = document.getElementById('toast');
 
-    /* ── F) HELPERS ── */
-
-    /** Errores Firebase → español */
-    function tradErr(code) {
-      const m = {
-        'auth/email-already-in-use':   'Ese correo ya tiene una cuenta registrada.',
-        'auth/invalid-email':          'El formato del correo no es válido.',
-        'auth/weak-password':          'La contraseña es muy débil (mínimo 6 caracteres).',
-        'auth/network-request-failed': 'Sin conexión. Revisa tu red e intenta de nuevo.',
-        'auth/too-many-requests':      'Demasiados intentos fallidos. Espera unos minutos.',
-        'auth/operation-not-allowed':  'El registro con email no está habilitado en Firebase.',
-      };
-      return m[code] || `Error inesperado (${code}). Intenta de nuevo.`;
-    }
-
-    /** Muestra un mensaje en el msgBox */
-    function showMsg(texto, tipo /* 'err' | 'ok' */) {
+    /* ── HELPERS ── */
+    function showMsg(texto, tipo) {
       $msgBox.className = `msg-box ${tipo}`;
-      $msgBox.innerHTML =
-        `<i class="fa-solid ${tipo === 'err'
-          ? 'fa-circle-exclamation'
-          : 'fa-circle-check'}"></i><span>${texto}</span>`;
+      $msgBox.innerHTML = `<i class="fa-solid ${tipo === 'err' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i><span>${texto}</span>`;
     }
     function clearMsg() { $msgBox.className = 'msg-box'; $msgBox.innerHTML = ''; }
 
-    /** Cambia estado carga del botón */
     function setLoad($btn, loading, defaultHTML) {
-      $btn.disabled = loading;
-      $btn.innerHTML = loading
-        ? `<div class="btn-ring"></div> Procesando…`
-        : defaultHTML;
+      $btn.disabled  = loading;
+      $btn.innerHTML = loading ? '<div class="btn-ring"></div> Procesando…' : defaultHTML;
     }
 
-    /** Toast de confirmación */
     let _tt = null;
     function showToast(msg) {
-      $toast.textContent = msg;
-      $toast.classList.add('show');
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
       clearTimeout(_tt);
-      _tt = setTimeout(() => $toast.classList.remove('show'), 3500);
+      _tt = setTimeout(() => el.classList.remove('show'), 3500);
     }
 
-    /** Actualiza barra de progreso */
     function setStep(n) {
       $seg1.className = 'step-seg ' + (n > 1 ? 'done' : n === 1 ? 'active' : '');
       $seg2.className = 'step-seg ' + (n > 2 ? 'done' : n === 2 ? 'active' : '');
       $seg3.className = 'step-seg ' + (n === 3 ? 'done' : '');
     }
 
-    /* ── G) PERSISTENCIA DE SESIÓN ──
-       Si ya hay sesión activa al cargar registro.html
-       → redirigir directamente al HOME.
-       Si no → ocultar loading y mostrar form.
-    ──────────────────────────────── */
-    onAuthStateChanged(auth, user => {
-      if (user && !registrando) {
-        // Sesión activa → home
+    /* Traduce errores de Supabase Auth al español */
+    function parseAuthError(msg = '') {
+      const m = msg.toLowerCase();
+      if (m.includes('user already registered') || m.includes('already registered'))
+        return 'Este correo ya tiene una cuenta registrada.';
+      if (m.includes('invalid email'))
+        return 'El formato del correo no es válido.';
+      if (m.includes('password') && (m.includes('short') || m.includes('6')))
+        return 'La contraseña debe tener al menos 6 caracteres.';
+      if (m.includes('network') || m.includes('fetch'))
+        return 'Sin conexión. Revisa tu red e intenta de nuevo.';
+      if (m.includes('too many') || m.includes('rate limit'))
+        return 'Demasiados intentos. Espera unos minutos.';
+      if (m.includes('email not confirmed'))
+        return 'Debes confirmar tu correo antes de entrar.';
+      return 'Error inesperado. Intenta de nuevo.';
+    }
+
+    /* ── VERIFICAR SESIÓN ACTIVA al cargar ── */
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
         window.location.replace(HOME);
         return;
       }
-      $loading.classList.add('hidden');
+    } catch (e) {
+      console.warn('[Kinetic - registro] No se pudo verificar sesión:', e);
+    }
+    $loading.classList.add('hidden');
+
+    /* Escuchar cambios de sesión futuros */
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session && !registrando) {
+        window.location.replace(HOME);
+      }
     });
 
-    /* ── H) TOGGLE CONTRASEÑA ── */
+    /* ── TOGGLE CONTRASEÑA ── */
     document.querySelectorAll('.eye').forEach(btn => {
       btn.addEventListener('click', () => {
         const inp = document.getElementById(btn.dataset.t);
         const ico = btn.querySelector('i');
-        if (inp.type === 'password') {
-          inp.type       = 'text';
-          ico.className  = 'fa-regular fa-eye-slash';
-          btn.setAttribute('aria-label', 'Ocultar contraseña');
-        } else {
-          inp.type       = 'password';
-          ico.className  = 'fa-regular fa-eye';
-          btn.setAttribute('aria-label', 'Mostrar contraseña');
-        }
+        const show = inp.type === 'password';
+        inp.type       = show ? 'text' : 'password';
+        ico.className  = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
       });
     });
 
-    /* ── I) PASO 1 — Validar identidad ── */
-    document.getElementById('btnStep1').addEventListener('click', () => {
-      clearMsg();
+    /* ── PASO 1: validar identidad ── */
+    document.getElementById('btnStep1').addEventListener('click', handleStep1);
 
-      const nombre = document.getElementById('fNombre').value.trim();
+    function handleStep1() {
+      clearMsg();
+      const nombre  = document.getElementById('fNombre').value.trim();
       const edadRaw = document.getElementById('fEdad').value;
       const genero  = document.getElementById('fGenero').value;
       const busca   = document.getElementById('fBusca').value;
       const bio     = document.getElementById('fBio').value.trim();
       const edad    = parseInt(edadRaw, 10);
 
-      if (!nombre)            { showMsg('Ingresa tu nombre o nickname.', 'err'); return; }
-      if (!edadRaw || isNaN(edad) || edad < 18) {
-        showMsg('Debes tener al menos 18 años para registrarte.', 'err'); return;
-      }
-      if (!genero)            { showMsg('Selecciona tu género.', 'err'); return; }
-      if (!busca)             { showMsg('Indica a quién buscas.', 'err'); return; }
+      if (!nombre)                          { showMsg('Ingresa tu nombre o nickname.', 'err'); return; }
+      if (!edadRaw || isNaN(edad) || edad < 18) { showMsg('Debes tener al menos 18 años.', 'err'); return; }
+      if (!genero)                          { showMsg('Selecciona tu género.', 'err'); return; }
+      if (!busca)                           { showMsg('Indica a quién buscas.', 'err'); return; }
 
-      // Guardar datos del paso 1
       dataPaso1 = { nombre, edad, genero, busca, bio };
-
-      // Avanzar al paso 2
       clearMsg();
-      $step1.style.display = 'none';
-      $step2.style.display = 'block';
+      $step1.style.display  = 'none';
+      $step2.style.display  = 'block';
       $footer.style.display = 'none';
       $terms.style.display  = 'none';
       setStep(2);
       document.getElementById('fEmail').focus();
+    }
+
+    /* ── PASO 1 → Enter ── */
+    ['fNombre','fEdad','fBio'].forEach(id => {
+      document.getElementById(id)?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') handleStep1();
+      });
     });
 
-    /* Botón volver desde paso 2 */
+    /* ── VOLVER A PASO 1 ── */
     document.getElementById('btnBack2').addEventListener('click', () => {
       clearMsg();
-      $step2.style.display = 'none';
-      $step1.style.display = 'block';
+      $step2.style.display  = 'none';
+      $step1.style.display  = 'block';
       $footer.style.display = 'block';
       $terms.style.display  = 'block';
       setStep(1);
     });
 
-    /* Enter en campos del paso 1 */
-    ['fNombre', 'fEdad', 'fBio'].forEach(id => {
+    /* ── PASO 2: crear cuenta en Supabase ── */
+    document.getElementById('btnStep2').addEventListener('click', handleStep2);
+
+    ['fEmail','fPass','fPass2'].forEach(id => {
       document.getElementById(id)?.addEventListener('keydown', e => {
-        if (e.key === 'Enter') document.getElementById('btnStep1').click();
+        if (e.key === 'Enter') handleStep2();
       });
     });
 
-    /* Enter en campos del paso 2 */
-    ['fEmail', 'fPass', 'fPass2'].forEach(id => {
-      document.getElementById(id)?.addEventListener('keydown', e => {
-        if (e.key === 'Enter') document.getElementById('btnStep2').click();
-      });
-    });
-
-    /* ── J) PASO 2 — Crear cuenta ──────────────────────
-       1. createUserWithEmailAndPassword
-       2. set() en users/${uid}         (nodo privado completo)
-       3. set() en radar_public/${uid}  (nodo público para el Radar)
-       4. Mostrar paso 3 y redirigir
-    ────────────────────────────────────────────────── */
-    document.getElementById('btnStep2').addEventListener('click', async () => {
+    async function handleStep2() {
       clearMsg();
-
       const email = document.getElementById('fEmail').value.trim();
       const pass  = document.getElementById('fPass').value;
       const pass2 = document.getElementById('fPass2').value;
 
-      // Validaciones cliente
-      if (!email)            { showMsg('Ingresa tu correo electrónico.', 'err'); return; }
-      if (pass.length < 6)   { showMsg('La contraseña debe tener al menos 6 caracteres.', 'err'); return; }
-      if (pass !== pass2)    { showMsg('Las contraseñas no coinciden.', 'err'); return; }
+      if (!email)           { showMsg('Ingresa tu correo electrónico.', 'err'); return; }
+      if (pass.length < 6)  { showMsg('La contraseña debe tener al menos 6 caracteres.', 'err'); return; }
+      if (pass !== pass2)   { showMsg('Las contraseñas no coinciden.', 'err'); return; }
+      if (registrando)      return;
 
-      if (registrando) return; // anti-doble-click
       registrando = true;
-      setLoad(document.getElementById('btnStep2'), true, '');
-
-      const today = new Date().toISOString().split('T')[0];
+      const $btn  = document.getElementById('btnStep2');
+      setLoad($btn, true, '');
 
       try {
-        /* 1. Crear cuenta en Firebase Auth */
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        const uid  = cred.user.uid;
-
-        /* Perfil completo — nodo privado (users/) */
-        const userData = {
-          uid,
-          name          : dataPaso1.nombre,
-          nombre        : dataPaso1.nombre,
-          age           : dataPaso1.edad,
-          edad          : dataPaso1.edad,
-          gender        : dataPaso1.genero,
-          genero        : dataPaso1.genero,
-          interestedIn  : dataPaso1.busca,
-          busca         : dataPaso1.busca,
-          bio           : dataPaso1.bio || '',
+        /* 1. Crear usuario en Supabase Auth */
+        const { data: authData, error: authErr } = await supabase.auth.signUp({
           email,
-          album         : [],
-          photos        : [],
-          profilePic    : '',
-          online        : true,
-          modoExpress   : false,
-          premium       : false,
-          lat           : null,
-          lng           : null,
-          dailyViews    : 0,
-          lastResetDate : today,
-          createdAt     : Date.now()
-        };
+          password: pass,
+          options: {
+            data: {
+              nombre: dataPaso1.nombre,
+              gender: dataPaso1.genero,
+              edad:   dataPaso1.edad,
+            }
+          }
+        });
 
-        /* Perfil público optimizado — nodo radar_public/ */
-        const publicData = {
-          uid,
-          name       : dataPaso1.nombre,
-          age        : dataPaso1.edad,
-          gender     : dataPaso1.genero,
-          profilePic : '',
-          album      : [],
-          online     : true,
-          lat        : null,
-          lng        : null
-        };
+        if (authErr) throw authErr;
 
-        /* 2. Escritura paralela en ambos nodos */
-        await Promise.all([
-          set(ref(db, `users/${uid}`),        userData),
-          set(ref(db, `radar_public/${uid}`), publicData)
-        ]);
+        const uid = authData.user?.id;
+        if (!uid) throw new Error('No se recibió ID de usuario de Supabase.');
 
-        /* 3. Mostrar paso 3 (éxito) */
+        /* 2. Insertar perfil completo en la tabla profiles
+              El trigger handle_new_user ya creó una fila mínima,
+              usamos UPSERT para no duplicar y añadir todos los campos. */
+        const { error: dbErr } = await supabase
+          .from('profiles')
+          .upsert({
+            id:           uid,
+            nombre:       dataPaso1.nombre,
+            edad:         dataPaso1.edad,
+            gender:       dataPaso1.genero,
+            busca:        dataPaso1.busca,
+            bio:          dataPaso1.bio || '',
+            email,
+            avatar_url:   null,
+            photos:       [],
+            online:       true,
+            modo_express: false,
+            lat:          null,
+            lng:          null,
+          }, { onConflict: 'id' });
+
+        if (dbErr) {
+          /* No bloqueamos el flujo — el perfil puede completarse en onboarding */
+          console.error('[Kinetic - registro] Error upsert perfil:', dbErr.message);
+        }
+
+        /* 3. Mostrar éxito */
         $step2.style.display = 'none';
         $step3.style.display = 'block';
         setStep(3);
         showToast(`¡Bienvenido/a, ${dataPaso1.nombre}! 🚀`);
 
-        /* 4. Redirigir al HOME después de 1.2s */
-        setTimeout(() => { window.location.href = HOME; }, 1200);
+        /* 4. Redirigir al onboarding */
+        setTimeout(() => { window.location.href = HOME; }, 1400);
 
       } catch (err) {
-        console.error('[Kinetic - registro] Error:', err.code, err.message);
+        console.error('[Kinetic - registro] Error:', err.message);
         registrando = false;
-        showMsg(tradErr(err.code), 'err');
-        setLoad(
-          document.getElementById('btnStep2'),
-          false,
-          '<i class="fa-solid fa-user-plus"></i> Crear cuenta'
-        );
+        showMsg(parseAuthError(err.message), 'err');
+        setLoad($btn, false, '<i class="fa-solid fa-user-plus"></i> Crear cuenta');
       }
-    });
+    }
 
   </script>
-  <!-- FIN DEL ÚNICO BLOQUE SCRIPT -->
 
-<script src="register-sw.js"></script>
-  
+  <script src="register-sw.js"></script>
 </body>
 </html>
