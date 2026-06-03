@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#0d0616" />
+  <title>Kinetic · Sin conexión</title>
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;900&family=Orbitron:wght@600;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#0d0616;--grad:linear-gradient(135deg,#8a2be2 0%,#ff00ff 100%);
+      --text:#ede0ff;--text-3:#52406e;--purple:#8a2be2;--magenta:#ff00ff;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      height:100%;background:var(--bg);color:var(--text);
+      font-family:'Urbanist',sans-serif;
+      display:flex;align-items:center;justify-content:center;
+    }
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;
+      background-image:
+        repeating-linear-gradient(0deg,  transparent,transparent 39px,rgba(138,43,226,.03) 40px),
+        repeating-linear-gradient(90deg, transparent,transparent 39px,rgba(138,43,226,.03) 40px);
+    }
+    .wrap{
+      position:relative;z-index:1;
+      display:flex;flex-direction:column;align-items:center;gap:20px;
+      padding:40px 28px;text-align:center;max-width:360px;
+    }
+    .logo{
+      font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;letter-spacing:.22em;
+      background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;filter:drop-shadow(0 0 14px rgba(138,43,226,.8));
+    }
+    .icon-wrap{
+      width:80px;height:80px;border-radius:50%;
+      background:rgba(138,43,226,.1);border:1px solid rgba(138,43,226,.25);
+      display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+      animation:pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{box-shadow:0 0 20px rgba(138,43,226,.2)}50%{box-shadow:0 0 40px rgba(138,43,226,.45)}}
+    .title{
+      font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;letter-spacing:.08em;
+      color:var(--text);
+    }
+    .sub{font-size:.88rem;color:var(--text-3);line-height:1.65}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;padding:13px 28px;
+      background:var(--grad);border:none;border-radius:12px;
+      color:#fff;font-family:'Orbitron',monospace;
+      font-size:.78rem;font-weight:700;letter-spacing:.12em;
+      cursor:pointer;box-shadow:0 0 20px rgba(138,43,226,.5);
+      transition:transform .15s,box-shadow .15s;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(255,0,255,.55)}
+    .btn:active{transform:scale(.97)}
+    .hint{font-size:.72rem;color:var(--text-3);margin-top:4px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">KINETIC</div>
+    <div class="icon-wrap">📡</div>
+    <div class="title">Sin conexión</div>
+    <div class="sub">Parece que no tienes internet en este momento.<br>Revisa tu conexión e inténtalo de nuevo.</div>
+    <button class="btn" onclick="window.location.reload()">
+      ↻ Reintentar
+    </button>
+    <div class="hint">Las páginas que visitaste antes pueden seguir disponibles.</div>
+  </div>
+</body>
+</html>
