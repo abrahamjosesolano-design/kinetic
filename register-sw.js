@@ -16,7 +16,7 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
+        .register('/kinetic/sw.js', { scope: '/kinetic/' })
         .then(reg => {
           console.log('[Kinetic PWA] SW registrado. Scope:', reg.scope);
 
@@ -133,7 +133,7 @@
     if (document.getElementById('kineticInstallBtn')) return;
     /* Solo mostrar en radar y perfil */
     const path = window.location.pathname;
-    if (!path.includes('radar') && !path.includes('perfil') && path !== '/') return;
+    if (!path.includes('radar') && !path.includes('perfil') && path !== '/kinetic/') return;
 
     const btn = document.createElement('button');
     btn.id = 'kineticInstallBtn';
