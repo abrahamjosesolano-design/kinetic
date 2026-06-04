@@ -47,18 +47,17 @@
     }
     ::-webkit-scrollbar{width:3px}
     ::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px}
-
     body::before{
       content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       background-image:
-        repeating-linear-gradient(0deg,  transparent,transparent 39px,rgba(138,43,226,.033) 40px),
-        repeating-linear-gradient(90deg, transparent,transparent 39px,rgba(138,43,226,.033) 40px);
+        repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(138,43,226,.033) 40px),
+        repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(138,43,226,.033) 40px);
     }
     body::after{
       content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       background:
-        radial-gradient(ellipse 65% 42% at 10%  5%, rgba(138,43,226,.16) 0%,transparent 65%),
-        radial-gradient(ellipse 50% 34% at 88% 90%,rgba(255,0,255,.10)  0%,transparent 60%);
+        radial-gradient(ellipse 65% 42% at 10% 5%,rgba(138,43,226,.16) 0%,transparent 65%),
+        radial-gradient(ellipse 50% 34% at 88% 90%,rgba(255,0,255,.10) 0%,transparent 60%);
     }
 
     /* ── PAGE ── */
@@ -70,11 +69,9 @@
 
     /* ── TOP BAR ── */
     .topbar{
-      position:sticky;top:0;z-index:100;
-      height:var(--topbar-h);
+      position:sticky;top:0;z-index:100;height:var(--topbar-h);
       display:flex;align-items:center;justify-content:space-between;
-      padding:0 18px;
-      background:rgba(13,6,22,.95);backdrop-filter:blur(24px);
+      padding:0 18px;background:rgba(13,6,22,.95);backdrop-filter:blur(24px);
       border-bottom:1px solid var(--border);flex-shrink:0;
     }
     .topbar-logo{
@@ -152,9 +149,9 @@
       display:none;grid-template-columns:repeat(3,1fr);
       gap:6px;padding:0 10px;
     }
-    @media(min-width:480px) {#radarGrid{grid-template-columns:repeat(4,1fr)}}
-    @media(min-width:680px) {#radarGrid{grid-template-columns:repeat(5,1fr)}}
-    @media(min-width:900px) {#radarGrid{grid-template-columns:repeat(6,1fr)}}
+    @media(min-width:480px){#radarGrid{grid-template-columns:repeat(4,1fr)}}
+    @media(min-width:680px){#radarGrid{grid-template-columns:repeat(5,1fr)}}
+    @media(min-width:900px){#radarGrid{grid-template-columns:repeat(6,1fr)}}
 
     /* ── CARD ── */
     .radar-card{
@@ -191,7 +188,6 @@
       0%,100%{box-shadow:0 0 5px var(--green)}
       50%    {box-shadow:0 0 12px var(--green),0 0 4px #fff}
     }
-
     .card-badge{
       position:absolute;top:7px;right:7px;padding:2px 8px;
       background:rgba(13,6,22,.65);border:1px solid rgba(255,0,255,.3);
@@ -199,17 +195,13 @@
       font-size:.52rem;font-weight:700;letter-spacing:.06em;
       color:rgba(255,0,255,.85);backdrop-filter:blur(4px);
     }
-
-    /* liked stamp */
     .card-liked-stamp{
       position:absolute;top:7px;left:7px;
       width:28px;height:28px;border-radius:50%;
       background:rgba(255,0,255,.85);
       display:flex;align-items:center;justify-content:center;
-      font-size:.8rem;box-shadow:0 0 10px rgba(255,0,255,.6);
-      pointer-events:none;
+      font-size:.8rem;box-shadow:0 0 10px rgba(255,0,255,.6);pointer-events:none;
     }
-
     .card-info{position:absolute;bottom:0;left:0;right:0;padding:8px 8px 7px;z-index:1}
     .card-name{
       font-size:.78rem;font-weight:800;color:#fff;line-height:1.2;
@@ -222,7 +214,6 @@
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
     .card-age-accent{color:rgba(255,0,255,.75)}
-
     .card-dist{
       position:absolute;bottom:7px;right:7px;
       display:flex;align-items:center;gap:4px;padding:2px 7px;
@@ -276,20 +267,31 @@
     }
     .btn-neon:hover{background:rgba(255,0,255,.18);box-shadow:var(--glow-m)}
 
+    /* ── TOAST ── */
+    #toast{
+      position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;
+      transform:translateX(-50%) translateY(8px);
+      background:rgba(18,9,31,.97);border:1px solid rgba(138,43,226,.5);
+      border-radius:var(--r-sm);padding:10px 18px;
+      font-size:.84rem;font-weight:600;color:var(--text);
+      box-shadow:var(--glow-p);backdrop-filter:blur(16px);
+      z-index:9999;white-space:nowrap;opacity:0;pointer-events:none;
+      transition:opacity .25s,transform .25s;
+    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
     /* ── BOTTOM NAV ── */
     nav.bottom-nav{
       position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);
       background:rgba(13,6,22,.97);backdrop-filter:blur(24px);
       border-top:1px solid rgba(138,43,226,.16);
-      display:flex;align-items:stretch;z-index:200;
-      padding-bottom:var(--sb);
+      display:flex;align-items:stretch;z-index:200;padding-bottom:var(--sb);
     }
     .nav-item{
       flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
       gap:4px;cursor:pointer;position:relative;text-decoration:none;
       transition:opacity .2s;-webkit-tap-highlight-color:transparent;
     }
-    .nav-item:active{opacity:.6}
     .nav-item i{font-size:1.22rem;color:var(--text-3);transition:color .25s,filter .25s,transform .25s}
     .nav-item span{font-size:.59rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);transition:color .25s}
     .nav-item.active i{color:var(--purple-hi);filter:drop-shadow(0 0 5px rgba(160,32,240,.85));transform:scale(1.18)}
@@ -313,19 +315,6 @@
       animation:badgeIn .3s cubic-bezier(.36,.07,.19,.97) both;
     }
     @keyframes badgeIn{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
-
-    /* ── TOAST ── */
-    #toast{
-      position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;
-      transform:translateX(-50%) translateY(8px);
-      background:rgba(18,9,31,.97);border:1px solid rgba(138,43,226,.5);
-      border-radius:var(--r-sm);padding:10px 18px;
-      font-size:.84rem;font-weight:600;color:var(--text);
-      box-shadow:var(--glow-p);backdrop-filter:blur(16px);
-      z-index:9999;white-space:nowrap;opacity:0;pointer-events:none;
-      transition:opacity .25s,transform .25s;
-    }
-    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   </style>
 </head>
 <body>
@@ -340,12 +329,14 @@
     </div>
   </div>
 
+  <!-- GEO BAR — se muestra si el usuario aún no activó ubicación -->
   <div id="geoBar">
     <i class="fa-solid fa-location-dot"></i>
     <span>Activa tu ubicación para ver distancias</span>
     <button id="geoBtn">Activar</button>
   </div>
 
+  <!-- FILTROS -->
   <div class="filter-bar" id="filterBar">
     <div class="chip active" data-filter="all">🌐 Todos</div>
     <div class="chip" data-filter="online">🟢 En línea</div>
@@ -357,6 +348,7 @@
 
   <div class="section-label"><span>📡 Personas cerca de ti</span></div>
 
+  <!-- SKELETON -->
   <div id="skeleton">
     <div class="skel-card"></div><div class="skel-card"></div>
     <div class="skel-card"></div><div class="skel-card"></div>
@@ -367,12 +359,14 @@
 
   <div id="radarGrid"></div>
 
+  <!-- ESTADO VACÍO -->
   <div class="state-wrap" id="emptyState">
     <div class="state-icon">📡</div>
     <div class="state-title">Sin resultados</div>
-    <div class="state-sub">No encontramos usuarios con este filtro.</div>
+    <div class="state-sub" id="emptyMsg">No encontramos usuarios con este filtro.</div>
   </div>
 
+  <!-- AUTH GATE -->
   <div class="state-wrap" id="authGate">
     <div class="state-icon" style="background:rgba(255,0,85,.07);border-color:rgba(255,0,85,.2)">
       <i class="fa-solid fa-lock" style="font-size:2rem;color:#ff4466"></i>
@@ -402,15 +396,13 @@
 <div id="toast"></div>
 
 <script type="module">
-  import { createClient }
-    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
   /* ── CONFIG ── */
   const SUPABASE_URL = 'https://qemnczuklcztdajyjblb.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_HE46cLZtaukvcva6bdKLGg_gz8HRet3';
   const supabase     = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  /* ── SVG FALLBACK ── */
   const AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none"
     style="width:100%;height:100%;stroke:#ff00ff;stroke-width:1.5;
            background:#12091f;border-radius:50%;">
@@ -419,43 +411,32 @@
   </svg>`;
 
   /* ── ESTADO ── */
-  let me           = null;   // perfil del usuario actual
-  let allUsers     = [];     // array de perfiles del radar
-  let likedSet     = new Set(); // uids a los que ya di like
+  let me           = null;
+  let session      = null;   // guardado para el pagehide keepalive
+  let allUsers     = [];
+  let likedSet     = new Set();
   let activeFilter = 'all';
   let myLat        = null;
   let myLng        = null;
-  let realtimeCh   = null;   // canal realtime de Supabase
-  let unreadCount  = 0;
+  let realtimeCh   = null;
+  let geoWatchId   = null;
 
   /* ── REFS DOM ── */
   const $skeleton = document.getElementById('skeleton');
   const $grid     = document.getElementById('radarGrid');
   const $empty    = document.getElementById('emptyState');
+  const $emptyMsg = document.getElementById('emptyMsg');
   const $authGate = document.getElementById('authGate');
   const $livePill = document.getElementById('livePill');
   const $geoBar   = document.getElementById('geoBar');
 
-  /* ══════════════════════════════════════════════
-     HELPERS
-  ══════════════════════════════════════════════ */
-  const esc = s => String(s??'')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  /* ── HELPERS ── */
+  function isUrl(v){ return typeof v==='string' && /^https?:\/\/.{5,}/.test(v.trim()); }
 
-  function isValidUrl(raw) {
-    if (typeof raw !== 'string') return false;
-    return raw.trim().length > 12 && /^https?:\/\/.{5,}/.test(raw.trim());
-  }
-
-  function firstPhoto(data) {
-    if (!data) return null;
-    const srcs = [
-      data.avatar_url,
-      ...(Array.isArray(data.photos) ? data.photos : []),
-    ];
-    for (const u of srcs) { if (isValidUrl(u)) return u.trim(); }
-    return null;
+  function firstPhoto(d) {
+    if (!d) return null;
+    const srcs = [d.avatar_url, ...(Array.isArray(d.photos) ? d.photos : [])];
+    return srcs.find(isUrl) || null;
   }
 
   function genderLabel(g) {
@@ -464,11 +445,14 @@
     return '✦';
   }
 
-  /* ══════════════════════════════════════════════
-     HAVERSINE — distancia entre dos coords (km)
-     Usada como fallback si PostGIS no devuelve
-     la columna `distance_km`.
-  ══════════════════════════════════════════════ */
+  function fmtDist(km) {
+    if (km == null) return null;
+    if (km < 1)    return `${Math.round(km * 1000)}m`;
+    if (km < 10)   return `${km.toFixed(1)}km`;
+    return `${Math.round(km)}km`;
+  }
+
+  /* Haversine — fallback cuando la RPC no devuelve distance_km */
   function haversineKm(lat1, lng1, lat2, lng2) {
     const R  = 6371;
     const dL = (lat2 - lat1) * Math.PI / 180;
@@ -477,19 +461,9 @@
              + Math.cos(lat1*Math.PI/180)
              * Math.cos(lat2*Math.PI/180)
              * Math.sin(dG/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  function fmtDist(km) {
-    if (km == null) return null;
-    if (km < 1)   return `${Math.round(km*1000)}m`;
-    if (km < 10)  return `${km.toFixed(1)}km`;
-    return `${Math.round(km)}km`;
-  }
-
-  /* ══════════════════════════════════════════════
-     TOAST
-  ══════════════════════════════════════════════ */
   let _tt = null;
   function showToast(msg, isErr=false) {
     const el = document.getElementById('toast');
@@ -505,67 +479,70 @@
   }
 
   /* ══════════════════════════════════════════════
-     AUTENTICACIÓN
-  ══════════════════════════════════════════════ */
-  const { data: { session } } = await supabase.auth.getSession();
+     AUTH
+  ══════════════════════════════════════════════ */
+  const { data: { session: sess } } = await supabase.auth.getSession();
 
-  if (!session) {
-    hideSkeleton();
-    $authGate.classList.add('show');
-  } else {
-    /* Cargar perfil propio */
-    const { data: myProfile } = await supabase
-      .from('profiles').select('*').eq('id', session.user.id).single();
-    me = myProfile || { id: session.user.id };
+  if (!sess) {
+    hideSkeleton();
+    $authGate.classList.add('show');
+  } else {
+    session = sess;
 
-    /* Marcar usuario como online */
-    await supabase.from('profiles')
-      .update({ online: true })
-      .eq('id', me.id);
+    /* Cargar perfil propio con .maybeSingle() — nunca lanza 406 */
+    const { data: myProfile } = await supabase
+      .from('profiles')
+      .select('id,nombre,gender,busca,modo_express,lat,lng,online')
+      .eq('id', sess.user.id)
+      .maybeSingle();
 
-    /* Cargar likes enviados para mostrar stamp en el radar */
-    await loadMyLikes();
+    me = myProfile || { id: sess.user.id };
 
-    /* Geolocalización (silenciosa al inicio) */
-    initGeo(true);
+    /* Marcar online */
+    supabase.from('profiles').update({ online: true }).eq('id', me.id).then(() => {});
 
-    /* Cargar usuarios del radar */
-    await loadRadar();
+    /* Cargar likes propios para mostrar stamp en las cards */
+    await loadMyLikes();
 
-    /* Suscribirse a cambios en tiempo real */
-    subscribeRealtime();
+    /* Intentar geo silenciosa al inicio */
+    initGeo(true);
 
-    /* Badge de mensajes sin leer */
-    loadUnreadBadge();
+    /* Cargar radar */
+    await loadRadar();
 
-    /* Filtros */
-    wireFilters();
-  }
+    /* Suscribir realtime del radar (usuarios cerca) */
+    subscribeRealtime();
+
+    /* Badge mensajes sin leer (Carga la cantidad inicial) */
+    await loadUnreadBadge();
+
+    /* Escucha realtime para nuevos mensajes (Evita el bucle infinito) */
+    subscribeBadgeRealtime();
+
+    /* Conectar filtros */
+    wireFilters();
+  }
 
   /* ══════════════════════════════════════════════
-     LIKES PROPIOS — para marcar cards ya likeadas
+     LIKES — cargar para marcar cards ya likeadas
   ══════════════════════════════════════════════ */
   async function loadMyLikes() {
     if (!me) return;
-    const { data } = await supabase
-      .from('likes')
-      .select('receiver_id')
-      .eq('sender_id', me.id);
-    if (data) data.forEach(r => likedSet.add(r.receiver_id));
+    try {
+      const { data } = await supabase
+        .from('likes')
+        .select('receiver_id')
+        .eq('sender_id', me.id);
+      if (data) data.forEach(r => likedSet.add(r.receiver_id));
+    } catch (e) {
+      console.warn('[Kinetic - radar] loadMyLikes:', e.message);
+    }
   }
 
   /* ══════════════════════════════════════════════
-     CARGA PRINCIPAL DEL RADAR
-
-     Estrategia de geo:
-     1. Si tenemos lat/lng  → llamar a la función
-        RPC `nearby_profiles` (PostGIS) que ordena
-        por distancia real en la DB.
-     2. Si no hay geo        → query simple a la
-        tabla profiles sin orden geo.
-
-     La función RPC debe existir en Supabase:
-     (SQL al final del archivo como comentario)
+     CARGAR RADAR
+     Prioridad 1: RPC nearby_profiles (PostGIS, distancia real)
+     Prioridad 2: fallback query simple si no hay geo o falla la RPC
   ══════════════════════════════════════════════ */
   async function loadRadar() {
     hideSkeleton();
@@ -573,62 +550,69 @@
     try {
       let users = [];
 
-      if (myLat != null && myLng != null) {
-        /* ── QUERY CON GEO (PostGIS RPC) ── */
+      if (myLat !== null && myLng !== null) {
+        /* ── Con geo: usar RPC nearby_profiles ── */
         const { data, error } = await supabase.rpc('nearby_profiles', {
           p_lat:        myLat,
           p_lng:        myLng,
-          p_limit:      100,
+          p_limit:      120,
           p_exclude_id: me.id,
         });
 
-        if (error) throw error;
-        users = data || [];
+        if (error) {
+          /* Si la RPC falla (PostGIS no activo, etc.) hacer fallback */
+          console.warn('[Kinetic - radar] RPC nearby_profiles falló, usando fallback:', error.message);
+          users = await fallbackQuery();
+        } else {
+          users = data || [];
+        }
 
       } else {
-        /* ── QUERY SIN GEO ── */
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id,nombre,edad,gender,bio,avatar_url,photos,online,modo_express,lat,lng')
-          .neq('id', me.id)
-          .order('online', { ascending: false })
-          .order('created_at', { ascending: false })
-          .limit(100);
-
-        if (error) throw error;
-        users = data || [];
+        /* ── Sin geo: query simple ordenado por online ── */
+        users = await fallbackQuery();
       }
 
       allUsers = users;
       renderGrid();
 
     } catch (err) {
-      console.error('[Kinetic - radar] Error cargando usuarios:', err);
+      console.error('[Kinetic - radar] loadRadar error:', err.message);
       hideSkeleton();
-      showToast('Error al cargar el Radar.', true);
+      showToast('Error al cargar el Radar. Intenta de nuevo.', true);
     }
+  }
+
+  /* Fallback sin PostGIS — ordena online primero */
+  async function fallbackQuery() {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id,nombre,edad,gender,bio,avatar_url,photos,online,modo_express,lat,lng')
+      .neq('id', me.id)
+      .order('online',     { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(120);
+
+    if (error) throw error;
+    return data || [];
   }
 
   /* ══════════════════════════════════════════════
      REALTIME — escucha INSERT/UPDATE en profiles
-     Cuando un usuario nuevo se registra o actualiza
-     su estado online, el Radar se refresca.
   ══════════════════════════════════════════════ */
   function subscribeRealtime() {
     if (realtimeCh) supabase.removeChannel(realtimeCh);
 
     realtimeCh = supabase
       .channel('radar-profiles')
-      .on(
-        'postgres_changes',
+      .on('postgres_changes',
         { event: '*', schema: 'public', table: 'profiles' },
-        async (payload) => {
+        payload => {
           /* Ignorar cambios propios */
           if (payload.new?.id === me?.id) return;
 
-          /* Actualizar o añadir el perfil en allUsers */
           const updated = payload.new;
-          const idx = allUsers.findIndex(u => u.id === updated.id);
+          const idx     = allUsers.findIndex(u => u.id === updated.id);
+
           if (idx >= 0) {
             allUsers[idx] = { ...allUsers[idx], ...updated };
           } else if (payload.eventType === 'INSERT') {
@@ -650,19 +634,18 @@
 
     /* Aplicar filtro activo */
     switch (activeFilter) {
-      case 'online':  users = users.filter(u => u.online === true); break;
-      case 'male':    users = users.filter(u => u.gender === 'male'); break;
-      case 'female':  users = users.filter(u => u.gender === 'female'); break;
-      case 'other':   users = users.filter(u => u.gender === 'other'); break;
-      case 'express': users = users.filter(u => u.modo_express === true); break;
+      case 'online':  users = users.filter(u => u.online === true);        break;
+      case 'male':    users = users.filter(u => u.gender === 'male');       break;
+      case 'female':  users = users.filter(u => u.gender === 'female');     break;
+      case 'other':   users = users.filter(u => u.gender === 'other');      break;
+      case 'express': users = users.filter(u => u.modo_express === true);   break;
     }
 
-    /* Calcular distancia con haversine si tenemos geo pero la RPC
-       no devolvió distance_km (fallback seguro) */
-    if (myLat != null && myLng != null) {
+    /* Si tenemos geo pero la RPC no devolvió distance_km → calcular con haversine */
+    if (myLat !== null && myLng !== null) {
       users = users.map(u => {
         if (u.distance_km == null && u.lat != null && u.lng != null) {
-          u = { ...u, distance_km: haversineKm(myLat, myLng, u.lat, u.lng) };
+          return { ...u, distance_km: haversineKm(myLat, myLng, u.lat, u.lng) };
         }
         return u;
       });
@@ -682,6 +665,9 @@
 
     if (users.length === 0) {
       $grid.style.display = 'none';
+      $emptyMsg.textContent = activeFilter === 'all'
+        ? 'Aún no hay usuarios en el Radar. ¡Invita a tus amigos!'
+        : 'No encontramos usuarios con este filtro.';
       $empty.classList.add('show');
       return;
     }
@@ -700,7 +686,7 @@
   ══════════════════════════════════════════════ */
   function buildCard(data, idx) {
     const uid      = data.id;
-    const name     = data.nombre || 'Desconocido';
+    const name     = data.nombre || 'Usuario';
     const age      = data.edad   || null;
     const gender   = data.gender || null;
     const online   = data.online === true;
@@ -714,76 +700,84 @@
     card.className = 'radar-card';
     card.style.animationDelay = `${Math.min(idx * 0.035, 0.7)}s`;
 
-    /* Foto */
+    /* Foto o placeholder SVG */
     if (photoUrl) {
       const img = document.createElement('img');
-      img.className = 'card-photo'; img.alt = name;
-      img.loading = 'lazy'; img.src = photoUrl;
+      img.className = 'card-photo';
+      img.alt       = name;
+      img.loading   = 'lazy';
+      img.src       = photoUrl;
       img.addEventListener('error', () => {
         img.remove();
         const ph = document.createElement('div');
-        ph.className = 'card-avatar-ph'; ph.innerHTML = AVATAR_SVG;
+        ph.className = 'card-avatar-ph';
+        ph.innerHTML = AVATAR_SVG;
         card.insertBefore(ph, card.firstChild);
       });
       card.appendChild(img);
     } else {
       const ph = document.createElement('div');
-      ph.className = 'card-avatar-ph'; ph.innerHTML = AVATAR_SVG;
+      ph.className = 'card-avatar-ph';
+      ph.innerHTML = AVATAR_SVG;
       card.appendChild(ph);
     }
 
-    /* Overlay */
+    /* Degradado inferior */
     const grad = document.createElement('div');
     grad.className = 'card-grad';
     card.appendChild(grad);
 
-    /* Online dot */
-    if (online) {
+    /* Online dot — solo si online Y no hay liked stamp */
+    if (online && !liked) {
       const dot = document.createElement('div');
       dot.className = 'card-online';
       card.appendChild(dot);
     }
 
-    /* Badge género / express */
+    /* Badge: liked stamp tiene prioridad sobre online dot */
+    if (liked) {
+      const stamp = document.createElement('div');
+      stamp.className   = 'card-liked-stamp';
+      stamp.textContent = '💜';
+      card.appendChild(stamp);
+    }
+
+    /* Badge género / express (esquina superior derecha) */
     if (express) {
       const b = document.createElement('div');
-      b.className = 'card-badge'; b.textContent = '⚡';
+      b.className   = 'card-badge';
+      b.textContent = '⚡';
       card.appendChild(b);
     } else if (gender) {
       const b = document.createElement('div');
-      b.className = 'card-badge'; b.textContent = genderLabel(gender);
+      b.className   = 'card-badge';
+      b.textContent = genderLabel(gender);
       card.appendChild(b);
-    }
-
-    /* Liked stamp */
-    if (liked) {
-      const stamp = document.createElement('div');
-      stamp.className = 'card-liked-stamp'; stamp.textContent = '💜';
-      card.appendChild(stamp);
     }
 
     /* Distancia */
     if (distStr) {
       const dist = document.createElement('div');
       dist.className = 'card-dist';
-      dist.innerHTML = `<i class="fa-solid fa-location-dot"></i>${esc(distStr)}`;
+      dist.innerHTML = `<i class="fa-solid fa-location-dot"></i>${distStr}`;
       card.appendChild(dist);
     }
 
-    /* Info */
-    const info = document.createElement('div');
+    /* Info inferior */
+    const info   = document.createElement('div');
     info.className = 'card-info';
 
     const nameEl = document.createElement('div');
-    nameEl.className = 'card-name'; nameEl.textContent = name;
+    nameEl.className   = 'card-name';
+    nameEl.textContent = name;
     info.appendChild(nameEl);
 
     if (age || gender) {
-      const meta = document.createElement('div');
+      const meta  = document.createElement('div');
       meta.className = 'card-meta';
       const parts = [];
-      if (age)    parts.push(`<span class="card-age-accent">${esc(String(age))} años</span>`);
-      if (gender) parts.push(esc(gender === 'male' ? 'Hombre' : gender === 'female' ? 'Mujer' : 'Otro'));
+      if (age)    parts.push(`<span class="card-age-accent">${age} años</span>`);
+      if (gender) parts.push(gender === 'male' ? 'Hombre' : gender === 'female' ? 'Mujer' : 'Otro');
       meta.innerHTML = parts.join(' · ');
       info.appendChild(meta);
     }
@@ -799,7 +793,7 @@
   }
 
   /* ══════════════════════════════════════════════
-     LIVE PILL — contador de usuarios online
+     LIVE PILL — contador online
   ══════════════════════════════════════════════ */
   function updateLivePill() {
     const n = allUsers.filter(u => u.online === true).length;
@@ -813,6 +807,8 @@
 
   /* ══════════════════════════════════════════════
      GEOLOCALIZACIÓN
+     initGeo(silent=true)  → no muestra geoBar si falla
+     initGeo(silent=false) → muestra geoBar si falla
   ══════════════════════════════════════════════ */
   function initGeo(silent = true) {
     if (!('geolocation' in navigator)) {
@@ -821,8 +817,8 @@
     }
     const opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 };
     navigator.geolocation.getCurrentPosition(
-      pos => onGeoSuccess(pos),
-      () => { if (!silent) $geoBar.style.display = 'none'; else $geoBar.style.display = 'flex'; },
+      pos  => onGeoSuccess(pos),
+      _err => { if (!silent) $geoBar.style.display = 'none'; else $geoBar.style.display = 'flex'; },
       opts
     );
   }
@@ -832,11 +828,12 @@
     myLng = pos.coords.longitude;
     $geoBar.style.display = 'none';
 
-    /* Actualizar lat/lng en Supabase */
-    if (me) {
-      await supabase.from('profiles')
+    /* Guardar lat/lng en Supabase para que otros puedan vernos en el mapa */
+    if (me?.id) {
+      supabase.from('profiles')
         .update({ lat: myLat, lng: myLng })
-        .eq('id', me.id);
+        .eq('id', me.id)
+        .then(() => {});
     }
 
     /* Recargar radar con distancias reales */
@@ -862,24 +859,27 @@
 
   /* ══════════════════════════════════════════════
      BADGE MENSAJES SIN LEER
-     Consulta la tabla `chats` buscando salas donde
-     unread_for = me.id
+     Usa count:exact + head:true — no descarga datos
   ══════════════════════════════════════════════ */
   async function loadUnreadBadge() {
     if (!me) return;
     try {
-      const { count } = await supabase
+      // Nota: Usar '*' en lugar de 'id' es más seguro con head:true en PostGREST
+      const { count, error } = await supabase
         .from('chats')
-        .select('id', { count: 'exact', head: true })
+        .select('*', { count: 'exact', head: true })
         .eq('unread_for', me.id);
 
-      unreadCount = count || 0;
-      updateNavBadge(unreadCount);
-    } catch(e) {
-      console.error('[Kinetic - radar] Badge error:', e);
+      if (error) throw error;
+      updateNavBadge(count || 0);
+    } catch (e) {
+      console.warn('[Kinetic - radar] Badge error:', e.message);
     }
+  }
 
-    /* Suscribir realtime para chats */
+  /* Se ejecuta UNA SOLA VEZ desde el bloque de autenticación inicial */
+  function subscribeBadgeRealtime() {
+    if (!me) return;
     supabase
       .channel('radar-chats-badge')
       .on('postgres_changes',
@@ -892,7 +892,10 @@
   function updateNavBadge(count) {
     const iconEl  = document.getElementById('navChatIcon');
     const navItem = document.getElementById('navChats');
+    
+    // Limpiar badges viejos
     navItem.querySelectorAll('.badge-counter').forEach(b => b.remove());
+    
     if (count > 0) {
       iconEl.classList.add('has-notif');
       const badge = document.createElement('div');
@@ -905,95 +908,27 @@
   }
 
   /* ══════════════════════════════════════════════
-     ONLINE = FALSE AL SALIR
+     ONLINE FALSE AL SALIR
   ══════════════════════════════════════════════ */
   window.addEventListener('pagehide', () => {
-    if (me) {
-      navigator.sendBeacon(
-        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${me.id}`,
-        JSON.stringify({ online: false })
-      );
-    }
     if (realtimeCh) supabase.removeChannel(realtimeCh);
-  });
+    if (geoWatchId != null) navigator.geolocation.clearWatch(geoWatchId);
 
+    if (me?.id && session?.access_token) {
+      fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${me.id}`, {
+        method:    'PATCH',
+        keepalive: true,
+        headers: {
+          'apikey':        SUPABASE_KEY,
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({ online: false }),
+      });
+    }
+  });
 </script>
 
-<!--
-═══════════════════════════════════════════════════════════════
-  SQL PARA SUPABASE — ejecutar en el SQL Editor del proyecto
-
-  1. Habilitar extensión PostGIS (si no está ya activa):
-     create extension if not exists postgis;
-
-  2. Agregar columna de geometría al perfil:
-     alter table profiles
-       add column if not exists location geography(Point, 4326);
-
-     -- Trigger para mantener location sincronizada con lat/lng:
-     create or replace function sync_profile_location()
-     returns trigger language plpgsql as $$
-     begin
-       if new.lat is not null and new.lng is not null then
-         new.location := st_makepoint(new.lng, new.lat)::geography;
-       end if;
-       return new;
-     end; $$;
-
-     create trigger trg_sync_location
-       before insert or update of lat, lng on profiles
-       for each row execute function sync_profile_location();
-
-  3. Índice espacial para búsquedas rápidas:
-     create index if not exists idx_profiles_location
-       on profiles using gist(location);
-
-  4. Función RPC que el Radar llama:
-     create or replace function nearby_profiles(
-       p_lat        float8,
-       p_lng        float8,
-       p_limit      int     default 100,
-       p_exclude_id uuid    default null
-     )
-     returns table (
-       id           uuid,
-       nombre       text,
-       edad         integer,
-       gender       text,
-       bio          text,
-       avatar_url   text,
-       photos       text[],
-       online       boolean,
-       modo_express boolean,
-       lat          float8,
-       lng          float8,
-       distance_km  float8
-     )
-     language sql stable as $$
-       select
-         p.id, p.nombre, p.edad, p.gender, p.bio,
-         p.avatar_url, p.photos, p.online, p.modo_express,
-         p.lat, p.lng,
-         round(
-           (st_distance(
-             p.location,
-             st_makepoint(p_lng, p_lat)::geography
-           ) / 1000.0)::numeric, 2
-         )::float8 as distance_km
-       from profiles p
-       where
-         p.id        != coalesce(p_exclude_id, '00000000-0000-0000-0000-000000000000')
-         and p.location is not null
-       order by p.location <-> st_makepoint(p_lng, p_lat)::geography
-       limit p_limit;
-     $$;
-
-     -- Permisos para usuarios anónimos (lectura pública del radar):
-     grant execute on function nearby_profiles to anon, authenticated;
-═══════════════════════════════════════════════════════════════
--->
-
 <script src="register-sw.js"></script>
-  
 </body>
 </html>
