@@ -16,20 +16,20 @@ const FONT_CACHE     = `${CACHE_VERSION}-fonts`;
 
 /* ── Archivos del app shell (se cachean en install) ── */
 const SHELL_ASSETS = [
-  '/',
-  '/index.html',
-  '/radar.html',
-  '/chats.html',
-  '/chat-interno.html',
-  '/likes.html',
-  '/matches.html',
-  '/perfil.html',
-  '/perfil-detalle.html',
-  '/onboarding.html',
-  '/notificaciones.html',
-  '/manifest.json',
+  '/kinetic/',
+  '/kinetic/index.html',
+  '/kinetic/radar.html',
+  '/kinetic/chats.html',
+  '/kinetic/chat-interno.html',
+  '/kinetic/likes.html',
+  '/kinetic/matches.html',
+  '/kinetic/perfil.html',
+  '/kinetic/perfil-detalle.html',
+  '/kinetic/onboarding.html',
+  '/kinetic/notificaciones.html',
+  '/kinetic/manifest.json',
   /* Página offline personalizada */
-  '/offline.html',
+  '/kinetic/offline.html',
 ];
 
 /* ── URLs que NUNCA se cachean (realtime, auth) ── */
@@ -127,7 +127,7 @@ self.addEventListener('fetch', event => {
      url.pathname.endsWith('.js')   ||
      url.pathname.endsWith('.css')  ||
      url.pathname.endsWith('.json') ||
-     url.pathname === '/')
+     url.pathname === '/kinetic/')
   ) {
     event.respondWith(cacheFirst(request, SHELL_CACHE));
     return;
@@ -203,7 +203,7 @@ async function offlineFallback(request) {
   /* Página HTML → offline.html */
   if (request.headers.get('accept')?.includes('text/html')) {
     const cache    = await caches.open(SHELL_CACHE);
-    const offline  = await cache.match('/offline.html');
+    const offline  = await cache.match('/kinetic/offline.html');
     if (offline) return offline;
   }
 
@@ -239,8 +239,8 @@ self.addEventListener('push', event => {
   const title   = payload.title || 'Kinetic';
   const options = {
     body:    payload.body    || 'Tienes actividad nueva.',
-    icon:    payload.icon    || '/icons/icon-192.png',
-    badge:   payload.badge   || '/icons/icon-96.png',
+    icon:    payload.icon    || '/kinetic/icons/icon-192.png',
+    badge:   payload.badge   || '/kinetic/icons/icon-96.png',
     image:   payload.image   || undefined,
     tag:     payload.tag     || 'kinetic-notif',
     data:    payload.data    || {},
@@ -265,14 +265,14 @@ self.addEventListener('notificationclick', event => {
   const action = event.action;
 
   /* Determinar URL de destino */
-  let targetUrl = '/radar.html';
+  let targetUrl = '/kinetic/radar.html';
 
   if (action === 'reply' || data.type === 'message') {
-    targetUrl = data.chat_url || `/chat-interno.html?id=${data.actor_id || ''}`;
+    targetUrl = data.chat_url || `/kinetic/chat-interno.html?id=${data.actor_id || ''}`;
   } else if (data.type === 'match') {
-    targetUrl = '/matches.html';
+    targetUrl = '/kinetic/matches.html';
   } else if (data.type === 'like' || data.type === 'visit') {
-    targetUrl = data.profile_url || `/perfil-detalle.html?id=${data.actor_id || ''}`;
+    targetUrl = data.profile_url || `/kinetic/perfil-detalle.html?id=${data.actor_id || ''}`;
   } else if (data.url) {
     targetUrl = data.url;
   }
